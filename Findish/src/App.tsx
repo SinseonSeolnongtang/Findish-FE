@@ -1,13 +1,29 @@
-import "./App.css";
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import MainPage from '@/pages/MainPage';
+import LoginPage from '@/pages/LoginPage';
+import SignupPage from '@/pages/SignupPage';
+import NormalModePage from '@/pages/NormalModePage';
+import PickModePage from '@/pages/PickModePage';
+import ComparePage from '@/pages/ComparePage';
+import AIPickPage from '@/pages/AIPickPage';
+import CartPage from '@/pages/CartPage';
+import MyPage from '@/pages/MyPage';
 
-function App() {
+export default function App() {
   return (
-    <>
-      <div className="flex justify-center text-2xl text-red-500">
-        Capston Design - Findish FE
-      </div>
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<MainPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/normal" element={<NormalModePage />} />
+        <Route path="/pick" element={<PickModePage />} />
+        <Route path="/compare" element={<ComparePage />} />
+        <Route path="/ai-pick" element={<AIPickPage />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/mypage" element={<MyPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
-
-export default App;

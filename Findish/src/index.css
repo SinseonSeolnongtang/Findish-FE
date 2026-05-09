@@ -1,1 +1,200 @@
+@import url("https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSansNeo.css");
+@import url("https://fonts.googleapis.com/css2?family=Unbounded:wght@400&display=swap");
 @import "tailwindcss";
+
+/* ================================================
+   Tailwind v4 Theme Tokens
+   색상 토큰: bg-*, text-*, border-* 유틸리티로 사용 가능
+   ================================================ */
+@theme {
+
+  /* ----- Orange ----- */
+  --color-orange-600: #F54900;
+  --color-orange-400: #FF6900;
+  --color-orange-350: #FFB079;
+  --color-orange-300: #FFD9C4;
+  --color-orange-200: #FFF1DF;
+  --color-orange-100: #FFF7ED;
+
+  /* ----- Neutral (Black) ----- */
+  --color-neutral-900: #000000;
+  --color-neutral-800: #101828;
+  --color-neutral-700: #364153;
+  --color-neutral-600: #4A5565;
+  --color-neutral-500: #6A7282;
+  --color-neutral-400: #99A1AF;
+  --color-neutral-300: #D1D5DC;
+  --color-neutral-200: #DEE6E9;
+  --color-neutral-100: #F3F1EF;
+
+  /* ----- Status ----- */
+  --color-success: #00A63E;
+  --color-error: #FF4500;
+  --color-error-dark: #E60000;
+  --color-star: #FDC700;
+
+  /* ----- Brand / Misc ----- */
+  --color-primary: #FF6900;
+  --color-primary-dark: #F54900;
+  --color-kakao: #FAE100;
+  --color-white-50: #FEFEFE;
+
+  /* ----- Font Families ----- */
+  --font-sans: "Spoqa Han Sans Neo", sans-serif;
+  --font-logo: "Unbounded", sans-serif;
+}
+
+/* ================================================
+   전역 CSS 변수 (Tailwind 유틸리티 외 용도)
+   ================================================ */
+:root {
+  --bg-gradient: linear-gradient(to bottom, #FFF3DB, #ffffff);
+  --header-height: 68px;
+}
+
+/* ================================================
+   Typography Utility Classes
+   사용법: className="typo-h1" / className="typo-body-md"
+   ================================================ */
+@layer utilities {
+
+  /* 로고 */
+  .typo-logo {
+    font-family: "Unbounded", sans-serif;
+    font-size: 32px;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  /* 토글 탭 */
+  .typo-toggle {
+    font-family: "Spoqa Han Sans Neo", sans-serif;
+    font-size: 28px;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  /* Display */
+  .typo-d1 {
+    font-family: "Spoqa Han Sans Neo", sans-serif;
+    font-size: 54px;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  .typo-d2 {
+    font-family: "Spoqa Han Sans Neo", sans-serif;
+    font-size: 43px;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  /* Heading */
+  .typo-h1 {
+    font-family: "Spoqa Han Sans Neo", sans-serif;
+    font-size: 34px;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  .typo-h1-medium {
+    font-family: "Spoqa Han Sans Neo", sans-serif;
+    font-size: 34px;
+    font-weight: 500;
+    line-height: normal;
+  }
+
+  .typo-h2 {
+    font-family: "Spoqa Han Sans Neo", sans-serif;
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 36px;
+    letter-spacing: 0.4px;
+  }
+
+  .typo-h3 {
+    font-family: "Spoqa Han Sans Neo", sans-serif;
+    font-size: 28px;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  /* Title */
+  .typo-t1 {
+    font-family: "Spoqa Han Sans Neo", sans-serif;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  .typo-t1-medium {
+    font-family: "Spoqa Han Sans Neo", sans-serif;
+    font-size: 24px;
+    font-weight: 500;
+    line-height: normal;
+  }
+
+  .typo-t2 {
+    font-family: "Spoqa Han Sans Neo", sans-serif;
+    font-size: 22px;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  .typo-t2-medium {
+    font-family: "Spoqa Han Sans Neo", sans-serif;
+    font-size: 22px;
+    font-weight: 500;
+    line-height: normal;
+  }
+
+  /* Body */
+  .typo-body-lg {
+    font-family: "Spoqa Han Sans Neo", sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  .typo-body-md {
+    font-family: "Spoqa Han Sans Neo", sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  .typo-body-sm {
+    font-family: "Spoqa Han Sans Neo", sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  /* Caption */
+  .typo-caption {
+    font-family: "Spoqa Han Sans Neo", sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  .typo-caption-medium {
+    font-family: "Spoqa Han Sans Neo", sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: normal;
+  }
+
+  /* Micro */
+  .typo-micro {
+    font-family: "Spoqa Han Sans Neo", sans-serif;
+    font-size: 10px;
+    font-weight: 400;
+    line-height: normal;
+  }
+
+  /* 브랜드 배경 그라디언트 */
+  .bg-gradient-brand {
+    background: linear-gradient(to bottom, #FFF3DB, #ffffff);
+  }
+}

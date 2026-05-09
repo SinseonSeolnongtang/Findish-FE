@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Figma artifacts
+figma_parsed.md
+figma_response.json
+
+# Environment variables
+.env
+.env.*
+!.env.example
