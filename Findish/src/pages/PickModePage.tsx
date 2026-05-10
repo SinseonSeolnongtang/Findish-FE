@@ -5,8 +5,7 @@ import Header from "@/components/common/Header";
 import SearchBar from "@/components/common/SearchBar";
 import ChatbotFAB from "@/components/common/ChatbotFAB";
 import LikeButton from "@/components/common/LikeButton";
-import PinNamed from "@/components/common/PinNamed";
-import MAP_BG from "@/assets/map_bg.png";
+import PickMapView from "@/features/pick/PickMapView";
 import { SECTIONS, MOCK_LIST } from "@/features/pick/types";
 import SectionDots from "@/features/pick/SectionDots";
 import HomeSection from "@/features/pick/HomeSection";
@@ -69,25 +68,7 @@ export default function PickModePage() {
       </div>
 
       {/* 지도 배경 */}
-      <div
-        className="absolute inset-0 pt-17"
-        style={{
-          backgroundImage: `url(${MAP_BG})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        {query && (
-          <PinNamed
-            name={restaurant.name}
-            rating={4.2}
-            imageUrl={restaurant.imageUrl}
-            isSelected={true}
-            onClick={() => {}}
-            style={{ left: "54%", top: "45%" }}
-          />
-        )}
-      </div>
+      <PickMapView restaurant={restaurant} showPin={!!query} />
 
       {/* 좌측 사이드바 */}
       {query && (

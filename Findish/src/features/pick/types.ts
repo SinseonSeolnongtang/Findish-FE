@@ -19,6 +19,8 @@ export interface Restaurant {
   serviceImage: string;
   currentIndex: number;
   total: number;
+  lat?: number;
+  lng?: number;
 }
 
 export const SECTIONS: { key: Section; label: string }[] = [
@@ -35,6 +37,8 @@ export const MOCK_LIST: Restaurant[] = [
     category: "한식",
     distance: "5.8km",
     station: "성신여대입구역 도보 5분",
+    lat: 37.5921,
+    lng: 127.0162,
     priceRange: "15,000원 ~ 20,000원",
     keywords: ["#고기", "#성신여대", "#회식"],
     positiveKeywords: ["#육즙", "#양많아요"],
@@ -61,6 +65,8 @@ export const MOCK_LIST: Restaurant[] = [
     category: "한식",
     distance: "2.5km",
     station: "한성대입구역 도보 5분",
+    lat: 37.5882,
+    lng: 127.0154,
     priceRange: "20,000원 ~ 30,000원",
     keywords: ["#삼겹살", "#성북천", "#서울야경"],
     positiveKeywords: ["#육즙", "#두꺼워요"],
@@ -88,6 +94,8 @@ export const MOCK_LIST: Restaurant[] = [
     category: "일식",
     distance: "3.1km",
     station: "홍대입구역 도보 8분",
+    lat: 37.5570,
+    lng: 126.9247,
     priceRange: "12,000원 ~ 16,000원",
     keywords: ["#라멘", "#홍대", "#혼밥"],
     positiveKeywords: ["#진한국물", "#고기많아요"],
@@ -114,6 +122,8 @@ export const MOCK_LIST: Restaurant[] = [
     category: "양식",
     distance: "4.3km",
     station: "이태원역 도보 3분",
+    lat: 37.5349,
+    lng: 126.9942,
     priceRange: "18,000원 ~ 25,000원",
     keywords: ["#수제버거", "#이태원", "#브런치"],
     positiveKeywords: ["#두꺼운패티", "#바삭한번"],
@@ -140,6 +150,8 @@ export const MOCK_LIST: Restaurant[] = [
     category: "한식",
     distance: "1.2km",
     station: "마포역 도보 2분",
+    lat: 37.5387,
+    lng: 126.9480,
     priceRange: "8,000원 ~ 12,000원",
     keywords: ["#순대국밥", "#마포", "#해장"],
     positiveKeywords: ["#진한국물", "#가성비"],
