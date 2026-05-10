@@ -15,6 +15,8 @@ export interface StoreCardData {
   rating: number;
   keywords: string[];
   imageUrl?: string;
+  lat?: number;
+  lng?: number;
 }
 
 interface StoreCardProps {

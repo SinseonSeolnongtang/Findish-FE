@@ -1,57 +1,49 @@
 import { useEffect, useRef } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { type StoreCardData } from "@/components/common/StoreCard";
+import { type Restaurant } from "@/features/pick/types";
 import PinNamed from "@/components/common/PinNamed";
 
-interface MapViewProps {
-  restaurants: StoreCardData[];
-  selectedId: number | null;
-  onPinClick: (id: number) => void;
-  searched: boolean;
+interface Props {
+  restaurant: Restaurant;
+  showPin: boolean;
 }
 
-function pinHtml(name: string, rating: number, imageUrl: string | undefined, isSelected: boolean): string {
+function pinHtml(name: string, imageUrl: string): string {
   return renderToStaticMarkup(
     <PinNamed
       name={name}
-      rating={rating}
+      rating={0}
       imageUrl={imageUrl}
-      isSelected={isSelected}
+      isSelected
       style={{ position: "relative", transform: "none" }}
     />
   );
 }
 
-export default function MapView({
-  restaurants,
-  selectedId,
-  onPinClick,
-  searched,
-}: MapViewProps) {
+export default function PickMapView({ restaurant, showPin }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<naver.maps.Map | null>(null);
-  const markersRef = useRef<naver.maps.Marker[]>([]);
+  const markerRef = useRef<naver.maps.Marker | null>(null);
 
+  // 지도 초기화 (마운트 시 1회)
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     mapRef.current = new naver.maps.Map(container, {
-      center: new naver.maps.LatLng(37.582, 127.008),
-      zoom: 15,
+      center: new naver.maps.LatLng(37.5820, 127.0080),
+      zoom: 16,
       zoomControl: false,
       mapDataControl: false,
       scaleControl: false,
       scrollWheel: false,
     });
 
-    // 누적 delta가 임계값을 넘어야 한 단계 줌 (기본 대비 ~3배 둔감)
     let accumulated = 0;
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const map = mapRef.current;
       if (!map) return;
-      // ctrlKey=true: 트랙패드 핀치 (작은 delta) → 낮은 임계값
       const threshold = e.ctrlKey ? 80 : 300;
       accumulated += e.deltaY;
       const steps = Math.trunc(accumulated / threshold);
@@ -64,37 +56,36 @@ export default function MapView({
 
     return () => {
       container.removeEventListener("wheel", onWheel);
+      // Naver Maps가 주입한 인라인 스타일 제거 (StrictMode 대응)
       container.removeAttribute("style");
       mapRef.current = null;
     };
   }, []);
 
+  // 레스토랑 변경 또는 핀 표시 여부 변경 시 마커 업데이트
   useEffect(() => {
     if (!mapRef.current) return;
 
-    markersRef.current.forEach((m) => m.setMap(null));
-    markersRef.current = [];
+    if (markerRef.current) {
+      markerRef.current.setMap(null);
+      markerRef.current = null;
+    }
 
-    if (!searched) return;
+    if (!showPin || restaurant.lat == null || restaurant.lng == null) return;
 
-    restaurants.forEach((r) => {
-      if (r.lat == null || r.lng == null) return;
-      const isSelected = selectedId === r.id;
+    const position = new naver.maps.LatLng(restaurant.lat, restaurant.lng);
+    mapRef.current.panTo(position);
 
-      const marker = new naver.maps.Marker({
-        position: new naver.maps.LatLng(r.lat, r.lng),
-        map: mapRef.current!,
-        title: r.name,
-        icon: {
-          content: pinHtml(r.name, r.rating, r.imageUrl, isSelected),
-          anchor: new naver.maps.Point(46, 120),
-        },
-      });
-
-      marker.addListener("click", () => onPinClick(r.id));
-      markersRef.current.push(marker);
+    markerRef.current = new naver.maps.Marker({
+      position,
+      map: mapRef.current,
+      icon: {
+        content: pinHtml(restaurant.name, restaurant.imageUrl),
+        // 핀 삼각형 끝(tip) 위치: x=46(핀 바디 중앙), y=120(삼각형 하단)
+        anchor: new naver.maps.Point(46, 120),
+      },
     });
-  }, [searched, restaurants, selectedId, onPinClick]);
+  }, [restaurant, showPin]);
 
   return (
     <div

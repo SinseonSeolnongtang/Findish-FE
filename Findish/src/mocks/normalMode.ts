@@ -12,6 +12,8 @@ export const MOCK_RESTAURANTS: StoreCardData[] = [
     keywords: ["#가성비", "#질좋은고기", "#고기가두껍"],
     imageUrl:
       "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=200&q=80",
+    lat: 37.5831,
+    lng: 127.0028,
   },
   {
     id: 2,
@@ -24,6 +26,8 @@ export const MOCK_RESTAURANTS: StoreCardData[] = [
     keywords: ["#고기구워주는", "#찔좋은고기"],
     imageUrl:
       "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=200&q=80",
+    lat: 37.5752,
+    lng: 127.0208,
   },
   {
     id: 3,
@@ -36,6 +40,8 @@ export const MOCK_RESTAURANTS: StoreCardData[] = [
     keywords: ["#돈마호크", "#제주흑돼지", "#가성비"],
     imageUrl:
       "https://images.unsplash.com/photo-1558030006-450675393462?w=200&q=80",
+    lat: 37.5858,
+    lng: 127.0015,
   },
   {
     id: 4,
@@ -48,6 +54,8 @@ export const MOCK_RESTAURANTS: StoreCardData[] = [
     keywords: ["#고기구워주는", "#질좋은고기"],
     imageUrl:
       "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=200&q=80",
+    lat: 37.5823,
+    lng: 127.0018,
   },
   {
     id: 5,
@@ -60,6 +68,8 @@ export const MOCK_RESTAURANTS: StoreCardData[] = [
     keywords: ["#고기구워주는", "#뜨는맛집", "#가성비"],
     imageUrl:
       "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=200&q=80",
+    lat: 37.5778,
+    lng: 127.0230,
   },
   {
     id: 6,
@@ -72,6 +82,8 @@ export const MOCK_RESTAURANTS: StoreCardData[] = [
     keywords: ["#가성비", "#질좋은고기", "#고기가두껍"],
     imageUrl:
       "https://images.unsplash.com/photo-1544025162-d76594e8c5f9?w=200&q=80",
+    lat: 37.5820,
+    lng: 127.0255,
   },
 ];
 

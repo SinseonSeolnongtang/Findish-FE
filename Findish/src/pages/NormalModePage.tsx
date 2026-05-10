@@ -6,7 +6,7 @@ import ChatbotFAB from "@/components/common/ChatbotFAB";
 import StoreDetail from "@/features/store/StoreDetail";
 import MapView from "@/features/normalMode/MapView";
 import SearchResultPanel from "@/features/normalMode/SearchResultPanel";
-import { MOCK_RESTAURANTS, PIN_POSITIONS } from "@/mocks/normalMode";
+import { MOCK_RESTAURANTS } from "@/mocks/normalMode";
 
 export default function NormalModePage() {
   const navigate = useNavigate();
@@ -36,7 +36,6 @@ export default function NormalModePage() {
 
       <MapView
         restaurants={MOCK_RESTAURANTS}
-        pinPositions={PIN_POSITIONS}
         selectedId={selectedId}
         onPinClick={handlePinClick}
         searched={searched}

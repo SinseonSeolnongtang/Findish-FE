@@ -37,29 +37,38 @@ export default function PinNamed({
         ...style,
       }}
     >
-      {/* 핀 바디: 음식 사진 + 삼각형 포인터 */}
-      <div className="absolute" style={{ top: 8, left: 0, right: 16, bottom: 22 }}>
+      {/* 핀 바디: 음식 사진 */}
+      <div
+        className="absolute"
+        style={{ top: 8, left: 0, right: 16, bottom: 22 }}
+      >
         <div
           className="absolute inset-0 rounded-[10px]"
           style={{ background: pinBg, boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}
         />
         <div className="absolute inset-1.5 rounded-lg overflow-hidden bg-[#E5E7EB]">
           {imageUrl && (
-            <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
+            <img
+              src={imageUrl}
+              alt={name}
+              className="w-full h-full object-cover"
+            />
           )}
         </div>
-        <div
-          className="absolute left-1/2 -translate-x-1/2"
-          style={{
-            bottom: -12,
-            width: 0,
-            height: 0,
-            borderLeft: "8px solid transparent",
-            borderRight: "8px solid transparent",
-            borderTop: `12px solid ${pinBg}`,
-          }}
-        />
       </div>
+
+      <div
+        className="absolute"
+        style={{
+          top: 108,
+          left: 38,
+          width: 0,
+          height: 0,
+          borderLeft: "8px solid transparent",
+          borderRight: "8px solid transparent",
+          borderTop: `12px solid ${pinBg}`,
+        }}
+      />
 
       {/* 별점 뱃지 — 우상단 */}
       <div className="absolute top-0 right-0 bg-primary flex items-center gap-1 px-2.5 py-0.75 rounded-full">

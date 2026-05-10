@@ -8,6 +8,7 @@ import ComparePage from '@/pages/ComparePage';
 import AIPickPage from '@/pages/AIPickPage';
 import CartPage from '@/pages/CartPage';
 import MyPage from '@/pages/MyPage';
+import MapTestPage from '@/pages/MapTestPage';
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/ai-pick" element={<AIPickPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/mypage" element={<MyPage />} />
+        <Route path="/about" element={<MapTestPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
