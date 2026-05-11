@@ -81,7 +81,7 @@ export const MOCK_RESTAURANTS: StoreCardData[] = [
     summary: "벚꽃뷰와 함께하는 낭만적인 식사",
     keywords: ["#가성비", "#질좋은고기", "#고기가두껍"],
     imageUrl:
-      "https://images.unsplash.com/photo-1544025162-d76594e8c5f9?w=200&q=80",
+      "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=200&q=80",
     lat: 37.5820,
     lng: 127.0255,
   },
