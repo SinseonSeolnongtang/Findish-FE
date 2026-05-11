@@ -9,14 +9,17 @@ import AIPickPage from '@/pages/AIPickPage';
 import CartPage from '@/pages/CartPage';
 import MyPage from '@/pages/MyPage';
 import MapTestPage from '@/pages/MapTestPage';
+import AuthLayout from '@/layout/AuthLayout';
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<MainPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
+        <Route element={<AuthLayout />}>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+        </Route>
         <Route path="/normal" element={<NormalModePage />} />
         <Route path="/pick" element={<PickModePage />} />
         <Route path="/compare" element={<ComparePage />} />
