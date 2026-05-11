@@ -36,6 +36,17 @@ export const handlers = [
     return HttpResponse.json({ isDuplicated: false });
   }),
 
+  http.get('/api/v1/members/me', () => {
+    return HttpResponse.json({
+      memberId: 1,
+      loginId: 'mockuser123',
+      name: '홍길동',
+      email: 'mock@example.com',
+      loginType: 'LOCAL',
+      isLoginIdEditable: true,
+    });
+  }),
+
   http.post('/api/v1/members/join', () => {
     return HttpResponse.json(
       {

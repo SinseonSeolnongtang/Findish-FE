@@ -11,6 +11,7 @@ import CartPage from '@/pages/CartPage';
 import MyPage from '@/pages/MyPage';
 import MapTestPage from '@/pages/MapTestPage';
 import AuthLayout from '@/layout/AuthLayout';
+import PrivateRoute from '@/components/common/PrivateRoute';
 
 const queryClient = new QueryClient();
 
@@ -29,7 +30,9 @@ export default function App() {
           <Route path="/compare" element={<ComparePage />} />
           <Route path="/ai-pick" element={<AIPickPage />} />
           <Route path="/cart" element={<CartPage />} />
-          <Route path="/mypage" element={<MyPage />} />
+          <Route element={<PrivateRoute />}>
+            <Route path="/mypage" element={<MyPage />} />
+          </Route>
           <Route path="/about" element={<MapTestPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

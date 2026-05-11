@@ -1,17 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import Button from "./Button";
 import CartIcon from "@/assets/icons/user/cart.svg?react";
+import { useAuthStore } from "@/stores/authStore";
+import { useGetMeQuery } from "@/hooks/useAuth";
 
-interface HeaderProps {
-  isLoggedIn?: boolean;
-  username?: string;
-}
-
-export default function Header({
-  isLoggedIn = false,
-  username = "김민서",
-}: HeaderProps) {
+export default function Header() {
   const navigate = useNavigate();
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+  const { data } = useGetMeQuery();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-17 bg-white shadow-sm flex items-center px-10">
@@ -41,7 +37,7 @@ export default function Header({
               to="/mypage"
               className="typo-body-md text-neutral-800 hover:text-primary transition-colors"
             >
-              {username}님
+              {data?.name}님
             </Link>
             <Link
               to="/cart"

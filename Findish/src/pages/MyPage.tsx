@@ -5,16 +5,40 @@ import { cn } from "@/lib/utils";
 import LikedTab from "@/features/myPage/LikedTab";
 import ReservationTab from "@/features/myPage/ReservationTab";
 import OrderTab from "@/features/myPage/OrderTab";
+import { useGetMeQuery } from "@/hooks/useAuth";
 
 type Tab = "좋아요 내역" | "예약 내역" | "주문 내역";
 const TABS: Tab[] = ["좋아요 내역", "예약 내역", "주문 내역"];
 
 export default function MyPage() {
   const [activeTab, setActiveTab] = useState<Tab>("좋아요 내역");
+  const { data, isLoading, isError } = useGetMeQuery();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#FAFAFA]">
+        <Header />
+        <div className="flex items-center justify-center min-h-screen">
+          <p className="typo-body-lg text-neutral-400">불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-[#FAFAFA]">
+        <Header />
+        <div className="flex items-center justify-center min-h-screen">
+          <p className="typo-body-lg text-red-400">정보를 불러오지 못했습니다.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
-      <Header isLoggedIn />
+      <Header />
 
       <div className="pt-17 flex min-h-screen">
         <aside className="w-44 bg-white border-r border-[#E5E7EB] py-8 px-4 shrink-0">
@@ -51,9 +75,12 @@ export default function MyPage() {
                 <circle cx="12" cy="7" r="4" />
               </svg>
             </div>
-            <p className="typo-t1-medium leading-9 text-neutral-900 flex-1">
-              김민서 님, 안녕하세요
-            </p>
+            <div className="flex-1">
+              <p className="typo-t1-medium leading-9 text-neutral-900">
+                {data?.name} 님, 안녕하세요
+              </p>
+              <p className="typo-body-sm text-neutral-400">{data?.email}</p>
+            </div>
             <Button>개인정보 수정</Button>
           </div>
 
