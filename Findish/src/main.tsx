@@ -6,7 +6,14 @@ import App from './App.tsx'
 async function prepare() {
   if (import.meta.env.DEV) {
     const { worker } = await import('./mocks/browser');
-    await worker.start({ onUnhandledRequest: 'bypass' });
+    await worker.start({
+      onUnhandledRequest(request, print) {
+        const { pathname } = new URL(request.url);
+        if (pathname.startsWith('/api/')) {
+          print.warning();
+        }
+      },
+    });
   }
 }
 

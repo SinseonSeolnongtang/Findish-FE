@@ -3,21 +3,24 @@ import { useNavigate } from "react-router-dom";
 import Header from "@/components/common/Header";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
-
 import googleImg from "@/assets/images/google.png";
-
-interface LoginForm {
-  username: string;
-  password: string;
-}
+import { useLoginMutation } from "@/hooks/useAuth";
+import { useAuthStore } from "@/stores/authStore";
+import type { LoginRequest } from "@/types/auth";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { register, handleSubmit } = useForm<LoginForm>();
+  const { register, handleSubmit } = useForm<LoginRequest>();
+  const { mutate: loginMutate, isPending, isError } = useLoginMutation();
+  const loginToStore = useAuthStore((s) => s.login);
 
-  const onSubmit = (data: LoginForm) => {
-    console.log(data);
-    navigate("/normal");
+  const onSubmit = (data: LoginRequest) => {
+    loginMutate(data, {
+      onSuccess: (res) => {
+        loginToStore(res.accessToken);
+        navigate("/");
+      },
+    });
   };
 
   return (
@@ -37,7 +40,7 @@ export default function LoginPage() {
             <Input
               label="아이디"
               placeholder="아이디"
-              {...register("username", { required: true })}
+              {...register("loginId", { required: true })}
             />
             <div className="flex flex-col gap-1">
               <Input
@@ -62,8 +65,18 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <Button type="submit" size="lg" className="w-full mt-2">
-              로그인
+            {isError && (
+              <p className="typo-body-sm text-red-500 text-center">
+                아이디 또는 비밀번호가 올바르지 않습니다.
+              </p>
+            )}
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full mt-2"
+              disabled={isPending}
+            >
+              {isPending ? "로그인 중..." : "로그인"}
             </Button>
           </form>
 
