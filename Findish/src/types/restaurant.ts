@@ -42,8 +42,8 @@ export interface GetMenusResponse {
 // ─── 4. 리뷰 목록 조회 ───────────────────────────────────────────────────────
 // GET /api/v1/restaurants/{restaurantId}/reviews
 export interface GetReviewsRequest {
-  page: number;
-  size: number;
+  page?: number;
+  size?: number;
   photoOnly?: boolean;
   sort?: string;
   keyword?: string;
