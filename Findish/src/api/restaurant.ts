@@ -1,5 +1,7 @@
 import axiosInstance from '@/lib/axiosInstance';
 import type {
+  SearchRestaurantsRequest,
+  SearchRestaurantsResponse,
   GetRestaurantResponse,
   GetAiSummaryResponse,
   GetMenusResponse,
@@ -60,6 +62,16 @@ export const createReservation = async (
   const { data } = await axiosInstance.post<CreateReservationResponse>(
     `/api/v1/restaurants/${restaurantId}/reservations`,
     body,
+  );
+  return data;
+};
+
+export const searchRestaurants = async (
+  params: SearchRestaurantsRequest,
+): Promise<SearchRestaurantsResponse> => {
+  const { data } = await axiosInstance.get<SearchRestaurantsResponse>(
+    '/api/v1/restaurants/search',
+    { params },
   );
   return data;
 };

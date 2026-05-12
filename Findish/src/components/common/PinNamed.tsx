@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 interface PinNamedProps {
   name: string;
-  rating: number;
+  rating?: number;
   imageUrl?: string;
   isSelected?: boolean;
   onClick?: () => void;
@@ -71,10 +71,12 @@ export default function PinNamed({
       />
 
       {/* 별점 뱃지 — 우상단 */}
-      <div className="absolute top-0 right-0 bg-primary flex items-center gap-1 px-2.5 py-0.75 rounded-full">
-        <span className="text-white typo-micro">★</span>
-        <span className="text-white typo-caption font-medium">{rating}</span>
-      </div>
+      {rating != null && (
+        <div className="absolute top-0 right-0 bg-primary flex items-center gap-1 px-2.5 py-0.75 rounded-full">
+          <span className="text-white typo-micro">★</span>
+          <span className="text-white typo-caption font-medium">{rating}</span>
+        </div>
+      )}
 
       {/* 식당명 라벨 — 하단 중앙 */}
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-white px-2 py-1 rounded-[10px] whitespace-nowrap shadow-[0px_2px_2px_rgba(0,0,0,0.2)]">

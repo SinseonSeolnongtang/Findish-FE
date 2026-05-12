@@ -2,7 +2,121 @@ import { http, HttpResponse } from "msw";
 
 const BASE = "/api/v1/restaurants/:restaurantId";
 
+const MOCK_SEARCH_RESTAURANTS = [
+  {
+    restaurantId: 1,
+    name: "착한돼지집",
+    category: "삼겹살",
+    address: "서울 성동구 왕십리로 123",
+    lat: 37.5665,
+    lng: 126.978,
+    reviewCount: 500,
+    distance: 400,
+    thumbnailUrl: "https://images.unsplash.com/photo-1558030006-450675393462?w=400&q=80",
+    tags: ["#삼겹살", "#혼밥"],
+    isOpen: true,
+  },
+  {
+    restaurantId: 2,
+    name: "고기굽는마을",
+    category: "삼겹살",
+    address: "서울 성북구 동선동 45",
+    lat: 37.5831,
+    lng: 127.0028,
+    reviewCount: 600,
+    distance: 820,
+    thumbnailUrl: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&q=80",
+    tags: ["#가성비", "#질좋은고기"],
+    isOpen: true,
+  },
+  {
+    restaurantId: 3,
+    name: "방목",
+    category: "삼겹살",
+    address: "서울 성북구 삼선동 67",
+    lat: 37.5752,
+    lng: 127.0208,
+    reviewCount: 500,
+    distance: 1200,
+    thumbnailUrl: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&q=80",
+    tags: ["#고기구워주는", "#질좋은고기"],
+    isOpen: true,
+  },
+  {
+    restaurantId: 4,
+    name: "육식주 혜화점",
+    category: "한식",
+    address: "서울 종로구 혜화동 89",
+    lat: 37.5823,
+    lng: 127.0018,
+    reviewCount: 2000,
+    distance: 1500,
+    thumbnailUrl: "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=400&q=80",
+    tags: ["#고기구워주는", "#질좋은고기"],
+    isOpen: true,
+  },
+  {
+    restaurantId: 5,
+    name: "명삼 성신여대고깃집",
+    category: "삼겹살",
+    address: "서울 성북구 보문동 200",
+    lat: 37.5778,
+    lng: 127.023,
+    reviewCount: 400,
+    distance: 2100,
+    thumbnailUrl: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&q=80",
+    tags: ["#고기구워주는", "#뜨는맛집", "#가성비"],
+    isOpen: true,
+  },
+  {
+    restaurantId: 6,
+    name: "방목 2호점",
+    category: "삼겹살",
+    address: "서울 성북구 정릉동 10",
+    lat: 37.582,
+    lng: 127.0255,
+    reviewCount: 400,
+    distance: 2500,
+    thumbnailUrl: "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=400&q=80",
+    tags: ["#가성비", "#질좋은고기"],
+    isOpen: true,
+  },
+];
+
 export const restaurantHandlers = [
+  // 0. 키워드 검색 — /:restaurantId 패턴보다 반드시 앞에 위치해야 함
+  http.get("/api/v1/restaurants/search", ({ request }) => {
+    const url = new URL(request.url);
+    const keyword = url.searchParams.get("keyword") ?? "";
+    const page = Number(url.searchParams.get("page") ?? 0);
+    const size = Number(url.searchParams.get("size") ?? 20);
+    const sort = url.searchParams.get("sort");
+
+    const lower = keyword.toLowerCase();
+    const matched = keyword
+      ? MOCK_SEARCH_RESTAURANTS.filter(
+          (r) =>
+            r.name.includes(keyword) ||
+            r.category.includes(keyword) ||
+            r.tags.some((t) => t.includes(lower)),
+        )
+      : MOCK_SEARCH_RESTAURANTS;
+
+    const results = matched.length > 0 ? matched : MOCK_SEARCH_RESTAURANTS;
+
+    const sorted = sort === "distance"
+      ? [...results].sort((a, b) => a.distance - b.distance)
+      : results;
+
+    const start = page * size;
+    const paginated = sorted.slice(start, start + size);
+
+    return HttpResponse.json({
+      totalCount: sorted.length,
+      restaurants: paginated,
+    });
+  }),
+
   // 1. 식당 기본 정보
   http.get(BASE, () => {
     return HttpResponse.json({

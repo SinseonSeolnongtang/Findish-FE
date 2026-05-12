@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/common/Header";
 import SearchBar from "@/components/common/SearchBar";
@@ -6,14 +6,38 @@ import ChatbotFAB from "@/components/common/ChatbotFAB";
 import StoreDetail from "@/features/store/StoreDetail";
 import MapView from "@/features/normalMode/MapView";
 import SearchResultPanel from "@/features/normalMode/SearchResultPanel";
-import { MOCK_RESTAURANTS } from "@/mocks/normalMode";
+import { useSearchRestaurantsQuery } from "@/hooks/useRestaurant";
+import type { StoreCardData } from "@/components/common/StoreCard";
+import type { SearchRestaurantItem } from "@/types/restaurant";
+
+function toStoreCard(item: SearchRestaurantItem): StoreCardData {
+  return {
+    id: item.restaurantId,
+    name: item.name,
+    category: item.category,
+    isOpen: item.isOpen,
+    reviewCount: String(item.reviewCount),
+    keywords: item.tags,
+    imageUrl: item.thumbnailUrl,
+    lat: item.lat,
+    lng: item.lng,
+  };
+}
 
 export default function NormalModePage() {
   const navigate = useNavigate();
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [searched, setSearched] = useState(false);
+  const [keyword, setKeyword] = useState("");
 
-  const selected = MOCK_RESTAURANTS.find((r) => r.id === selectedId);
+  const { data, isLoading } = useSearchRestaurantsQuery({ keyword });
+
+  const restaurants = useMemo(
+    () => (data?.restaurants ?? []).map(toStoreCard),
+    [data],
+  );
+
+  const selected = restaurants.find((r) => r.id === selectedId);
+  const searched = !!keyword.trim();
 
   const handlePinClick = (id: number) => setSelectedId(id === selectedId ? null : id);
   const handleCardSelect = (id: number) => setSelectedId(id === selectedId ? null : id);
@@ -28,22 +52,24 @@ export default function NormalModePage() {
             mode="normal"
             onModeChange={() => navigate("/pick")}
             onSearch={(q) => {
-              if (q.trim()) setSearched(true);
+              setSelectedId(null);
+              setKeyword(q.trim());
             }}
           />
         </div>
       </div>
 
       <MapView
-        restaurants={MOCK_RESTAURANTS}
+        restaurants={restaurants}
         selectedId={selectedId}
         onPinClick={handlePinClick}
-        searched={searched}
+        searched={searched && !isLoading}
       />
 
-      {searched && (
+      {searched && !isLoading && (
         <SearchResultPanel
-          restaurants={MOCK_RESTAURANTS}
+          restaurants={restaurants}
+          totalCount={data?.totalCount ?? 0}
           selectedId={selectedId}
           onSelect={handleCardSelect}
         />

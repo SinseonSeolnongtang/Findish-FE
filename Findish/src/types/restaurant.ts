@@ -1,3 +1,31 @@
+// ─── 0. 키워드 검색 (일반모드) ────────────────────────────────────────────────
+// GET /api/v1/restaurants/search
+export interface SearchRestaurantItem {
+  restaurantId: number;
+  name: string;
+  category: string;
+  address: string;
+  lat: number;
+  lng: number;
+  reviewCount: number;
+  distance: number; // 단위: m
+  thumbnailUrl: string;
+  tags: string[];
+  isOpen: boolean;
+}
+export interface SearchRestaurantsRequest {
+  keyword: string;
+  lat?: number;
+  lng?: number;
+  sort?: string;
+  page?: number;
+  size?: number;
+}
+export interface SearchRestaurantsResponse {
+  totalCount: number;
+  restaurants: SearchRestaurantItem[];
+}
+
 // ─── 1. 식당 기본 정보 ───────────────────────────────────────────────────────
 // GET /api/v1/restaurants/{restaurantId}
 export interface GetRestaurantResponse {

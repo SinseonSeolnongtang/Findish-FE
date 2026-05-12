@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import {
+  searchRestaurants,
   getRestaurantBasic,
   getRestaurantAiSummary,
   getRestaurantMenus,
@@ -8,7 +9,20 @@ import {
   getAvailableSlots,
   createReservation,
 } from '@/api/restaurant';
-import type { GetReviewsRequest, GetAvailableSlotsRequest, CreateReservationRequest } from '@/types/restaurant';
+import type {
+  SearchRestaurantsRequest,
+  GetReviewsRequest,
+  GetAvailableSlotsRequest,
+  CreateReservationRequest,
+} from '@/types/restaurant';
+
+export const useSearchRestaurantsQuery = (params: SearchRestaurantsRequest) => {
+  return useQuery({
+    queryKey: ['restaurants', 'search', params],
+    queryFn: () => searchRestaurants(params),
+    enabled: !!params.keyword.trim(),
+  });
+};
 
 export const useRestaurantBasicQuery = (restaurantId: number) => {
   return useQuery({

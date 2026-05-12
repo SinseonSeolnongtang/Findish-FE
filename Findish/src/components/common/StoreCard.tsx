@@ -9,10 +9,10 @@ export interface StoreCardData {
   id: number;
   name: string;
   category: string;
-  summary: string;
+  summary?: string;
   isOpen: boolean;
   reviewCount: string;
-  rating: number;
+  rating?: number;
   keywords: string[];
   imageUrl?: string;
   lat?: number;
@@ -58,9 +58,11 @@ export default function StoreCard({
           )}
         </div>
         {/* Rating badge — bottom-left of image */}
-        <div className="absolute bottom-2 left-1.5">
-          <Rating value={store.rating} />
-        </div>
+        {store.rating != null && (
+          <div className="absolute bottom-2 left-1.5">
+            <Rating value={store.rating} />
+          </div>
+        )}
       </div>
 
       {/* 정보 */}
@@ -89,9 +91,11 @@ export default function StoreCard({
         </div>
 
         {/* 요약 */}
-        <p className="typo-caption text-neutral-600 mt-1.5 overflow-hidden whitespace-nowrap text-ellipsis">
-          {store.summary}
-        </p>
+        {store.summary && (
+          <p className="typo-caption text-neutral-600 mt-1.5 overflow-hidden whitespace-nowrap text-ellipsis">
+            {store.summary}
+          </p>
+        )}
 
         {/* 영업상태 + 리뷰 수 */}
         <div className="flex items-center gap-3 mt-1.5">
