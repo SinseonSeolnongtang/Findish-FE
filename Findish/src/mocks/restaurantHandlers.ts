@@ -2,7 +2,17 @@ import { http, HttpResponse } from "msw";
 
 const BASE = "/api/v1/restaurants/:restaurantId";
 
-const MOCK_SEARCH_RESTAURANTS = [
+export const likedRestaurantIds = new Set<number>([2, 4]);
+export const likeCounts: Record<number, number> = {
+  1: 127,
+  2: 46,
+  3: 32,
+  4: 89,
+  5: 20,
+  6: 15,
+};
+
+export const MOCK_SEARCH_RESTAURANTS = [
   {
     restaurantId: 1,
     name: "착한돼지집",
@@ -12,7 +22,8 @@ const MOCK_SEARCH_RESTAURANTS = [
     lng: 126.978,
     reviewCount: 500,
     distance: 400,
-    thumbnailUrl: "https://images.unsplash.com/photo-1558030006-450675393462?w=400&q=80",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1558030006-450675393462?w=400&q=80",
     tags: ["#삼겹살", "#혼밥"],
     isOpen: true,
   },
@@ -25,7 +36,8 @@ const MOCK_SEARCH_RESTAURANTS = [
     lng: 127.0028,
     reviewCount: 600,
     distance: 820,
-    thumbnailUrl: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&q=80",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&q=80",
     tags: ["#가성비", "#질좋은고기"],
     isOpen: true,
   },
@@ -38,7 +50,8 @@ const MOCK_SEARCH_RESTAURANTS = [
     lng: 127.0208,
     reviewCount: 500,
     distance: 1200,
-    thumbnailUrl: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&q=80",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&q=80",
     tags: ["#고기구워주는", "#질좋은고기"],
     isOpen: true,
   },
@@ -51,7 +64,8 @@ const MOCK_SEARCH_RESTAURANTS = [
     lng: 127.0018,
     reviewCount: 2000,
     distance: 1500,
-    thumbnailUrl: "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=400&q=80",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=400&q=80",
     tags: ["#고기구워주는", "#질좋은고기"],
     isOpen: true,
   },
@@ -64,7 +78,8 @@ const MOCK_SEARCH_RESTAURANTS = [
     lng: 127.023,
     reviewCount: 400,
     distance: 2100,
-    thumbnailUrl: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&q=80",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400&q=80",
     tags: ["#고기구워주는", "#뜨는맛집", "#가성비"],
     isOpen: true,
   },
@@ -77,7 +92,8 @@ const MOCK_SEARCH_RESTAURANTS = [
     lng: 127.0255,
     reviewCount: 400,
     distance: 2500,
-    thumbnailUrl: "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=400&q=80",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=400&q=80",
     tags: ["#가성비", "#질좋은고기"],
     isOpen: true,
   },
@@ -104,9 +120,10 @@ export const restaurantHandlers = [
 
     const results = matched.length > 0 ? matched : MOCK_SEARCH_RESTAURANTS;
 
-    const sorted = sort === "distance"
-      ? [...results].sort((a, b) => a.distance - b.distance)
-      : results;
+    const sorted =
+      sort === "distance"
+        ? [...results].sort((a, b) => a.distance - b.distance)
+        : results;
 
     const start = page * size;
     const paginated = sorted.slice(start, start + size);
@@ -280,5 +297,19 @@ export const restaurantHandlers = [
       },
       { status: 201 },
     );
+  }),
+
+  // 8. 좋아요 토글
+  http.post(`${BASE}/like`, ({ params }) => {
+    const id = Number(params.restaurantId);
+    const isLiked = !likedRestaurantIds.has(id);
+    if (isLiked) {
+      likedRestaurantIds.add(id);
+      likeCounts[id] = (likeCounts[id] ?? 0) + 1;
+    } else {
+      likedRestaurantIds.delete(id);
+      likeCounts[id] = Math.max(0, (likeCounts[id] ?? 0) - 1);
+    }
+    return HttpResponse.json({ isLiked, likeCount: likeCounts[id] ?? 0 });
   }),
 ];

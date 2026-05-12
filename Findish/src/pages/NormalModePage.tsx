@@ -6,7 +6,11 @@ import ChatbotFAB from "@/components/common/ChatbotFAB";
 import StoreDetail from "@/features/store/StoreDetail";
 import MapView from "@/features/normalMode/MapView";
 import SearchResultPanel from "@/features/normalMode/SearchResultPanel";
-import { useSearchRestaurantsQuery } from "@/hooks/useRestaurant";
+import {
+  useSearchRestaurantsQuery,
+  useMyLikesQuery,
+  useToggleLikeMutation,
+} from "@/hooks/useRestaurant";
 import type { StoreCardData } from "@/components/common/StoreCard";
 import type { SearchRestaurantItem } from "@/types/restaurant";
 
@@ -28,8 +32,40 @@ export default function NormalModePage() {
   const navigate = useNavigate();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [keyword, setKeyword] = useState("");
+  // id → true(좋아요) / false(취소) 낙관적 오버라이드
+  const [toggledIds, setToggledIds] = useState<Record<number, boolean>>({});
 
   const { data, isLoading } = useSearchRestaurantsQuery({ keyword });
+  const { data: likesData } = useMyLikesQuery();
+  const { mutate: toggleLikeMutate } = useToggleLikeMutation();
+
+  const likedIds = useMemo(() => {
+    const base = new Set<number>(
+      likesData?.restaurants.map((r) => r.restaurantId) ?? [],
+    );
+    Object.entries(toggledIds).forEach(([id, isLiked]) => {
+      if (isLiked) base.add(Number(id));
+      else base.delete(Number(id));
+    });
+    return base;
+  }, [likesData, toggledIds]);
+
+  const handleToggleLike = (id: number) => {
+    const currentlyLiked = likedIds.has(id);
+    setToggledIds((prev) => ({ ...prev, [id]: !currentlyLiked }));
+    toggleLikeMutate(id, {
+      onSuccess: (res) => {
+        setToggledIds((prev) => ({ ...prev, [id]: res.isLiked }));
+      },
+      onError: () => {
+        setToggledIds((prev) => {
+          const next = { ...prev };
+          delete next[id];
+          return next;
+        });
+      },
+    });
+  };
 
   const restaurants = useMemo(
     () => (data?.restaurants ?? []).map(toStoreCard),
@@ -72,6 +108,8 @@ export default function NormalModePage() {
           totalCount={data?.totalCount ?? 0}
           selectedId={selectedId}
           onSelect={handleCardSelect}
+          likedIds={likedIds}
+          onToggleLike={handleToggleLike}
         />
       )}
 

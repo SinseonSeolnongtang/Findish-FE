@@ -12,6 +12,9 @@ import type {
   GetAvailableSlotsResponse,
   CreateReservationRequest,
   CreateReservationResponse,
+  ToggleLikeResponse,
+  GetMyLikesRequest,
+  GetMyLikesResponse,
 } from '@/types/restaurant';
 
 export const getRestaurantBasic = async (restaurantId: number): Promise<GetRestaurantResponse> => {
@@ -71,6 +74,21 @@ export const searchRestaurants = async (
 ): Promise<SearchRestaurantsResponse> => {
   const { data } = await axiosInstance.get<SearchRestaurantsResponse>(
     '/api/v1/restaurants/search',
+    { params },
+  );
+  return data;
+};
+
+export const toggleLike = async (restaurantId: number): Promise<ToggleLikeResponse> => {
+  const { data } = await axiosInstance.post<ToggleLikeResponse>(
+    `/api/v1/restaurants/${restaurantId}/like`,
+  );
+  return data;
+};
+
+export const getMyLikes = async (params?: GetMyLikesRequest): Promise<GetMyLikesResponse> => {
+  const { data } = await axiosInstance.get<GetMyLikesResponse>(
+    '/api/v1/members/me/likes',
     { params },
   );
   return data;

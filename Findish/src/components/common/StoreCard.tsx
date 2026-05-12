@@ -40,7 +40,9 @@ export default function StoreCard({
   isFavorited = false,
   className,
 }: StoreCardProps) {
-  const [favorited, setFavorited] = useState(isFavorited);
+  const isControlled = onFavorite !== undefined;
+  const [localFavorited, setLocalFavorited] = useState(isFavorited);
+  const favorited = isControlled ? isFavorited : localFavorited;
 
   return (
     <div
@@ -100,7 +102,7 @@ export default function StoreCard({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                setFavorited((prev) => !prev);
+                if (!isControlled) setLocalFavorited((prev) => !prev);
                 onFavorite?.();
               }}
               className="flex items-center justify-center w-7 h-7 rounded-md border border-neutral-200 bg-white hover:bg-neutral-50 transition-colors cursor-pointer"

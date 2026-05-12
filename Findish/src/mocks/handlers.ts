@@ -1,4 +1,5 @@
 import { http, HttpResponse } from 'msw';
+import { likedRestaurantIds, MOCK_SEARCH_RESTAURANTS } from './restaurantHandlers';
 
 export const handlers = [
   // Auth
@@ -69,6 +70,30 @@ export const handlers = [
       email: 'mock@example.com',
       isLoginIdEditable: true,
       updatedAt: new Date().toISOString(),
+    });
+  }),
+
+  // 좋아요 목록 조회
+  http.get('/api/v1/members/me/likes', ({ request }) => {
+    const url = new URL(request.url);
+    const page = Number(url.searchParams.get('page') ?? 0);
+    const size = Number(url.searchParams.get('size') ?? 10);
+
+    const liked = MOCK_SEARCH_RESTAURANTS.filter((r) =>
+      likedRestaurantIds.has(r.restaurantId),
+    ).map((r) => ({
+      restaurantId: r.restaurantId,
+      name: r.name,
+      category: r.category,
+      address: r.address,
+      thumbnailUrl: r.thumbnailUrl,
+      likedAt: new Date(Date.now() - Math.random() * 7 * 86400000).toISOString(),
+    }));
+
+    const start = page * size;
+    return HttpResponse.json({
+      totalCount: liked.length,
+      restaurants: liked.slice(start, start + size),
     });
   }),
 ];

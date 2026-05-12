@@ -5,6 +5,8 @@ interface SearchResultPanelProps {
   totalCount: number;
   selectedId: number | null;
   onSelect: (id: number) => void;
+  likedIds?: Set<number>;
+  onToggleLike?: (id: number) => void;
 }
 
 export default function SearchResultPanel({
@@ -12,6 +14,8 @@ export default function SearchResultPanel({
   totalCount,
   selectedId,
   onSelect,
+  likedIds,
+  onToggleLike,
 }: SearchResultPanelProps) {
   return (
     <div className="absolute left-0 top-17 bottom-0 w-120 bg-white shadow-[4px_0px_12px_rgba(0,0,0,0.08)] flex flex-col z-20">
@@ -28,6 +32,8 @@ export default function SearchResultPanel({
             store={r}
             isActive={selectedId === r.id}
             onClick={() => onSelect(r.id)}
+            isFavorited={likedIds?.has(r.id) ?? false}
+            onFavorite={() => onToggleLike?.(r.id)}
           />
         ))}
       </div>

@@ -8,13 +8,17 @@ import {
   getRestaurantInfo,
   getAvailableSlots,
   createReservation,
+  toggleLike,
+  getMyLikes,
 } from '@/api/restaurant';
 import type {
   SearchRestaurantsRequest,
   GetReviewsRequest,
   GetAvailableSlotsRequest,
   CreateReservationRequest,
+  GetMyLikesRequest,
 } from '@/types/restaurant';
+import { useAuthStore } from '@/stores/authStore';
 
 export const useSearchRestaurantsQuery = (params: SearchRestaurantsRequest) => {
   return useQuery({
@@ -75,5 +79,20 @@ export const useAvailableSlotsQuery = (restaurantId: number, params: GetAvailabl
 export const useCreateReservationMutation = (restaurantId: number) => {
   return useMutation({
     mutationFn: (body: CreateReservationRequest) => createReservation(restaurantId, body),
+  });
+};
+
+export const useToggleLikeMutation = () => {
+  return useMutation({
+    mutationFn: (restaurantId: number) => toggleLike(restaurantId),
+  });
+};
+
+export const useMyLikesQuery = (params?: GetMyLikesRequest) => {
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+  return useQuery({
+    queryKey: ['likes', 'me', params],
+    queryFn: () => getMyLikes(params),
+    enabled: isLoggedIn,
   });
 };

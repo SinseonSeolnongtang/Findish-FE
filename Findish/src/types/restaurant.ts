@@ -133,3 +133,30 @@ export interface CreateReservationResponse {
   status: string;
   calendarSaved: boolean;
 }
+
+// ─── 8. 좋아요 토글 ───────────────────────────────────────────────────────────
+// POST /api/v1/restaurants/{restaurantId}/like
+export interface ToggleLikeResponse {
+  isLiked: boolean;
+  likeCount: number;
+}
+
+// ─── 9. 좋아요 목록 조회 ──────────────────────────────────────────────────────
+// GET /api/v1/members/me/likes
+export interface GetMyLikesRequest {
+  sort?: string;
+  page?: number;
+  size?: number;
+}
+export interface LikedRestaurantItem {
+  restaurantId: number;
+  name: string;
+  category: string;
+  address: string;
+  thumbnailUrl: string;
+  likedAt: string;
+}
+export interface GetMyLikesResponse {
+  totalCount: number;
+  restaurants: LikedRestaurantItem[];
+}
