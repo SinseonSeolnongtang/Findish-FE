@@ -6,6 +6,7 @@ import AiTab from "./tabs/AiTab";
 import MenuTab from "./tabs/MenuTab";
 import ReviewTab from "./tabs/ReviewTab";
 import InfoTab from "./tabs/InfoTab";
+import ReservationPanel from "./ReservationPanel";
 import CloseLgIcon from "@/assets/icons/common/close_lg.svg?react";
 import Button from "@/components/common/Button";
 
@@ -25,6 +26,9 @@ interface StoreDetailProps {
 
 export default function StoreDetail({ store, onClose }: StoreDetailProps) {
   const [activeTab, setActiveTab] = useState<TabType>("ai");
+  const [showReservation, setShowReservation] = useState(false);
+
+  const restaurantId = store.id;
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -52,44 +56,67 @@ export default function StoreDetail({ store, onClose }: StoreDetailProps) {
 
       {/* 스크롤 영역 */}
       <div className="flex-1 overflow-y-auto">
-        <StoreBasicInfo store={store} />
+        <StoreBasicInfo store={store} restaurantId={restaurantId} />
 
-        {/* 탭 바 */}
-        <div className="flex border-b border-neutral-200">
-          {(["ai", "menu", "review", "info"] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={cn(
-                "flex-1 py-2 text-[14px] font-medium transition-colors cursor-pointer",
-                activeTab === tab
-                  ? "text-primary border-b-2 border-primary"
-                  : "text-neutral-500",
-              )}
-            >
-              {TAB_LABELS[tab]}
-            </button>
-          ))}
-        </div>
+        {showReservation ? (
+          <ReservationPanel
+            restaurantId={restaurantId}
+            restaurantName={store.name}
+            onClose={() => setShowReservation(false)}
+          />
+        ) : (
+          <>
+            {/* 탭 바 */}
+            <div className="flex border-b border-neutral-200">
+              {(["ai", "menu", "review", "info"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={cn(
+                    "flex-1 py-2 text-[14px] font-medium transition-colors cursor-pointer",
+                    activeTab === tab
+                      ? "text-primary border-b-2 border-primary"
+                      : "text-neutral-500",
+                  )}
+                >
+                  {TAB_LABELS[tab]}
+                </button>
+              ))}
+            </div>
 
-        {activeTab === "ai" && (
-          <AiTab store={store} onMoreClick={() => setActiveTab("menu")} />
+            {activeTab === "ai" && (
+              <AiTab
+                store={store}
+                restaurantId={restaurantId}
+                onMoreClick={() => setActiveTab("menu")}
+              />
+            )}
+            {activeTab === "menu" && (
+              <MenuTab restaurantId={restaurantId} />
+            )}
+            {activeTab === "review" && (
+              <ReviewTab restaurantId={restaurantId} />
+            )}
+            {activeTab === "info" && (
+              <InfoTab restaurantId={restaurantId} />
+            )}
+          </>
         )}
-        {activeTab === "menu" && <MenuTab store={store} />}
-        {activeTab === "review" && <ReviewTab store={store} />}
-        {activeTab === "info" && <InfoTab />}
       </div>
 
       {/* 예약하기 버튼 */}
-      <div className="shrink-0 p-2 border-t border-neutral-100">
-        <Button
-          variant="primary"
-          size="sm"
-          className="w-full h-11 text-[15px] font-bold rounded-xl"
-        >
-          예약하기
-        </Button>
-      </div>
+      {!showReservation && (
+        <div className="shrink-0 p-2 border-t border-neutral-100">
+          <Button
+            variant="primary"
+            size="sm"
+            className="w-full h-11 text-[15px] font-bold rounded-xl"
+            onClick={() => setShowReservation(true)}
+          >
+            예약하기
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

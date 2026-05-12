@@ -1,16 +1,24 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { type StoreCardData } from "@/components/common/StoreCard";
+import { useRestaurantBasicQuery } from "@/hooks/useRestaurant";
 
 const DAYS = ["월", "화", "수", "목", "금", "토", "일"] as const;
 
 interface StoreBasicInfoProps {
   store: StoreCardData;
+  restaurantId: number;
 }
 
-export default function StoreBasicInfo({ store }: StoreBasicInfoProps) {
+export default function StoreBasicInfo({ store, restaurantId }: StoreBasicInfoProps) {
   const [hoursOpen, setHoursOpen] = useState(false);
   const [activeDay, setActiveDay] = useState(2);
+
+  const { data: restaurantData } = useRestaurantBasicQuery(restaurantId);
+
+  const isOpen = restaurantData?.isOpen ?? store.isOpen;
+  const reviewCount = restaurantData?.reviewCount ?? store.reviewCount;
+  const businessHours = restaurantData?.businessHours;
 
   return (
     <div className="px-4 pt-4 pb-2">
@@ -25,11 +33,15 @@ export default function StoreBasicInfo({ store }: StoreBasicInfoProps) {
               <circle cx="8" cy="8" r="6.5" stroke="#6A7282" strokeWidth="1.2" />
               <path d="M8 5v3l2 1.5" stroke="#6A7282" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            <span className={cn("text-[12px] font-bold", store.isOpen ? "text-[#00A63E]" : "text-[#FF4500]")}>
-              {store.isOpen ? "영업중" : "영업전"}
+            <span className={cn("text-[12px] font-bold", isOpen ? "text-[#00A63E]" : "text-[#FF4500]")}>
+              {isOpen ? "영업중" : "영업전"}
             </span>
-            <div className="w-px h-3 bg-[#D1D5DC]" />
-            <span className="text-[12px] text-black">수요일 16:00 - 24:00</span>
+            {businessHours && (
+              <>
+                <div className="w-px h-3 bg-[#D1D5DC]" />
+                <span className="text-[12px] text-black">{businessHours}</span>
+              </>
+            )}
             <button
               onClick={() => setHoursOpen((v) => !v)}
               className="text-[#6A7282] ml-0.5"
@@ -44,7 +56,7 @@ export default function StoreBasicInfo({ store }: StoreBasicInfoProps) {
             </button>
           </div>
           {hoursOpen && (
-            <div className="mt-1 bg-white border border-[#F3F1EF] rounded-md shadow-[0px_2px_4px_rgba(0,0,0,0.1)] p-2 w-[181px]">
+            <div className="mt-1 bg-white border border-[#F3F1EF] rounded-md shadow-[0px_2px_4px_rgba(0,0,0,0.1)] p-2 w-45.25">
               <div className="flex gap-1 mb-2">
                 {DAYS.map((day, i) => (
                   <button
@@ -62,8 +74,11 @@ export default function StoreBasicInfo({ store }: StoreBasicInfoProps) {
                 ))}
               </div>
               <div className="text-[10px] text-black">
-                <p className="font-bold">16:00 - 24:00</p>
-                <p className="text-[#6A7282]">라스트 오더 23:00</p>
+                {businessHours ? (
+                  <p className="font-bold">{businessHours}</p>
+                ) : (
+                  <p className="text-neutral-400">영업시간 정보 없음</p>
+                )}
               </div>
             </div>
           )}
@@ -75,18 +90,19 @@ export default function StoreBasicInfo({ store }: StoreBasicInfoProps) {
             <rect x="2.5" y="1.5" width="12" height="14" rx="1.5" stroke="#6A7282" strokeWidth="1.2" />
             <path d="M5 6h7M5 9h7M5 12h4" stroke="#6A7282" strokeWidth="1.2" strokeLinecap="round" />
           </svg>
-          <span className="text-[12px] text-[#6A7282]">리뷰 {store.reviewCount}</span>
+          <span className="text-[12px] text-[#6A7282]">리뷰 {reviewCount}</span>
         </div>
 
-        {/* 주차 */}
-        <div className="flex items-center gap-1.5">
-          <svg width="14" height="12" viewBox="0 0 14 12" fill="none" className="shrink-0">
-            <path d="M2 6L3.5 2.5H10.5L12 6V10H2V6Z" stroke="#6A7282" strokeWidth="1.1" strokeLinejoin="round" />
-            <circle cx="4" cy="10" r="1.5" fill="#6A7282" />
-            <circle cx="10" cy="10" r="1.5" fill="#6A7282" />
-          </svg>
-          <span className="text-[12px] font-bold text-[#E60000]">주차 불가능</span>
-        </div>
+        {/* 가격대 */}
+        {restaurantData?.priceRange && (
+          <div className="flex items-center gap-1.5">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0">
+              <circle cx="7" cy="7" r="5.5" stroke="#6A7282" strokeWidth="1.1" />
+              <path d="M7 4v6M5 8.5c0 .828.895 1.5 2 1.5s2-.672 2-1.5S8.105 7 7 7s-2-.672-2-1.5S5.895 4 7 4s2 .672 2 1.5" stroke="#6A7282" strokeWidth="1.1" strokeLinecap="round" />
+            </svg>
+            <span className="text-[12px] text-[#6A7282]">{restaurantData.priceRange}</span>
+          </div>
+        )}
       </div>
     </div>
   );
