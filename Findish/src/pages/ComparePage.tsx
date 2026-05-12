@@ -105,7 +105,7 @@ export default function ComparePage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Header isLoggedIn />
+      <Header />
 
       <main className="pt-17 max-w-225 mx-auto px-8 py-8">
         {/* 뒤로가기 */}

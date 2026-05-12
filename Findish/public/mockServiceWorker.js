@@ -272,11 +272,11 @@ async function getResponse(event, client, requestId, requestInterceptedAt) {
     }
 
     case 'PASSTHROUGH': {
-      return passthrough()
+      return passthrough().catch(() => Response.error())
     }
   }
 
-  return passthrough()
+  return passthrough().catch(() => Response.error())
 }
 
 /**

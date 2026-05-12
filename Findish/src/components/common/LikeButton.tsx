@@ -5,16 +5,20 @@ interface LikeButtonProps {
   liked?: boolean;
   imageUrl?: string;
   className?: string;
+  onClick?: () => void;
 }
 
 export default function LikeButton({
   liked = false,
   imageUrl,
   className,
+  onClick,
 }: LikeButtonProps) {
   return (
     <div
+      onClick={onClick}
       className={cn(
+        onClick && liked && imageUrl && "cursor-pointer",
         "w-25 h-25 bg-neutral-100 border-[1.5px] border-dashed border-neutral-300 rounded-[10px] flex items-center justify-center overflow-hidden",
         liked && !imageUrl && "bg-orange-200 border-orange-400",
         liked && imageUrl && "border-solid border-orange-400",
