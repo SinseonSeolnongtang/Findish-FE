@@ -69,7 +69,7 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Header isLoggedIn />
+      <Header />
 
       <main className="pt-17 max-w-195 mx-auto px-8 py-10">
         {/* 레스토랑 그룹 헤더 */}

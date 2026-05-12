@@ -4,7 +4,7 @@ import { type Restaurant } from "@/features/pick/types";
 import PinNamed from "@/components/common/PinNamed";
 
 interface Props {
-  restaurant: Restaurant;
+  restaurant: Restaurant | null;
   showPin: boolean;
 }
 
@@ -71,7 +71,7 @@ export default function PickMapView({ restaurant, showPin }: Props) {
       markerRef.current = null;
     }
 
-    if (!showPin || restaurant.lat == null || restaurant.lng == null) return;
+    if (!showPin || !restaurant || restaurant.lat == null || restaurant.lng == null) return;
 
     const position = new naver.maps.LatLng(restaurant.lat, restaurant.lng);
     mapRef.current.panTo(position);

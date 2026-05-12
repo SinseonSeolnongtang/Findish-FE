@@ -5,14 +5,102 @@ import type { SelectionItem } from "@/types/explore";
 let selectionStore: SelectionItem[] = [];
 
 const MOCK_RESTAURANTS = [
-  { restaurantId: 1, name: "착한돼지집", category: "삼겹살", address: "서울 마포구 망원동 123", distance: 350, priceRange: "10,000원 ~ 20,000원", lat: 37.5565, lng: 126.9100, imageUrls: ["https://picsum.photos/seed/ex1/800/600"], tags: ["#삼겹살", "#혼밥"] },
-  { restaurantId: 2, name: "방목 1호점", category: "삼겹살", address: "서울 성북구 동선동 45", distance: 820, priceRange: "15,000원 ~ 25,000원", lat: 37.5891, lng: 127.0160, imageUrls: ["https://picsum.photos/seed/ex2/800/600"], tags: ["#삼겹살", "#회식"] },
-  { restaurantId: 3, name: "방목 2호점", category: "삼겹살", address: "서울 성북구 삼선동 67", distance: 1200, priceRange: "20,000원 ~ 30,000원", lat: 37.5893, lng: 127.0180, imageUrls: ["https://picsum.photos/seed/ex3/800/600"], tags: ["#삼겹살", "#데이트"] },
-  { restaurantId: 4, name: "명삼 성신여대고깃집", category: "고기구이", address: "서울 성북구 보문동 89", distance: 1500, priceRange: "15,000원 ~ 25,000원", lat: 37.5920, lng: 127.0200, imageUrls: ["https://picsum.photos/seed/ex4/800/600"], tags: ["#고기", "#가성비"] },
-  { restaurantId: 5, name: "서울 소금구이", category: "삼겹살", address: "서울 은평구 불광동 200", distance: 2100, priceRange: "12,000원 ~ 18,000원", lat: 37.6109, lng: 126.9280, imageUrls: ["https://picsum.photos/seed/ex5/800/600"], tags: ["#소금구이", "#가성비"] },
-  { restaurantId: 6, name: "황금돼지", category: "삼겹살", address: "서울 종로구 인사동 10", distance: 2500, priceRange: "18,000원 ~ 28,000원", lat: 37.5741, lng: 126.9854, imageUrls: ["https://picsum.photos/seed/ex6/800/600"], tags: ["#삼겹살", "#접대"] },
-  { restaurantId: 7, name: "흑돼지 명가", category: "흑돼지", address: "서울 서대문구 창천동 55", distance: 3000, priceRange: "22,000원 ~ 35,000원", lat: 37.5595, lng: 126.9393, imageUrls: ["https://picsum.photos/seed/ex7/800/600"], tags: ["#흑돼지", "#프리미엄"] },
-  { restaurantId: 8, name: "이베리코 하우스", category: "이베리코", address: "서울 강남구 신사동 300", distance: 4200, priceRange: "30,000원 ~ 50,000원", lat: 37.5240, lng: 127.0202, imageUrls: ["https://picsum.photos/seed/ex8/800/600"], tags: ["#이베리코", "#데이트"] },
+  {
+    restaurantId: 1,
+    name: "착한돼지집",
+    category: "삼겹살",
+    address: "서울 마포구 망원동 123",
+    distance: 350,
+    priceRange: "10,000원 ~ 20,000원",
+    lat: 37.5565,
+    lng: 126.91,
+    imageUrls: ["https://picsum.photos/seed/ex1/800/600"],
+    tags: ["#삼겹살", "#혼밥"],
+  },
+  {
+    restaurantId: 2,
+    name: "방목 1호점",
+    category: "삼겹살",
+    address: "서울 성북구 동선동 45",
+    distance: 820,
+    priceRange: "15,000원 ~ 25,000원",
+    lat: 37.5891,
+    lng: 127.016,
+    imageUrls: ["https://picsum.photos/seed/ex2/800/600"],
+    tags: ["#삼겹살", "#회식"],
+  },
+  {
+    restaurantId: 3,
+    name: "방목 2호점",
+    category: "삼겹살",
+    address: "서울 성북구 삼선동 67",
+    distance: 1200,
+    priceRange: "20,000원 ~ 30,000원",
+    lat: 37.5893,
+    lng: 127.018,
+    imageUrls: ["https://picsum.photos/seed/ex3/800/600"],
+    tags: ["#삼겹살", "#데이트"],
+  },
+  {
+    restaurantId: 4,
+    name: "명삼 성신여대고깃집",
+    category: "고기구이",
+    address: "서울 성북구 보문동 89",
+    distance: 1500,
+    priceRange: "15,000원 ~ 25,000원",
+    lat: 37.592,
+    lng: 127.02,
+    imageUrls: ["https://picsum.photos/seed/ex6/800/600"],
+    tags: ["#고기", "#가성비"],
+  },
+  {
+    restaurantId: 5,
+    name: "서울 소금구이",
+    category: "삼겹살",
+    address: "서울 은평구 불광동 200",
+    distance: 2100,
+    priceRange: "12,000원 ~ 18,000원",
+    lat: 37.6109,
+    lng: 126.928,
+    imageUrls: ["https://picsum.photos/seed/ex5/800/600"],
+    tags: ["#소금구이", "#가성비"],
+  },
+  {
+    restaurantId: 6,
+    name: "황금돼지",
+    category: "삼겹살",
+    address: "서울 종로구 인사동 10",
+    distance: 2500,
+    priceRange: "18,000원 ~ 28,000원",
+    lat: 37.5741,
+    lng: 126.9854,
+    imageUrls: ["https://picsum.photos/seed/ex6/800/600"],
+    tags: ["#삼겹살", "#접대"],
+  },
+  {
+    restaurantId: 7,
+    name: "흑돼지 명가",
+    category: "흑돼지",
+    address: "서울 서대문구 창천동 55",
+    distance: 3000,
+    priceRange: "22,000원 ~ 35,000원",
+    lat: 37.5595,
+    lng: 126.9393,
+    imageUrls: ["https://picsum.photos/seed/ex7/800/600"],
+    tags: ["#흑돼지", "#프리미엄"],
+  },
+  {
+    restaurantId: 8,
+    name: "이베리코 하우스",
+    category: "이베리코",
+    address: "서울 강남구 신사동 300",
+    distance: 4200,
+    priceRange: "30,000원 ~ 50,000원",
+    lat: 37.524,
+    lng: 127.0202,
+    imageUrls: ["https://picsum.photos/seed/ex8/800/600"],
+    tags: ["#이베리코", "#데이트"],
+  },
 ];
 
 export const exploreHandlers = [
@@ -21,7 +109,7 @@ export const exploreHandlers = [
     const url = new URL(request.url);
     const keyword = url.searchParams.get("keyword") ?? "";
 
-    const filtered = keyword
+    const matched = keyword
       ? MOCK_RESTAURANTS.filter(
           (r) =>
             r.name.includes(keyword) ||
@@ -30,9 +118,12 @@ export const exploreHandlers = [
         )
       : MOCK_RESTAURANTS;
 
+    // 자연어 검색 mock: 매칭 없으면 전체 반환
+    const results = matched.length > 0 ? matched : MOCK_RESTAURANTS;
+
     return HttpResponse.json({
-      totalCount: filtered.length,
-      restaurants: filtered,
+      totalCount: results.length,
+      restaurants: results,
     });
   }),
 
@@ -45,7 +136,8 @@ export const exploreHandlers = [
         negativeKeywords: ["#짠맛", "#양이적음"],
       },
       atmosphere: {
-        summary: "성북천 앞에 위치해서 벚꽃과 함께 운치있는 식사를 즐길 수 있어요.",
+        summary:
+          "성북천 앞에 위치해서 벚꽃과 함께 운치있는 식사를 즐길 수 있어요.",
         positiveKeywords: ["#활기넘치는분위기", "#산뜻"],
         negativeKeywords: ["#소음내부"],
       },

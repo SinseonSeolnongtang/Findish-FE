@@ -1,14 +1,13 @@
 import Keyword from '@/components/common/Keyword';
+import type { CategorySummary } from '@/types/explore';
 import type { Restaurant } from './types';
-
-const VIBE_POSITIVE = ['#운치있어요', '#뷰맛집'];
-const VIBE_NEGATIVE = ['#소음많음'];
 
 interface Props {
   restaurant: Restaurant;
+  atmosphere?: CategorySummary;
 }
 
-export default function VibeSection({ restaurant }: Props) {
+export default function VibeSection({ restaurant, atmosphere }: Props) {
   return (
     <div className="flex flex-col h-full">
       <div className="px-3.75 pt-5 shrink-0 flex justify-center">
@@ -27,7 +26,7 @@ export default function VibeSection({ restaurant }: Props) {
           <div>
             <p className="typo-body-sm font-bold text-neutral-500 mb-1.5">좋아요</p>
             <div className="flex flex-wrap gap-1">
-              {VIBE_POSITIVE.map((k) => (
+              {(atmosphere?.positiveKeywords ?? []).map((k) => (
                 <Keyword key={k} label={k} colored />
               ))}
             </div>
@@ -35,7 +34,7 @@ export default function VibeSection({ restaurant }: Props) {
           <div>
             <p className="typo-body-sm font-bold text-neutral-500 mb-1.5">아쉬워요</p>
             <div className="flex flex-wrap gap-1">
-              {VIBE_NEGATIVE.map((k) => (
+              {(atmosphere?.negativeKeywords ?? []).map((k) => (
                 <Keyword key={k} label={k} colored />
               ))}
             </div>
