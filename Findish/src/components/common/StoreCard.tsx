@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import Rating from "./Rating";
 import Keyword from "./Keyword";
 import Button from "./Button";
 import ReviewIcon from "@/assets/icons/common/review.svg?react";
 import ClockIcon from "@/assets/icons/common/clock.svg?react";
+import FavoriteIcon from "@/assets/icons/common/favorite.svg?react";
 
 export interface StoreCardData {
   id: number;
@@ -24,6 +26,8 @@ interface StoreCardProps {
   isActive?: boolean;
   onClick?: () => void;
   onReserve?: () => void;
+  onFavorite?: () => void;
+  isFavorited?: boolean;
   className?: string;
 }
 
@@ -32,8 +36,12 @@ export default function StoreCard({
   isActive,
   onClick,
   onReserve,
+  onFavorite,
+  isFavorited = false,
   className,
 }: StoreCardProps) {
+  const [favorited, setFavorited] = useState(isFavorited);
+
   return (
     <div
       onClick={onClick}
@@ -42,7 +50,7 @@ export default function StoreCard({
         isActive ? "bg-orange-100" : "bg-white hover:bg-orange-100",
         className,
       )}
-      style={{ padding: "10px 22px" }}
+      style={{ padding: "10px 10px" }}
     >
       {/* 가게 대표 이미지 */}
       <div className="relative shrink-0 w-31.5 h-31.5">
@@ -77,17 +85,34 @@ export default function StoreCard({
               {store.category}
             </span>
           </div>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onReserve?.();
-            }}
-            className="shrink-0 w-12.5 h-6.25 typo-micro rounded-md px-0 whitespace-nowrap"
-          >
-            예약하기
-          </Button>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onReserve?.();
+              }}
+              className="w-14 h-7 typo-micro rounded-md px-0 whitespace-nowrap"
+            >
+              예약하기
+            </Button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setFavorited((prev) => !prev);
+                onFavorite?.();
+              }}
+              className="flex items-center justify-center w-7 h-7 rounded-md border border-neutral-200 bg-white hover:bg-neutral-50 transition-colors cursor-pointer"
+            >
+              <FavoriteIcon
+                width={16}
+                height={16}
+                stroke={favorited ? "var(--color-primary)" : "#99A1AF"}
+                fill={favorited ? "var(--color-primary)" : "none"}
+              />
+            </button>
+          </div>
         </div>
 
         {/* 요약 */}
@@ -103,7 +128,11 @@ export default function StoreCard({
             <ClockIcon
               width={16}
               height={16}
-              stroke={store.isOpen ? "var(--color-success)" : "var(--color-neutral-400)"}
+              stroke={
+                store.isOpen
+                  ? "var(--color-success)"
+                  : "var(--color-neutral-400)"
+              }
             />
             <span
               className={cn(

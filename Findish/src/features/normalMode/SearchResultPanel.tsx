@@ -14,7 +14,7 @@ export default function SearchResultPanel({
   onSelect,
 }: SearchResultPanelProps) {
   return (
-    <div className="absolute left-0 top-17 bottom-0 w-108.5 bg-white shadow-[4px_0px_12px_rgba(0,0,0,0.08)] flex flex-col z-20">
+    <div className="absolute left-0 top-17 bottom-0 w-120 bg-white shadow-[4px_0px_12px_rgba(0,0,0,0.08)] flex flex-col z-20">
       <div className="px-5.5 py-2.5 border-b border-[#F3F4F6] pt-8">
         <p className="typo-body-md text-neutral-600">
           검색 결과 &nbsp;
