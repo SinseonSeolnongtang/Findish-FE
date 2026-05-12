@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { login, join, checkId, getMe } from '@/api/auth';
+import { login, join, checkId, getMe, logout } from '@/api/auth';
 import { useAuthStore } from '@/stores/authStore';
 import type { LoginRequest, JoinRequest } from '@/types/auth';
 
@@ -21,6 +21,16 @@ export const useGetMeQuery = () => {
     queryKey: ['me'],
     queryFn: getMe,
     enabled: isLoggedIn,
+  });
+};
+
+export const useLogoutMutation = () => {
+  const storeLogout = useAuthStore((s) => s.logout);
+  return useMutation({
+    mutationFn: logout,
+    onSettled: () => {
+      storeLogout();
+    },
   });
 };
 
