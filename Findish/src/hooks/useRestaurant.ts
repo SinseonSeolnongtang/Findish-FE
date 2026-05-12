@@ -1,0 +1,65 @@
+import { useMutation, useQuery } from '@tanstack/react-query';
+import {
+  getRestaurantBasic,
+  getRestaurantAiSummary,
+  getRestaurantMenus,
+  getRestaurantReviews,
+  getRestaurantInfo,
+  getAvailableSlots,
+  createReservation,
+} from '@/api/restaurant';
+import type { GetReviewsRequest, GetAvailableSlotsRequest, CreateReservationRequest } from '@/types/restaurant';
+
+export const useRestaurantBasicQuery = (restaurantId: number) => {
+  return useQuery({
+    queryKey: ['restaurant', restaurantId],
+    queryFn: () => getRestaurantBasic(restaurantId),
+    enabled: !!restaurantId,
+  });
+};
+
+export const useRestaurantAiSummaryQuery = (restaurantId: number) => {
+  return useQuery({
+    queryKey: ['restaurant', restaurantId, 'ai-summary'],
+    queryFn: () => getRestaurantAiSummary(restaurantId),
+    enabled: !!restaurantId,
+  });
+};
+
+export const useRestaurantMenusQuery = (restaurantId: number) => {
+  return useQuery({
+    queryKey: ['restaurant', restaurantId, 'menus'],
+    queryFn: () => getRestaurantMenus(restaurantId),
+    enabled: !!restaurantId,
+  });
+};
+
+export const useRestaurantReviewsQuery = (restaurantId: number, params: GetReviewsRequest) => {
+  return useQuery({
+    queryKey: ['restaurant', restaurantId, 'reviews', params],
+    queryFn: () => getRestaurantReviews(restaurantId, params),
+    enabled: !!restaurantId,
+  });
+};
+
+export const useRestaurantInfoQuery = (restaurantId: number) => {
+  return useQuery({
+    queryKey: ['restaurant', restaurantId, 'info'],
+    queryFn: () => getRestaurantInfo(restaurantId),
+    enabled: !!restaurantId,
+  });
+};
+
+export const useAvailableSlotsQuery = (restaurantId: number, params: GetAvailableSlotsRequest) => {
+  return useQuery({
+    queryKey: ['restaurant', restaurantId, 'available-slots', params.date],
+    queryFn: () => getAvailableSlots(restaurantId, params),
+    enabled: !!restaurantId && !!params.date,
+  });
+};
+
+export const useCreateReservationMutation = (restaurantId: number) => {
+  return useMutation({
+    mutationFn: (body: CreateReservationRequest) => createReservation(restaurantId, body),
+  });
+};
