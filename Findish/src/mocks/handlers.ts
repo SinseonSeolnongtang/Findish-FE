@@ -59,4 +59,16 @@ export const handlers = [
       { status: 201 },
     );
   }),
+
+  http.patch('/api/v1/members/me', async ({ request }) => {
+    const body = await request.json() as { loginId?: string; name?: string };
+    return HttpResponse.json({
+      memberId: 1,
+      loginId: body.loginId ?? 'mockuser123',
+      name: body.name ?? '홍길동',
+      email: 'mock@example.com',
+      isLoginIdEditable: true,
+      updatedAt: new Date().toISOString(),
+    });
+  }),
 ];

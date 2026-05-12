@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { login, join, checkId, getMe, logout } from '@/api/auth';
+import { login, join, checkId, getMe, logout, updateMe } from '@/api/auth';
 import { useAuthStore } from '@/stores/authStore';
-import type { LoginRequest, JoinRequest } from '@/types/auth';
+import type { LoginRequest, JoinRequest, UpdateMeRequest } from '@/types/auth';
 
 export const useLoginMutation = () => {
   return useMutation({
@@ -40,5 +40,11 @@ export const useCheckIdQuery = (loginId: string) => {
     queryFn: () => checkId(loginId),
     enabled: loginId.trim().length > 0,
     staleTime: 1000 * 30,
+  });
+};
+
+export const useUpdateMeMutation = () => {
+  return useMutation({
+    mutationFn: (body: UpdateMeRequest) => updateMe(body),
   });
 };
