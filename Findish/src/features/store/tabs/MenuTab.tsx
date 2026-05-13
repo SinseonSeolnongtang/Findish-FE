@@ -1,5 +1,7 @@
+import { useState } from "react";
 import MenuItem from "@/components/common/MenuItem";
 import { useRestaurantMenusQuery } from "@/hooks/useRestaurant";
+import { useAddToCartMutation } from "@/hooks/useCart";
 
 interface MenuTabProps {
   restaurantId: number;
@@ -7,6 +9,16 @@ interface MenuTabProps {
 
 export default function MenuTab({ restaurantId }: MenuTabProps) {
   const { data, isLoading, isError } = useRestaurantMenusQuery(restaurantId);
+  const { mutate: addToCart } = useAddToCartMutation();
+  const [addingMenuId, setAddingMenuId] = useState<number | null>(null);
+
+  const handleAdd = (menuId: number) => {
+    setAddingMenuId(menuId);
+    addToCart(
+      { restaurantId, menuId, quantity: 1 },
+      { onSettled: () => setAddingMenuId(null) },
+    );
+  };
 
   if (isLoading) {
     return (
@@ -29,7 +41,14 @@ export default function MenuTab({ restaurantId }: MenuTabProps) {
   return (
     <div className="flex flex-col gap-3 p-4">
       {data?.menus.map((m) => (
-        <MenuItem key={m.menuId} name={m.name} price={m.price} imageUrl={m.imageUrl} />
+        <MenuItem
+          key={m.menuId}
+          name={m.name}
+          price={m.price}
+          imageUrl={m.imageUrl}
+          isAdding={addingMenuId === m.menuId}
+          onAdd={() => handleAdd(m.menuId)}
+        />
       ))}
     </div>
   );

@@ -6,6 +6,7 @@ interface MenuItemProps {
   price: number;
   imageUrl?: string;
   onAdd?: () => void;
+  isAdding?: boolean;
   className?: string;
 }
 
@@ -14,6 +15,7 @@ export default function MenuItem({
   price,
   imageUrl,
   onAdd,
+  isAdding = false,
   className,
 }: MenuItemProps) {
   return (
@@ -44,10 +46,11 @@ export default function MenuItem({
       {/* 담기 버튼 */}
       <Button
         onClick={onAdd}
+        disabled={isAdding}
         variant="primary"
         className="shrink-0 h-6.25 px-2 typo-micro rounded-md whitespace-nowrap"
       >
-        +1 담기
+        {isAdding ? "담는 중..." : "+1 담기"}
       </Button>
     </div>
   );
