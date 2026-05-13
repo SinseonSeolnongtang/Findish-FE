@@ -2,6 +2,37 @@ import { http, HttpResponse } from "msw";
 
 const BASE = "/api/v1/restaurants/:restaurantId";
 
+export const MOCK_MENUS = [
+  {
+    menuId: 1,
+    name: "한우 꽃등심 200g",
+    price: 65000,
+    imageUrl: "https://picsum.photos/seed/menu1/400/300",
+    description: "1++ 등급 한우 꽃등심을 직화로 구워드립니다.",
+  },
+  {
+    menuId: 2,
+    name: "한우 안심 150g",
+    price: 72000,
+    imageUrl: "https://picsum.photos/seed/menu2/400/300",
+    description: "부드럽고 담백한 한우 안심.",
+  },
+  {
+    menuId: 3,
+    name: "된장찌개",
+    price: 8000,
+    imageUrl: "https://picsum.photos/seed/menu3/400/300",
+    description: "직접 담근 된장으로 끓인 구수한 찌개.",
+  },
+  {
+    menuId: 4,
+    name: "공기밥",
+    price: 2000,
+    imageUrl: "https://picsum.photos/seed/menu4/400/300",
+    description: "",
+  },
+];
+
 export const likedRestaurantIds = new Set<number>([2, 4]);
 export const likeCounts: Record<number, number> = {
   1: 127,
@@ -171,38 +202,7 @@ export const restaurantHandlers = [
 
   // 3. 메뉴 목록
   http.get(`${BASE}/menus`, () => {
-    return HttpResponse.json({
-      menus: [
-        {
-          menuId: 1,
-          name: "한우 꽃등심 200g",
-          price: 65000,
-          imageUrl: "https://picsum.photos/seed/menu1/400/300",
-          description: "1++ 등급 한우 꽃등심을 직화로 구워드립니다.",
-        },
-        {
-          menuId: 2,
-          name: "한우 안심 150g",
-          price: 72000,
-          imageUrl: "https://picsum.photos/seed/menu2/400/300",
-          description: "부드럽고 담백한 한우 안심.",
-        },
-        {
-          menuId: 3,
-          name: "된장찌개",
-          price: 8000,
-          imageUrl: "https://picsum.photos/seed/menu3/400/300",
-          description: "직접 담근 된장으로 끓인 구수한 찌개.",
-        },
-        {
-          menuId: 4,
-          name: "공기밥",
-          price: 2000,
-          imageUrl: "https://picsum.photos/seed/menu4/400/300",
-          description: "",
-        },
-      ],
-    });
+    return HttpResponse.json({ menus: MOCK_MENUS });
   }),
 
   // 4. 리뷰 목록

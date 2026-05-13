@@ -1,29 +1,11 @@
 import { http, HttpResponse } from 'msw';
 import type { CartItem } from '@/types/cart';
+import { MOCK_MENUS, MOCK_SEARCH_RESTAURANTS } from './restaurantHandlers';
 
 // ─── 인메모리 장바구니 상태 ────────────────────────────────────────────────────
-let nextCartItemId = 3;
-
-let mockCartItems: CartItem[] = [
-  {
-    cartItemId: 1,
-    menuId: 1,
-    name: '한우 꽃등심 200g',
-    price: 65000,
-    quantity: 2,
-    imageUrl: 'https://picsum.photos/seed/menu1/400/300',
-  },
-  {
-    cartItemId: 2,
-    menuId: 4,
-    name: '공기밥',
-    price: 2000,
-    quantity: 2,
-    imageUrl: 'https://picsum.photos/seed/menu4/400/300',
-  },
-];
-
-const MOCK_RESTAURANT = { restaurantId: 1, restaurantName: '미슐랭 한우 구이' };
+let nextCartItemId = 1;
+let mockCartItems: CartItem[] = [];
+let mockCartRestaurant = { restaurantId: 0, restaurantName: '' };
 
 const calcTotalPrice = () => mockCartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 const calcTotalCount = () => mockCartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -39,7 +21,7 @@ export const cartHandlers = [
     return HttpResponse.json(
       {
         orderId: Math.floor(Math.random() * 100000),
-        restaurantName: MOCK_RESTAURANT.restaurantName,
+        restaurantName: mockCartRestaurant.restaurantName,
         items: orderedItems,
         totalPrice,
       },
@@ -50,7 +32,7 @@ export const cartHandlers = [
   // 1. 장바구니 조회
   http.get('/api/v1/cart', () => {
     return HttpResponse.json({
-      ...MOCK_RESTAURANT,
+      ...mockCartRestaurant,
       items: mockCartItems,
       totalPrice: calcTotalPrice(),
     });
@@ -59,6 +41,18 @@ export const cartHandlers = [
   // 2. 메뉴 담기
   http.post('/api/v1/cart', async ({ request }) => {
     const body = (await request.json()) as { restaurantId: number; menuId: number; quantity: number };
+
+    // 식당 변경 시 장바구니 초기화
+    if (mockCartRestaurant.restaurantId !== body.restaurantId) {
+      mockCartItems = [];
+      const restaurant = MOCK_SEARCH_RESTAURANTS.find((r) => r.restaurantId === body.restaurantId);
+      mockCartRestaurant = {
+        restaurantId: body.restaurantId,
+        restaurantName: restaurant?.name ?? `식당 ${body.restaurantId}`,
+      };
+    }
+
+    const menu = MOCK_MENUS.find((m) => m.menuId === body.menuId);
     const existing = mockCartItems.find((item) => item.menuId === body.menuId);
 
     if (existing) {
@@ -73,10 +67,10 @@ export const cartHandlers = [
     mockCartItems.push({
       cartItemId,
       menuId: body.menuId,
-      name: `메뉴 ${body.menuId}`,
-      price: 10000,
+      name: menu?.name ?? `메뉴 ${body.menuId}`,
+      price: menu?.price ?? 0,
       quantity: body.quantity,
-      imageUrl: `https://picsum.photos/seed/menu${body.menuId}/400/300`,
+      imageUrl: menu?.imageUrl ?? '',
     });
 
     return HttpResponse.json(
