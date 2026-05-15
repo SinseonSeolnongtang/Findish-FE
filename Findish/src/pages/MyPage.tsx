@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Header from "@/components/common/Header";
 import Button from "@/components/common/Button";
 import { cn } from "@/lib/utils";
@@ -11,8 +12,16 @@ import { useGetMeQuery } from "@/hooks/useAuth";
 type Tab = "좋아요 내역" | "예약 내역" | "주문 내역";
 const TABS: Tab[] = ["좋아요 내역", "예약 내역", "주문 내역"];
 
+const TAB_PARAM_MAP: Record<string, Tab> = {
+  reservation: "예약 내역",
+  order: "주문 내역",
+  liked: "좋아요 내역",
+};
+
 export default function MyPage() {
-  const [activeTab, setActiveTab] = useState<Tab>("좋아요 내역");
+  const [searchParams] = useSearchParams();
+  const initialTab = TAB_PARAM_MAP[searchParams.get("tab") ?? ""] ?? "좋아요 내역";
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const { data, isLoading, isError } = useGetMeQuery();
 

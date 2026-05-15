@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/common/Header";
 import SearchBar from "@/components/common/SearchBar";
-import ChatbotFAB from "@/components/common/ChatbotFAB";
+import ChatbotFAB from "@/features/agent/ChatbotFAB";
 import StoreDetail from "@/features/store/StoreDetail";
 import MapView from "@/features/normalMode/MapView";
 import SearchResultPanel from "@/features/normalMode/SearchResultPanel";
