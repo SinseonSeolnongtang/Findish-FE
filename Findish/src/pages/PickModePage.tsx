@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Button from "@/components/common/Button";
 import Header from "@/components/common/Header";
 import SearchBar from "@/components/common/SearchBar";
-import ChatbotFAB from "@/components/common/ChatbotFAB";
+import ChatbotFAB from "@/features/agent/ChatbotFAB";
 import LikeButton from "@/components/common/LikeButton";
 import PickMapView from "@/features/pick/PickMapView";
 import { SECTIONS } from "@/features/pick/types";

@@ -18,6 +18,28 @@ export const agentHandlers = [
   http.post('/api/v1/agent/chat', async ({ request }) => {
     const { message } = (await request.json()) as SendMessageRequest;
 
+    if (message.includes('예약 취소')) {
+      return HttpResponse.json({
+        message: `${MOCK_RESTAURANT_NAME} 예약을 취소할까요?`,
+        intent: 'CANCEL_RESERVATION',
+        step: 'CONFIRMING',
+        targetId: 1,
+        reservation: null,
+        menus: null,
+      });
+    }
+
+    if (message.includes('주문 취소') || message.includes('취소')) {
+      return HttpResponse.json({
+        message: `${MOCK_RESTAURANT_NAME} 주문을 취소할까요?`,
+        intent: 'CANCEL_ORDER',
+        step: 'CONFIRMING',
+        targetId: 2,
+        reservation: null,
+        menus: null,
+      });
+    }
+
     if (message.includes('예약')) {
       return HttpResponse.json({
         message: `${MOCK_RESTAURANT_NAME}으로 5명 예약할까요?`,
@@ -54,17 +76,6 @@ export const agentHandlers = [
         targetId: null,
         reservation: null,
         menus: MOCK_MENUS,
-      });
-    }
-
-    if (message.includes('취소')) {
-      return HttpResponse.json({
-        message: `${MOCK_RESTAURANT_NAME} 주문을 취소할까요?`,
-        intent: 'CANCEL_ORDER',
-        step: 'CONFIRMING',
-        targetId: 2,
-        reservation: null,
-        menus: null,
       });
     }
 
@@ -113,7 +124,13 @@ export const agentHandlers = [
     return HttpResponse.json({ messages: MOCK_CHAT_HISTORY });
   }),
 
-  // 5. 주문 취소
+  // 5. 예약 취소
+  http.patch('/api/v1/agent/reservations/:reservationId/cancel', ({ params }) => {
+    const reservationId = Number(params.reservationId);
+    return HttpResponse.json({ reservationId, status: 'CANCELLED' });
+  }),
+
+  // 6. 주문 취소
   http.patch('/api/v1/agent/orders/:orderId/cancel', ({ params }) => {
     const orderId = Number(params.orderId);
     return HttpResponse.json({ orderId, status: 'CANCELLED' });
