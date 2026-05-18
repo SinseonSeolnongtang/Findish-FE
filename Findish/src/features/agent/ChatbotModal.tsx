@@ -7,6 +7,7 @@ import {
   useSendMessageMutation,
   useConfirmReservationMutation,
   useConfirmOrderMutation,
+  useCancelReservationMutation,
   useCancelOrderMutation,
 } from "@/hooks/useAgent";
 import { useAuthStore } from "@/stores/authStore";
@@ -27,7 +28,7 @@ interface LocalMessage {
   reservation?: AgentReservationInfo | null;
   menus?: AgentMenuInfo[] | null;
   confirmed?: boolean;
-  messageType?: "login_required" | "reservation_complete" | "order_complete";
+  messageType?: "login_required" | "reservation_complete" | "reservation_cancelled" | "order_complete";
 }
 
 interface ChatbotModalProps {
@@ -121,6 +122,7 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
   const sendMutation = useSendMessageMutation();
   const confirmReservationMutation = useConfirmReservationMutation();
   const confirmOrderMutation = useConfirmOrderMutation();
+  const cancelReservationMutation = useCancelReservationMutation();
   const cancelOrderMutation = useCancelOrderMutation();
 
   const isPending = sendMutation.isPending;
@@ -222,6 +224,18 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
       return;
     }
 
+    if (msg.intent === "CANCEL_RESERVATION" && msg.targetId != null) {
+      cancelReservationMutation.mutate(msg.targetId, {
+        onSuccess: () =>
+          setMessages((prev) => [
+            ...prev,
+            { id: makeId(), role: "agent", text: "", messageType: "reservation_cancelled" },
+          ]),
+        onError: () => addAgentMessage("취소 처리 중 오류가 발생했습니다."),
+      });
+      return;
+    }
+
     if (msg.intent === "CANCEL_ORDER" && msg.targetId != null) {
       cancelOrderMutation.mutate(msg.targetId, {
         onSuccess: () => addAgentMessage("주문이 취소되었습니다."),
@@ -296,6 +310,12 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
                     message="예약 완료했습니다!"
                     to="/mypage?tab=reservation"
                     linkText="예약 내역 보러가기"
+                  />
+                ) : msg.messageType === "reservation_cancelled" ? (
+                  <AgentLinkMessage
+                    message="예약이 취소되었습니다."
+                    to="/mypage?tab=reservation&subTab=cancelled"
+                    linkText="예약 내역 바로가기"
                   />
                 ) : msg.messageType === "order_complete" ? (
                   <AgentLinkMessage

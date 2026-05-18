@@ -8,6 +8,7 @@ import type {
   ConfirmOrderResponse,
   GetChatHistoryRequest,
   GetChatHistoryResponse,
+  CancelReservationResponse,
   CancelOrderResponse,
 } from '@/types/agent';
 
@@ -28,6 +29,11 @@ export const confirmOrder = async (body: ConfirmOrderRequest): Promise<ConfirmOr
 
 export const getChatHistory = async (params?: GetChatHistoryRequest): Promise<GetChatHistoryResponse> => {
   const { data } = await axiosInstance.get<GetChatHistoryResponse>('/api/v1/agent/chat/history', { params });
+  return data;
+};
+
+export const cancelAgentReservation = async (reservationId: number): Promise<CancelReservationResponse> => {
+  const { data } = await axiosInstance.patch<CancelReservationResponse>(`/api/v1/agent/reservations/${reservationId}/cancel`);
   return data;
 };
 

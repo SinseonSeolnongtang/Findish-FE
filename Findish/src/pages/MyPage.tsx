@@ -18,9 +18,17 @@ const TAB_PARAM_MAP: Record<string, Tab> = {
   liked: "좋아요 내역",
 };
 
+type ReservationFilter = "방문예정" | "방문완료" | "취소/노쇼";
+const SUB_TAB_PARAM_MAP: Record<string, ReservationFilter> = {
+  cancelled: "취소/노쇼",
+  completed: "방문완료",
+  upcoming: "방문예정",
+};
+
 export default function MyPage() {
   const [searchParams] = useSearchParams();
   const initialTab = TAB_PARAM_MAP[searchParams.get("tab") ?? ""] ?? "좋아요 내역";
+  const initialReservationFilter = SUB_TAB_PARAM_MAP[searchParams.get("subTab") ?? ""] ?? "방문예정";
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const { data, isLoading, isError } = useGetMeQuery();
@@ -100,7 +108,7 @@ export default function MyPage() {
               </div>
 
               {activeTab === "좋아요 내역" && <LikedTab />}
-              {activeTab === "예약 내역" && <ReservationTab />}
+              {activeTab === "예약 내역" && <ReservationTab initialFilter={initialReservationFilter} />}
               {activeTab === "주문 내역" && <OrderTab />}
             </>
           )}

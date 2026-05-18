@@ -9,8 +9,12 @@ const RESERVATION_FILTERS: ReservationFilter[] = [
   "취소/노쇼",
 ];
 
-export default function ReservationTab() {
-  const [filter, setFilter] = useState<ReservationFilter>("방문예정");
+interface ReservationTabProps {
+  initialFilter?: ReservationFilter;
+}
+
+export default function ReservationTab({ initialFilter = "방문예정" }: ReservationTabProps) {
+  const [filter, setFilter] = useState<ReservationFilter>(initialFilter);
 
   return (
     <>

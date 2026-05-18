@@ -127,7 +127,7 @@ export const agentHandlers = [
   // 5. 예약 취소
   http.patch('/api/v1/agent/reservations/:reservationId/cancel', ({ params }) => {
     const reservationId = Number(params.reservationId);
-    return HttpResponse.json({ reservationId, status: 'CANCELLED' });
+    return HttpResponse.json({ reservationId, status: 'CANCELLED', cancelReason: 'USER_CANCEL' });
   }),
 
   // 6. 주문 취소
