@@ -103,7 +103,15 @@ export interface GetChatHistoryResponse {
   messages: ChatHistoryMessage[];
 }
 
-// ─── 5. 주문 취소 ─────────────────────────────────────────────────────────────
+// ─── 5. 예약 취소 ─────────────────────────────────────────────────────────────
+// PATCH /api/v1/agent/reservations/{reservationId}/cancel
+export interface CancelReservationResponse {
+  reservationId: number;
+  status: 'CANCELLED';
+  cancelReason: string;
+}
+
+// ─── 6. 주문 취소 ─────────────────────────────────────────────────────────────
 // PATCH /api/v1/agent/orders/{orderId}/cancel
 export interface CancelOrderResponse {
   orderId: number;

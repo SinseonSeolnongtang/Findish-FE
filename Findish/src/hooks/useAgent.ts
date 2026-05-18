@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { sendMessage, confirmReservation, confirmOrder, getChatHistory, cancelAgentOrder } from '@/api/agent';
+import { sendMessage, confirmReservation, confirmOrder, getChatHistory, cancelAgentReservation, cancelAgentOrder } from '@/api/agent';
 import type {
   SendMessageRequest,
   ConfirmReservationRequest,
@@ -40,6 +40,16 @@ export const useConfirmOrderMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: ConfirmOrderRequest) => confirmOrder(body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: CHAT_HISTORY_QUERY_KEY });
+    },
+  });
+};
+
+export const useCancelReservationMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (reservationId: number) => cancelAgentReservation(reservationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CHAT_HISTORY_QUERY_KEY });
     },
