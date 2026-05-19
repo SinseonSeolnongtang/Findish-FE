@@ -112,13 +112,22 @@ export interface SendFriendRequestResponse {
   status: "PENDING";
 }
 
-// ─── Friend 3. 친구 요청 수락/거절 (PATCH /api/v1/friends/requests/{requestId})
+// ─── Friend 3. 받은 친구 요청 목록 조회 (GET /api/v1/friends/requests/received)
+export interface ReceivedFriendRequestItem {
+  requestId: string;
+  senderId: string;
+  senderName: string;
+  senderLoginId: string;
+  requestedAt: string;
+}
+
+// ─── Friend 4. 친구 요청 수락/거절 (PATCH /api/v1/friends/requests/{requestId})
 export type FriendRequestResolution = "ACCEPTED" | "REJECTED";
 export interface ResolveFriendRequestBody {
   status: FriendRequestResolution;
 }
 export interface ResolveFriendRequestResponse {
-  requestId: number;
+  requestId: string;
   status: FriendRequestResolution;
 }
 

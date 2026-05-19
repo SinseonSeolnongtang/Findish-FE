@@ -1,8 +1,16 @@
-const SITUATIONS = ['데이트', '친구', '혼자', '회식', '가족'];
+import type { AiPickSituation } from '@/types/aiPick';
+
+const SITUATIONS: { label: string; value: AiPickSituation }[] = [
+  { label: '데이트', value: 'DATE' },
+  { label: '친구', value: 'FRIEND' },
+  { label: '혼자', value: 'ALONE' },
+  { label: '회식', value: 'MEETING' },
+  { label: '가족', value: 'FAMILY' },
+];
 
 interface Props {
-  selected: string;
-  onSelect: (v: string) => void;
+  selected: AiPickSituation | '';
+  onSelect: (v: AiPickSituation | '') => void;
   onPrev: () => void;
   onNext: () => void;
 }
@@ -17,17 +25,17 @@ export default function StepSituation({ selected, onSelect, onPrev, onNext }: Pr
       </div>
 
       <div className="flex flex-wrap justify-center gap-2 w-119">
-        {SITUATIONS.map(s => (
+        {SITUATIONS.map(({ label, value }) => (
           <button
-            key={s}
-            onClick={() => onSelect(selected === s ? '' : s)}
+            key={value}
+            onClick={() => onSelect(selected === value ? '' : value)}
             className={`px-5 py-1.75 rounded-[17px] typo-body-lg cursor-pointer transition-colors ${
-              selected === s
+              selected === value
                 ? 'bg-primary text-white font-bold'
                 : 'bg-orange-100 text-primary-dark'
             }`}
           >
-            {s}
+            {label}
           </button>
         ))}
       </div>

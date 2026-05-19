@@ -83,7 +83,7 @@ export const aiPickHandlers = [
         presetId: Date.now(),
         title,
         aiMessage: `Findish AI가 ${situationLabel}에 딱 맞는 가게를 골라봤어요!`,
-        restaurants: MOCK_AIPICK_RESTAURANTS,
+        restaurants: [MOCK_AIPICK_RESTAURANTS[0]],
         createdAt: new Date().toISOString(),
       },
       { status: 201 },
@@ -100,15 +100,18 @@ export const aiPickHandlers = [
     const presetId = Number(params.presetId);
     return HttpResponse.json({
       presetId,
-      title: MOCK_PRESET_HISTORY.find((p) => p.presetId === presetId)?.title ?? "맞춤 추천",
-      friends: [MOCK_FRIENDS[0], MOCK_FRIENDS[1]],
+      title: "다원님 외 3명과 함께하는 식사",
+      friends: [
+        { memberId: 2, name: "다원" },
+        { memberId: 5, name: "윤서" },
+      ],
       situation: "FRIEND",
-      budgetMin: 15000,
-      budgetMax: 30000,
+      budgetMin: 10000,
+      budgetMax: 38000,
       priorities: ["TASTE", "ATMOSPHERE"],
-      extraCondition: "주차 가능한 곳",
+      extraCondition: "주차가 되면 좋겠어",
       aiMessage: "Findish AI가 친구들과 즐거운 한 끼를 위한 가게를 골라봤어요!",
-      restaurants: MOCK_AIPICK_RESTAURANTS,
+      restaurants: [MOCK_AIPICK_RESTAURANTS[0]],
       createdAt: "2026-05-01T10:00:00",
     });
   }),
@@ -135,6 +138,26 @@ export const aiPickHandlers = [
   // GET /api/v1/friends
   http.get("/api/v1/friends", () => {
     return HttpResponse.json({ friends: MOCK_FRIENDS });
+  }),
+
+  // GET /api/v1/friends/requests/received
+  http.get("/api/v1/friends/requests/received", () => {
+    return HttpResponse.json([
+      {
+        requestId: "340f0639-aaaa-bbbb-cccc-111111111111",
+        senderId: "602f0c10-aaaa-bbbb-cccc-222222222222",
+        senderName: "민지",
+        senderLoginId: "minji03",
+        requestedAt: "2026-05-18T14:22:00",
+      },
+      {
+        requestId: "340f0639-aaaa-bbbb-cccc-333333333333",
+        senderId: "602f0c10-aaaa-bbbb-cccc-444444444444",
+        senderName: "윤서",
+        senderLoginId: "yunseo02",
+        requestedAt: "2026-05-19T09:10:00",
+      },
+    ]);
   }),
 
   // POST /api/v1/friends/requests

@@ -5,6 +5,7 @@ import {
   getPresetDetail,
   updatePreset,
   getFriends,
+  getReceivedFriendRequests,
   requestFriend,
   respondFriendRequest,
   deleteFriend,
@@ -18,6 +19,7 @@ import type {
 
 const PRESET_HISTORY_KEY = ['preset-history'] as const;
 const FRIENDS_KEY = ['friends'] as const;
+const RECEIVED_REQUESTS_KEY = ['received-friend-requests'] as const;
 
 // ─── useQuery ────────────────────────────────────────────────────────────────
 
@@ -43,6 +45,14 @@ export const useFriendsQuery = () => {
   return useQuery({
     queryKey: FRIENDS_KEY,
     queryFn: getFriends,
+  });
+};
+
+// GET /api/v1/friends/requests/received
+export const useReceivedFriendRequestsQuery = () => {
+  return useQuery({
+    queryKey: RECEIVED_REQUESTS_KEY,
+    queryFn: getReceivedFriendRequests,
   });
 };
 
@@ -86,10 +96,11 @@ export const useRequestFriendMutation = () => {
 export const useRespondFriendRequestMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ requestId, body }: { requestId: number; body: ResolveFriendRequestBody }) =>
+    mutationFn: ({ requestId, body }: { requestId: string; body: ResolveFriendRequestBody }) =>
       respondFriendRequest(requestId, body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: FRIENDS_KEY });
+      queryClient.invalidateQueries({ queryKey: RECEIVED_REQUESTS_KEY });
     },
   });
 };

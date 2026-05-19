@@ -7,6 +7,7 @@ import type {
   GetAiPickPresetsResponse,
   GetAiPickPresetDetailResponse,
   GetFriendsResponse,
+  ReceivedFriendRequestItem,
   SendFriendRequestBody,
   SendFriendRequestResponse,
   ResolveFriendRequestBody,
@@ -59,6 +60,14 @@ export const getFriends = async (): Promise<GetFriendsResponse> => {
   return data;
 };
 
+// GET /api/v1/friends/requests/received
+export const getReceivedFriendRequests = async (): Promise<ReceivedFriendRequestItem[]> => {
+  const { data } = await axiosInstance.get<ReceivedFriendRequestItem[]>(
+    '/api/v1/friends/requests/received',
+  );
+  return data;
+};
+
 // POST /api/v1/friends/requests
 export const requestFriend = async (
   body: SendFriendRequestBody,
@@ -72,7 +81,7 @@ export const requestFriend = async (
 
 // PATCH /api/v1/friends/requests/{requestId}
 export const respondFriendRequest = async (
-  requestId: number,
+  requestId: string,
   body: ResolveFriendRequestBody,
 ): Promise<ResolveFriendRequestResponse> => {
   const { data } = await axiosInstance.patch<ResolveFriendRequestResponse>(
