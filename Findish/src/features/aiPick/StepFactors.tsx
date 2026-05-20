@@ -1,8 +1,17 @@
-const FACTORS = ['맛', '분위기', '가성비', '청결도', '서비스', '웨이팅', '주차'];
+import type { AiPickPriority } from '@/types/aiPick';
+
+const FACTORS: { label: string; value: AiPickPriority }[] = [
+  { label: '맛', value: 'TASTE' },
+  { label: '분위기', value: 'ATMOSPHERE' },
+  { label: '가성비', value: 'PRICE' },
+  { label: '청결도', value: 'CLEANLINESS' },
+  { label: '서비스', value: 'SERVICE' },
+  { label: '주차', value: 'PARKING' },
+];
 
 interface Props {
-  selected: string[];
-  onSelect: (v: string[]) => void;
+  selected: AiPickPriority[];
+  onSelect: (v: AiPickPriority[]) => void;
   additionalNote: string;
   onNoteChange: (v: string) => void;
   onPrev: () => void;
@@ -11,7 +20,7 @@ interface Props {
 }
 
 export default function StepFactors({ selected, onSelect, additionalNote, onNoteChange, onPrev, onNext, loading }: Props) {
-  const toggle = (val: string) => {
+  const toggle = (val: AiPickPriority) => {
     if (selected.includes(val)) onSelect(selected.filter(v => v !== val));
     else onSelect([...selected, val]);
   };
@@ -29,17 +38,17 @@ export default function StepFactors({ selected, onSelect, additionalNote, onNote
 
       <div className="w-119 flex flex-col items-center gap-4">
         <div className="flex flex-wrap justify-center gap-2">
-          {FACTORS.map(f => (
+          {FACTORS.map(({ label, value }) => (
             <button
-              key={f}
-              onClick={() => toggle(f)}
+              key={value}
+              onClick={() => toggle(value)}
               className={`px-5 py-1.75 rounded-[17px] typo-body-lg cursor-pointer transition-colors ${
-                selected.includes(f)
+                selected.includes(value)
                   ? 'bg-primary text-white font-bold'
                   : 'bg-orange-100 text-primary-dark'
               }`}
             >
-              {f}
+              {label}
             </button>
           ))}
         </div>

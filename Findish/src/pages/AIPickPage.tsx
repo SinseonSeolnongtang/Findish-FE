@@ -1,64 +1,85 @@
-import { useState } from "react";
-import Header from "@/components/common/Header";
-import Button from "@/components/common/Button";
-import AISidebar from "@/features/aiPick/AISidebar";
-import StepCompanion from "@/features/aiPick/StepCompanion";
-import StepSituation from "@/features/aiPick/StepSituation";
-import StepBudget from "@/features/aiPick/StepBudget";
-import StepFactors from "@/features/aiPick/StepFactors";
-import StepResult from "@/features/aiPick/StepResult";
-import FriendList from "@/features/aiPick/FriendList";
+import { useState } from 'react';
+import Header from '@/components/common/Header';
+import Button from '@/components/common/Button';
+import AISidebar from '@/features/aiPick/AISidebar';
+import StepCompanion from '@/features/aiPick/StepCompanion';
+import StepSituation from '@/features/aiPick/StepSituation';
+import StepBudget from '@/features/aiPick/StepBudget';
+import StepFactors from '@/features/aiPick/StepFactors';
+import StepResult from '@/features/aiPick/StepResult';
+import FriendList from '@/features/aiPick/FriendList';
+import { useCreatePresetMutation, useUpdatePresetMutation, usePresetDetailQuery } from '@/hooks/useAiPick';
+import type { AiPickSituation, AiPickPriority, AiPickRestaurantItem } from '@/types/aiPick';
 
-interface ResultStore {
-  name: string;
-  category: string;
-  tagline: string;
-  image: string;
-  isOpen: boolean;
-  reviewCount: string;
-  keywords: string[];
-  reason: string;
+type View = 'home' | 'preset' | 'result' | 'friends';
+
+interface ResultData {
+  aiMessage: string;
+  restaurants: AiPickRestaurantItem[];
 }
 
-type View = "home" | "preset" | "result" | "friends";
-
 export default function AIPickPage() {
-  const [view, setView] = useState<View>("home");
+  const [view, setView] = useState<View>('home');
   const [presetStep, setPresetStep] = useState<1 | 2 | 3 | 4>(1);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedPresetId, setSelectedPresetId] = useState<number | null>(null);
 
-  const [companions, setCompanions] = useState<string[]>([]);
-  const [situation, setSituation] = useState("");
+  // 폼 상태 — API enum 타입으로 관리
+  const [companions, setCompanions] = useState<number[]>([]);
+  const [situation, setSituation] = useState<AiPickSituation | ''>('');
   const [budgetMin, setBudgetMin] = useState(10000);
   const [budgetMax, setBudgetMax] = useState(38000);
-  const [priorities, setPriorities] = useState<string[]>([]);
-  const [additionalNote, setAdditionalNote] = useState("");
+  const [priorities, setPriorities] = useState<AiPickPriority[]>([]);
+  const [additionalNote, setAdditionalNote] = useState('');
 
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<ResultStore | null>(null);
+  const [result, setResult] = useState<ResultData | null>(null);
+
+  const createPresetMutation = useCreatePresetMutation();
+  const updatePresetMutation = useUpdatePresetMutation();
+  const { data: presetDetail } = usePresetDetailQuery(selectedPresetId ?? 0);
+
+  // 사이드바에서 히스토리 클릭 → 프리셋 상세 조회 후 결과 뷰 진입
+  const handlePresetSelect = (presetId: number) => {
+    setSelectedPresetId(presetId);
+    setResult(null);
+    setView('result');
+  };
 
   const handleStart = () => {
     setPresetStep(1);
-    setView("preset");
+    setView('preset');
   };
 
-  const handlePick = async () => {
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 1800));
-    setResult({
-      name: "방목 2호점",
-      category: "한식",
-      tagline: "직화로 완성되는 특별한 맛",
-      image:
-        "https://www.figma.com/api/mcp/asset/771182db-44d5-4065-950e-719d3bbc9abf",
-      isOpen: true,
-      reviewCount: "400+",
-      keywords: ["#가성비", "#육즙가득", "#직화구이"],
-      reason:
-        '석우, 성재님과의 회식 자리에 딱 맞는 곳이에요. 1인당 2만~3만원대로 설정하신 예산 범위 안에 들어오고, 두 분 모두 가성비를 중시하시는 만큼 양 대비 가격이 합리적인 이 곳을 추천드려요.\n\n직화구이 방식으로 고기의 육즙이 살아있고, 오징어사리 서비스가 특히 인기예요. 최근 리뷰에서도 "고기 질이 좋다", "직원이 친절하다"는 평이 많아 서비스 면에서도 만족하실 거예요. 주차 공간도 넉넉해 이동이 편리합니다.',
-    });
-    setLoading(false);
-    setView("result");
+  const handlePick = () => {
+    if (!situation) return;
+
+    const body = {
+      friendIds: companions.length > 0 ? companions : undefined,
+      situation,
+      budgetMin,
+      budgetMax,
+      priorities,
+      extraCondition: additionalNote.trim() || undefined,
+    };
+
+    if (selectedPresetId !== null) {
+      updatePresetMutation.mutate(
+        { presetId: selectedPresetId, body },
+        {
+          onSuccess: (data) => {
+            setResult({ aiMessage: data.aiMessage, restaurants: data.restaurants });
+            setView('result');
+          },
+        },
+      );
+    } else {
+      createPresetMutation.mutate(body, {
+        onSuccess: (data) => {
+          setResult({ aiMessage: data.aiMessage, restaurants: data.restaurants });
+          setView('result');
+        },
+      });
+    }
   };
 
   const handleNextStep = () => {
@@ -70,6 +91,32 @@ export default function AIPickPage() {
     if (presetStep > 1) setPresetStep((s) => (s - 1) as 1 | 2 | 3);
   };
 
+  const handleReset = () => {
+    // selectedPresetId 유지 — 기존 프리셋이면 수정 API로 분기하기 위함
+    setResult(null);
+    setPresetStep(1);
+    setView('preset');
+  };
+
+  const handleNewChat = () => {
+    setSelectedPresetId(null);
+    setResult(null);
+    setPresetStep(1);
+    setCompanions([]);
+    setSituation('');
+    setBudgetMin(10000);
+    setBudgetMax(38000);
+    setPriorities([]);
+    setAdditionalNote('');
+    setView('home');
+  };
+
+  // 사이드바 히스토리 선택 시 presetDetail이 로드되면 표시
+  const displayResult: ResultData | null =
+    selectedPresetId !== null && presetDetail
+      ? { aiMessage: presetDetail.aiMessage, restaurants: presetDetail.restaurants }
+      : result;
+
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <Header />
@@ -78,11 +125,14 @@ export default function AIPickPage() {
         <AISidebar
           open={sidebarOpen}
           onToggle={() => setSidebarOpen((o) => !o)}
-          onFriendClick={() => setView("friends")}
+          onFriendClick={() => setView('friends')}
+          onNewChat={handleNewChat}
+          onPresetSelect={handlePresetSelect}
         />
 
         <main className="flex-1 overflow-y-auto">
-          {view === "home" && (
+          {/* 홈 */}
+          {view === 'home' && (
             <div className="flex items-center justify-center h-full">
               <div className="text-center flex flex-col items-center gap-4">
                 <h1 className="typo-h1 font-bold text-neutral-800">
@@ -104,7 +154,8 @@ export default function AIPickPage() {
             </div>
           )}
 
-          {view === "preset" && presetStep === 1 && (
+          {/* 프리셋 Step 1 — 동행인 */}
+          {view === 'preset' && presetStep === 1 && (
             <StepCompanion
               selected={companions}
               onSelect={setCompanions}
@@ -112,7 +163,8 @@ export default function AIPickPage() {
             />
           )}
 
-          {view === "preset" && presetStep === 2 && (
+          {/* 프리셋 Step 2 — 상황 */}
+          {view === 'preset' && presetStep === 2 && (
             <StepSituation
               selected={situation}
               onSelect={setSituation}
@@ -121,7 +173,8 @@ export default function AIPickPage() {
             />
           )}
 
-          {view === "preset" && presetStep === 3 && (
+          {/* 프리셋 Step 3 — 예산 */}
+          {view === 'preset' && presetStep === 3 && (
             <StepBudget
               minBudget={budgetMin}
               maxBudget={budgetMax}
@@ -132,7 +185,8 @@ export default function AIPickPage() {
             />
           )}
 
-          {view === "preset" && presetStep === 4 && (
+          {/* 프리셋 Step 4 — 우선순위 (마지막 단계, 여기서 API 호출) */}
+          {view === 'preset' && presetStep === 4 && (
             <StepFactors
               selected={priorities}
               onSelect={setPriorities}
@@ -140,21 +194,27 @@ export default function AIPickPage() {
               onNoteChange={setAdditionalNote}
               onPrev={handlePrevStep}
               onNext={handleNextStep}
-              loading={loading}
+              loading={createPresetMutation.isPending || updatePresetMutation.isPending}
             />
           )}
 
-          {view === "friends" && <FriendList />}
+          {/* 친구 관리 */}
+          {view === 'friends' && <FriendList />}
 
-          {view === "result" && result && (
+          {/* 추천 결과 — 새 프리셋 또는 히스토리 상세 */}
+          {view === 'result' && displayResult && (
             <StepResult
-              store={result}
-              onReset={() => {
-                setPresetStep(1);
-                setView("preset");
-                setResult(null);
-              }}
+              aiMessage={displayResult.aiMessage}
+              restaurants={displayResult.restaurants}
+              onReset={handleReset}
             />
+          )}
+
+          {/* 히스토리 상세 로딩 중 */}
+          {view === 'result' && !displayResult && (
+            <div className="flex items-center justify-center h-full">
+              <span className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
           )}
         </main>
       </div>
