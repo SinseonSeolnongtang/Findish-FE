@@ -1,4 +1,5 @@
 import { useRef, useCallback } from 'react';
+import StepLayout from './StepLayout';
 
 const MAX = 100000;
 const STEP = 1000;
@@ -36,11 +37,8 @@ export default function StepBudget({
 
       const clickVal = valueFromX(e.clientX);
       const which: 'min' | 'max' =
-        Math.abs(clickVal - minBudget) <= Math.abs(clickVal - maxBudget)
-          ? 'min'
-          : 'max';
+        Math.abs(clickVal - minBudget) <= Math.abs(clickVal - maxBudget) ? 'min' : 'max';
 
-      // Apply initial click position
       if (which === 'min') {
         onMinChange(Math.min(clickVal, maxBudget - STEP));
       } else {
@@ -70,16 +68,12 @@ export default function StepBudget({
   );
 
   return (
-    <div className="flex flex-col items-center justify-between h-full py-20">
-      <div className="w-130 text-center">
-        <h1 className="typo-h1 font-bold text-neutral-900">
-          얼마정도 사용하실 계획인가요?
-        </h1>
-        <p className="typo-t2 text-neutral-500 mt-2 tracking-[0.4px]">
-          1인당 사용하실 예상 금액이 있다면 알려주세요.
-        </p>
-      </div>
-
+    <StepLayout
+      title="얼마정도 사용하실 계획인가요?"
+      subtitle="1인당 사용하실 예상 금액이 있다면 알려주세요."
+      onPrev={onPrev}
+      onNext={onNext}
+    >
       <div className="w-119 flex flex-col gap-2">
         <p className="typo-body-lg text-neutral-900 text-center">1인당 금액</p>
 
@@ -89,7 +83,6 @@ export default function StepBudget({
           style={{ touchAction: 'none' }}
           onPointerDown={startDrag}
         >
-          {/* Visual track */}
           <div className="relative w-full h-1.75 rounded-full pointer-events-none">
             <div className="absolute inset-0 bg-orange-200 rounded-full" />
             <div
@@ -97,7 +90,6 @@ export default function StepBudget({
               style={{ left: `${minPct}%`, width: `${maxPct - minPct}%` }}
             />
           </div>
-          {/* Visual thumbs */}
           <div
             className="absolute -translate-x-1/2 w-4.5 h-4.5 rounded-full bg-primary pointer-events-none shadow"
             style={{ left: `${minPct}%` }}
@@ -108,37 +100,21 @@ export default function StepBudget({
           />
         </div>
 
-        {/* Dynamic labels below thumbs */}
         <div className="relative h-6">
           <span
             className="absolute typo-body-md text-neutral-900 -translate-x-1/2"
             style={{ left: `${minPct}%` }}
           >
-            {minBudget.toLocaleString("ko-KR")}
+            {minBudget.toLocaleString('ko-KR')}
           </span>
           <span
             className="absolute typo-body-md text-neutral-900 -translate-x-1/2"
             style={{ left: `${maxPct}%` }}
           >
-            {maxBudget.toLocaleString("ko-KR")}
+            {maxBudget.toLocaleString('ko-KR')}
           </span>
         </div>
       </div>
-
-      <div className="flex gap-3">
-        <button
-          onClick={onPrev}
-          className="w-27.5 h-11.5 border border-neutral-300 text-neutral-600 typo-body-sm rounded-[11px] hover:bg-gray-50 transition-colors cursor-pointer"
-        >
-          이전으로
-        </button>
-        <button
-          onClick={onNext}
-          className="w-38.75 h-11.5 bg-primary text-white typo-body-sm rounded-[11px] hover:bg-[#e55e00] transition-colors cursor-pointer"
-        >
-          다음으로
-        </button>
-      </div>
-    </div>
+    </StepLayout>
   );
 }
