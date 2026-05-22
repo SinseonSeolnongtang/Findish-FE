@@ -39,6 +39,9 @@
   --color-kakao: #FAE100;
   --color-white-50: #FEFEFE;
 
+  /* ----- Border Radius ----- */
+  --radius-6: 1.5rem;
+
   /* ----- Font Families ----- */
   --font-sans: "Spoqa Han Sans Neo", sans-serif;
   --font-logo: "Unbounded", sans-serif;
