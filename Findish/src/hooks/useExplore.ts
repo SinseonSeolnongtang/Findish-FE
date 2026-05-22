@@ -5,6 +5,7 @@ import {
   addSelection,
   getSelections,
   removeSelection,
+  getAnalysis,
 } from '@/api/explore';
 import type { ExploreSearchRequest, AddSelectionRequest } from '@/types/explore';
 
@@ -50,5 +51,12 @@ export const useRemoveSelectionMutation = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: SELECTIONS_KEY });
     },
+  });
+};
+
+export const useAnalysisQuery = () => {
+  return useQuery({
+    queryKey: ['explore', 'analysis'] as const,
+    queryFn: getAnalysis,
   });
 };

@@ -196,4 +196,67 @@ export const exploreHandlers = [
       selections: [...selectionStore],
     });
   }),
+
+  // 6. 가게 비교 분석
+  http.get("/api/v1/explore/analysis", () => {
+    const selected = selectionStore.slice(0, 3);
+
+    const restaurants = selected.map((s) => {
+      const found = MOCK_RESTAURANTS.find((r) => r.restaurantId === s.restaurantId);
+      return {
+        restaurantId: s.restaurantId,
+        name: s.name,
+        category: found?.category ?? "기타",
+        thumbnailUrl: s.thumbnailUrl,
+        topKeywords: [
+          { keyword: "청결도", positiveRatio: 88, negativeRatio: 12 },
+          { keyword: "친절함", positiveRatio: 75, negativeRatio: 25 },
+        ],
+      };
+    });
+
+    const ids = selected.map((s) => s.restaurantId);
+
+    const commonKeywords = [
+      {
+        keyword: "청결도",
+        scores: ids.map((id, i) => ({ restaurantId: id, ratio: [88, 82, 90][i] ?? 80 })),
+      },
+      {
+        keyword: "친절함",
+        scores: ids.map((id, i) => ({ restaurantId: id, ratio: [75, 80, 72][i] ?? 70 })),
+      },
+      {
+        keyword: "재방문의사",
+        scores: ids.map((id, i) => ({ restaurantId: id, ratio: [70, 68, 74][i] ?? 65 })),
+      },
+    ];
+
+    const tradeOffKeywords = [
+      {
+        keyword: "가성비",
+        scores: ids.map((id, i) => ({ restaurantId: id, ratio: [90, 45, 60][i] ?? 50 })),
+      },
+      {
+        keyword: "대기시간",
+        scores: ids.map((id, i) => ({ restaurantId: id, ratio: [30, 80, 55][i] ?? 50 })),
+      },
+      {
+        keyword: "양",
+        scores: ids.map((id, i) => ({ restaurantId: id, ratio: [85, 40, 70][i] ?? 60 })),
+      },
+    ];
+
+    return HttpResponse.json({
+      restaurants,
+      summary: {
+        commonText:
+          `공통점은 청결도와 친절함이 높다는 점입니다.\n재방문 의사를 중시한다면 ${selected[2]?.name ?? "세 번째 가게"}를 추천해요.`,
+        tradeOffText:
+          `가성비를 중시한다면 ${selected[0]?.name ?? "첫 번째 가게"}가 유리하고,\n대기 없이 빠른 식사를 원한다면 ${selected[0]?.name ?? "첫 번째 가게"}를 선택하세요.`,
+      },
+      commonKeywords,
+      tradeOffKeywords,
+    });
+  }),
 ];

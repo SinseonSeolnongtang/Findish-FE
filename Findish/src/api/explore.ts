@@ -5,6 +5,7 @@ import type {
   GetCardSummaryResponse,
   AddSelectionRequest,
   SelectionsResponse,
+  GetAnalysisResponse,
 } from '@/types/explore';
 
 export const getExploreSearch = async (params: ExploreSearchRequest): Promise<ExploreSearchResponse> => {
@@ -29,5 +30,10 @@ export const getSelections = async (): Promise<SelectionsResponse> => {
 
 export const removeSelection = async (restaurantId: string): Promise<SelectionsResponse> => {
   const { data } = await axiosInstance.delete<SelectionsResponse>(`/api/v1/explore/selections/${restaurantId}`);
+  return data;
+};
+
+export const getAnalysis = async (): Promise<GetAnalysisResponse> => {
+  const { data } = await axiosInstance.get<GetAnalysisResponse>('/api/v1/explore/analysis');
   return data;
 };
