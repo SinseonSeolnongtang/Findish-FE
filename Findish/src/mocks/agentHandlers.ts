@@ -3,9 +3,9 @@ import type { SendMessageRequest, ConfirmReservationRequest, ConfirmOrderRequest
 
 const MOCK_RESTAURANT_NAME = '방목 2호점';
 const MOCK_MENUS = [
-  { menuId: 1, name: '목살 완판(600g)', price: 43900, imageUrl: 'https://placehold.co/80x80?text=목살' },
-  { menuId: 2, name: '항정살(400g)', price: 36900, imageUrl: 'https://placehold.co/80x80?text=항정' },
-  { menuId: 3, name: '삼겹살(400g)', price: 32900, imageUrl: 'https://placehold.co/80x80?text=삼겹' },
+  { menuId: 'mock-menu-uuid-001', name: '목살 완판(600g)', price: 43900, imageUrl: 'https://placehold.co/80x80?text=목살' },
+  { menuId: 'mock-menu-uuid-002', name: '항정살(400g)', price: 36900, imageUrl: 'https://placehold.co/80x80?text=항정' },
+  { menuId: 'mock-menu-uuid-003', name: '삼겹살(400g)', price: 32900, imageUrl: 'https://placehold.co/80x80?text=삼겹' },
 ];
 
 const MOCK_CHAT_HISTORY = [
@@ -23,7 +23,7 @@ export const agentHandlers = [
         message: `${MOCK_RESTAURANT_NAME} 예약을 취소할까요?`,
         intent: 'CANCEL_RESERVATION',
         step: 'CONFIRMING',
-        targetId: 1,
+        targetId: 'mock-reservation-uuid-001',
         reservation: null,
         menus: null,
       });
@@ -34,7 +34,7 @@ export const agentHandlers = [
         message: `${MOCK_RESTAURANT_NAME} 주문을 취소할까요?`,
         intent: 'CANCEL_ORDER',
         step: 'CONFIRMING',
-        targetId: 2,
+        targetId: 'mock-order-uuid-001',
         reservation: null,
         menus: null,
       });
@@ -94,7 +94,7 @@ export const agentHandlers = [
     const body = (await request.json()) as ConfirmReservationRequest;
     return HttpResponse.json(
       {
-        reservationId: 1,
+        reservationId: 'mock-reservation-uuid-001',
         restaurantName: MOCK_RESTAURANT_NAME,
         date: body.date,
         time: body.time,
@@ -114,7 +114,7 @@ export const agentHandlers = [
     });
     const totalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
     return HttpResponse.json(
-      { orderId: 1, restaurantName: MOCK_RESTAURANT_NAME, items, totalPrice },
+      { orderId: 'mock-order-uuid-001', restaurantName: MOCK_RESTAURANT_NAME, items, totalPrice },
       { status: 201 },
     );
   }),
@@ -126,13 +126,13 @@ export const agentHandlers = [
 
   // 5. 예약 취소
   http.patch('/api/v1/agent/reservations/:reservationId/cancel', ({ params }) => {
-    const reservationId = Number(params.reservationId);
+    const reservationId = params.reservationId as string;
     return HttpResponse.json({ reservationId, status: 'CANCELLED', cancelReason: 'USER_CANCEL' });
   }),
 
   // 6. 주문 취소
   http.patch('/api/v1/agent/orders/:orderId/cancel', ({ params }) => {
-    const orderId = Number(params.orderId);
+    const orderId = params.orderId as string;
     return HttpResponse.json({ orderId, status: 'CANCELLED' });
   }),
 ];

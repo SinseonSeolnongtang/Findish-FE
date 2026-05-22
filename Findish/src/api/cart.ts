@@ -20,14 +20,14 @@ export const addToCart = async (body: AddCartItemRequest): Promise<AddCartItemRe
 };
 
 export const updateCartQuantity = async (
-  cartItemId: number,
+  cartItemId: string,
   body: UpdateCartItemRequest,
 ): Promise<UpdateCartItemResponse> => {
   const { data } = await axiosInstance.patch<UpdateCartItemResponse>(`/api/v1/cart/${cartItemId}`, body);
   return data;
 };
 
-export const deleteCartItem = async (cartItemId: number): Promise<DeleteCartItemResponse> => {
+export const deleteCartItem = async (cartItemId: string): Promise<DeleteCartItemResponse> => {
   const { data } = await axiosInstance.delete<DeleteCartItemResponse>(`/api/v1/cart/${cartItemId}`);
   return data;
 };

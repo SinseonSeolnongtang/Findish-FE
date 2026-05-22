@@ -34,7 +34,7 @@ export default function PickModePage() {
     ? restaurants[currentIdx % restaurants.length]
     : null;
 
-  const { data: cardSummary } = useCardSummaryQuery(currentRestaurant?.restaurantId ?? 0);
+  const { data: cardSummary } = useCardSummaryQuery(currentRestaurant?.restaurantId ?? '');
   const { data: selectionsData } = useSelectionsQuery();
   const addMutation = useAddSelectionMutation();
   const removeMutation = useRemoveSelectionMutation();
@@ -74,7 +74,7 @@ export default function PickModePage() {
       (s) => s.restaurantId === currentRestaurant?.restaurantId,
     ) ?? false;
 
-  const slots: ({ restaurantId: number; thumbnailUrl: string } | null)[] = [null, null, null];
+  const slots: ({ restaurantId: string; thumbnailUrl: string } | null)[] = [null, null, null];
   (selectionsData?.selections ?? []).forEach((s, i) => {
     if (i < 3) slots[i] = { restaurantId: s.restaurantId, thumbnailUrl: s.thumbnailUrl };
   });

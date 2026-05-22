@@ -1,8 +1,8 @@
 import { useFriendsQuery } from '@/hooks/useAiPick';
 
 interface Props {
-  selected: number[]; // friendIds
-  onSelect: (v: number[]) => void;
+  selected: string[]; // friendIds (UUID)
+  onSelect: (v: string[]) => void;
   onNext: () => void;
 }
 
@@ -11,7 +11,7 @@ export default function StepCompanion({ selected, onSelect, onNext }: Props) {
   const friends = data?.friends ?? [];
   const isNone = selected.length === 0;
 
-  const toggle = (memberId: number) => {
+  const toggle = (memberId: string) => {
     if (selected.includes(memberId)) {
       onSelect(selected.filter((id) => id !== memberId));
     } else {

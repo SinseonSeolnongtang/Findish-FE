@@ -5,7 +5,7 @@ import Button from "@/components/common/Button";
 import CloseLgIcon from "@/assets/icons/common/close_lg.svg?react";
 
 interface ReservationPanelProps {
-  restaurantId: number;
+  restaurantId: string;
   restaurantName: string;
   onClose: () => void;
 }
@@ -20,7 +20,7 @@ export default function ReservationPanel({
   const [partySize, setPartySize] = useState(2);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [confirmData, setConfirmData] = useState<{
-    reservationId: number;
+    reservationId: string;
     time: string;
   } | null>(null);
 

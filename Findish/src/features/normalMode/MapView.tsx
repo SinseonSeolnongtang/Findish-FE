@@ -5,8 +5,8 @@ import PinNamed from "@/components/common/PinNamed";
 
 interface MapViewProps {
   restaurants: StoreCardData[];
-  selectedId: number | null;
-  onPinClick: (id: number) => void;
+  selectedId: string | null;
+  onPinClick: (id: string) => void;
   searched: boolean;
 }
 

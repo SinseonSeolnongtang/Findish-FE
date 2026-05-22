@@ -3,9 +3,8 @@ import type { CartItem } from '@/types/cart';
 import { MOCK_MENUS, MOCK_SEARCH_RESTAURANTS } from './restaurantHandlers';
 
 // ─── 인메모리 장바구니 상태 ────────────────────────────────────────────────────
-let nextCartItemId = 1;
 let mockCartItems: CartItem[] = [];
-let mockCartRestaurant = { restaurantId: 0, restaurantName: '' };
+let mockCartRestaurant = { restaurantId: '', restaurantName: '' };
 
 const calcTotalPrice = () => mockCartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 const calcTotalCount = () => mockCartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -20,7 +19,7 @@ export const cartHandlers = [
 
     return HttpResponse.json(
       {
-        orderId: Math.floor(Math.random() * 100000),
+        orderId: crypto.randomUUID(),
         restaurantName: mockCartRestaurant.restaurantName,
         items: orderedItems,
         totalPrice,
@@ -40,12 +39,12 @@ export const cartHandlers = [
 
   // 2. 메뉴 담기
   http.post('/api/v1/cart', async ({ request }) => {
-    const body = (await request.json()) as { restaurantId: number; menuId: number; quantity: number };
+    const body = (await request.json()) as { restaurantId: string; menuId: string; quantity: number };
 
     // 식당 변경 시 장바구니 초기화
     if (mockCartRestaurant.restaurantId !== body.restaurantId) {
       mockCartItems = [];
-      const restaurant = MOCK_SEARCH_RESTAURANTS.find((r) => r.restaurantId === body.restaurantId);
+      const restaurant = MOCK_SEARCH_RESTAURANTS.find((r) => String(r.restaurantId) === body.restaurantId);
       mockCartRestaurant = {
         restaurantId: body.restaurantId,
         restaurantName: restaurant?.name ?? `식당 ${body.restaurantId}`,
@@ -63,7 +62,7 @@ export const cartHandlers = [
       );
     }
 
-    const cartItemId = nextCartItemId++;
+    const cartItemId = crypto.randomUUID();
     mockCartItems.push({
       cartItemId,
       menuId: body.menuId,
@@ -81,7 +80,7 @@ export const cartHandlers = [
 
   // 3. 수량 변경
   http.patch('/api/v1/cart/:cartItemId', async ({ params, request }) => {
-    const cartItemId = Number(params.cartItemId);
+    const cartItemId = params.cartItemId as string;
     const { quantity } = (await request.json()) as { quantity: number };
     const item = mockCartItems.find((i) => i.cartItemId === cartItemId);
 
@@ -93,7 +92,7 @@ export const cartHandlers = [
 
   // 4. 메뉴 삭제
   http.delete('/api/v1/cart/:cartItemId', ({ params }) => {
-    const cartItemId = Number(params.cartItemId);
+    const cartItemId = params.cartItemId as string;
     mockCartItems = mockCartItems.filter((i) => i.cartItemId !== cartItemId);
     return HttpResponse.json({ totalCount: calcTotalCount(), totalPrice: calcTotalPrice() });
   }),

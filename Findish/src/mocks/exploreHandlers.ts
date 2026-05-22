@@ -6,7 +6,7 @@ let selectionStore: SelectionItem[] = [];
 
 const MOCK_RESTAURANTS = [
   {
-    restaurantId: 1,
+    restaurantId: "550e8400-e29b-41d4-a716-446655440001",
     name: "착한돼지집",
     category: "삼겹살",
     address: "서울 마포구 망원동 123",
@@ -18,7 +18,7 @@ const MOCK_RESTAURANTS = [
     tags: ["#삼겹살", "#혼밥"],
   },
   {
-    restaurantId: 2,
+    restaurantId: "550e8400-e29b-41d4-a716-446655440002",
     name: "방목 1호점",
     category: "삼겹살",
     address: "서울 성북구 동선동 45",
@@ -30,7 +30,7 @@ const MOCK_RESTAURANTS = [
     tags: ["#삼겹살", "#회식"],
   },
   {
-    restaurantId: 3,
+    restaurantId: "550e8400-e29b-41d4-a716-446655440003",
     name: "방목 2호점",
     category: "삼겹살",
     address: "서울 성북구 삼선동 67",
@@ -42,7 +42,7 @@ const MOCK_RESTAURANTS = [
     tags: ["#삼겹살", "#데이트"],
   },
   {
-    restaurantId: 4,
+    restaurantId: "550e8400-e29b-41d4-a716-446655440004",
     name: "명삼 성신여대고깃집",
     category: "고기구이",
     address: "서울 성북구 보문동 89",
@@ -54,7 +54,7 @@ const MOCK_RESTAURANTS = [
     tags: ["#고기", "#가성비"],
   },
   {
-    restaurantId: 5,
+    restaurantId: "550e8400-e29b-41d4-a716-446655440005",
     name: "서울 소금구이",
     category: "삼겹살",
     address: "서울 은평구 불광동 200",
@@ -66,7 +66,7 @@ const MOCK_RESTAURANTS = [
     tags: ["#소금구이", "#가성비"],
   },
   {
-    restaurantId: 6,
+    restaurantId: "550e8400-e29b-41d4-a716-446655440006",
     name: "황금돼지",
     category: "삼겹살",
     address: "서울 종로구 인사동 10",
@@ -78,7 +78,7 @@ const MOCK_RESTAURANTS = [
     tags: ["#삼겹살", "#접대"],
   },
   {
-    restaurantId: 7,
+    restaurantId: "550e8400-e29b-41d4-a716-446655440007",
     name: "흑돼지 명가",
     category: "흑돼지",
     address: "서울 서대문구 창천동 55",
@@ -90,7 +90,7 @@ const MOCK_RESTAURANTS = [
     tags: ["#흑돼지", "#프리미엄"],
   },
   {
-    restaurantId: 8,
+    restaurantId: "550e8400-e29b-41d4-a716-446655440008",
     name: "이베리코 하우스",
     category: "이베리코",
     address: "서울 강남구 신사동 300",
@@ -151,7 +151,7 @@ export const exploreHandlers = [
 
   // 3. 식당 선택 (저장)
   http.post("/api/v1/explore/selections", async ({ request }) => {
-    const body = (await request.json()) as { restaurantId: number };
+    const body = (await request.json()) as { restaurantId: string };
     const restaurant = MOCK_RESTAURANTS.find(
       (r) => r.restaurantId === body.restaurantId,
     );
@@ -185,7 +185,7 @@ export const exploreHandlers = [
 
   // 5. 선택 취소
   http.delete("/api/v1/explore/selections/:restaurantId", ({ params }) => {
-    const restaurantId = Number(params.restaurantId);
+    const restaurantId = params.restaurantId as string;
     selectionStore = selectionStore.filter(
       (s) => s.restaurantId !== restaurantId,
     );
@@ -194,6 +194,69 @@ export const exploreHandlers = [
       selectedCount: selectionStore.length,
       isCompleted: selectionStore.length >= 3,
       selections: [...selectionStore],
+    });
+  }),
+
+  // 6. 가게 비교 분석
+  http.get("/api/v1/explore/analysis", () => {
+    const selected = selectionStore.slice(0, 3);
+
+    const restaurants = selected.map((s) => {
+      const found = MOCK_RESTAURANTS.find((r) => r.restaurantId === s.restaurantId);
+      return {
+        restaurantId: s.restaurantId,
+        name: s.name,
+        category: found?.category ?? "기타",
+        thumbnailUrl: s.thumbnailUrl,
+        topKeywords: [
+          { keyword: "청결도", positiveRatio: 88, negativeRatio: 12 },
+          { keyword: "친절함", positiveRatio: 75, negativeRatio: 25 },
+        ],
+      };
+    });
+
+    const ids = selected.map((s) => s.restaurantId);
+
+    const commonKeywords = [
+      {
+        keyword: "청결도",
+        scores: ids.map((id, i) => ({ restaurantId: id, ratio: [88, 82, 90][i] ?? 80 })),
+      },
+      {
+        keyword: "친절함",
+        scores: ids.map((id, i) => ({ restaurantId: id, ratio: [75, 80, 72][i] ?? 70 })),
+      },
+      {
+        keyword: "재방문의사",
+        scores: ids.map((id, i) => ({ restaurantId: id, ratio: [70, 68, 74][i] ?? 65 })),
+      },
+    ];
+
+    const tradeOffKeywords = [
+      {
+        keyword: "가성비",
+        scores: ids.map((id, i) => ({ restaurantId: id, ratio: [90, 45, 60][i] ?? 50 })),
+      },
+      {
+        keyword: "대기시간",
+        scores: ids.map((id, i) => ({ restaurantId: id, ratio: [30, 80, 55][i] ?? 50 })),
+      },
+      {
+        keyword: "양",
+        scores: ids.map((id, i) => ({ restaurantId: id, ratio: [85, 40, 70][i] ?? 60 })),
+      },
+    ];
+
+    return HttpResponse.json({
+      restaurants,
+      summary: {
+        commonText:
+          `공통점은 청결도와 친절함이 높다는 점입니다.\n재방문 의사를 중시한다면 ${selected[2]?.name ?? "세 번째 가게"}를 추천해요.`,
+        tradeOffText:
+          `가성비를 중시한다면 ${selected[0]?.name ?? "첫 번째 가게"}가 유리하고,\n대기 없이 빠른 식사를 원한다면 ${selected[0]?.name ?? "첫 번째 가게"}를 선택하세요.`,
+      },
+      commonKeywords,
+      tradeOffKeywords,
     });
   }),
 ];

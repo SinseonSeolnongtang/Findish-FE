@@ -29,13 +29,12 @@ export interface SearchRestaurantsResponse {
 // ─── 1. 식당 기본 정보 ───────────────────────────────────────────────────────
 // GET /api/v1/restaurants/{restaurantId}
 export interface GetRestaurantResponse {
-  restaurantId: number;
+  restaurantId: string;
   name: string;
   category: string;
   address: string;
   lat: number;
   lng: number;
-  rating: number;
   reviewCount: number;
   priceRange: string;
   businessHours: string;
@@ -57,7 +56,7 @@ export interface GetAiSummaryResponse {
 // ─── 3. 메뉴 목록 조회 ───────────────────────────────────────────────────────
 // GET /api/v1/restaurants/{restaurantId}/menus
 export interface MenuItem {
-  menuId: number;
+  menuId: string;
   name: string;
   price: number;
   imageUrl: string;
@@ -77,7 +76,7 @@ export interface GetReviewsRequest {
   keyword?: string;
 }
 export interface ReviewItem {
-  reviewId: number;
+  reviewId: string;
   author: string;
   content: string;
   imageUrls: string[];
@@ -125,7 +124,7 @@ export interface CreateReservationRequest {
   partySize: number;
 }
 export interface CreateReservationResponse {
-  reservationId: number;
+  reservationId: string;
   restaurantName: string;
   date: string;
   time: string;
@@ -149,7 +148,7 @@ export interface GetMyLikesRequest {
   size?: number;
 }
 export interface LikedRestaurantItem {
-  restaurantId: number;
+  restaurantId: string;
   name: string;
   category: string;
   address: string;

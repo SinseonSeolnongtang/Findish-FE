@@ -15,7 +15,7 @@ const SORT_MAP: Record<SortOption, string> = {
 };
 
 interface ReviewTabProps {
-  restaurantId: number;
+  restaurantId: string;
 }
 
 export default function ReviewTab({ restaurantId }: ReviewTabProps) {

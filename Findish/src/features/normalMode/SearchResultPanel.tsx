@@ -3,10 +3,10 @@ import StoreCard, { type StoreCardData } from "@/components/common/StoreCard";
 interface SearchResultPanelProps {
   restaurants: StoreCardData[];
   totalCount: number;
-  selectedId: number | null;
-  onSelect: (id: number) => void;
-  likedIds?: Set<number>;
-  onToggleLike?: (id: number) => void;
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+  likedIds?: Set<string>;
+  onToggleLike?: (id: string) => void;
 }
 
 export default function SearchResultPanel({

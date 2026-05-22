@@ -44,7 +44,7 @@ export interface JoinResponse {
 
 // 내 정보 조회
 export interface GetMeResponse {
-  memberId: number;
+  memberId: string;
   loginId: string;
   name: string;
   email: string;

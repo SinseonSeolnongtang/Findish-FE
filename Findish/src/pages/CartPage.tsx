@@ -17,7 +17,7 @@ export default function CartPage() {
   const { mutate: order, isPending: isOrdering } = useOrderCartMutation();
 
   const handleQuantityChange = (
-    cartItemId: number,
+    cartItemId: string,
     currentQty: number,
     delta: number,
   ) => {

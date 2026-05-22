@@ -8,15 +8,14 @@ export type OrderType = 'CART' | 'AGENT';
 // GET /api/v1/members/me/reservations
 
 export interface GetReservationsRequest {
-  status?: ReservationStatus;
-  sort?: string;
+  status: ReservationStatus;
   page?: number;
   size?: number;
 }
 
 export interface ReservationItem {
-  reservationId: number;
-  restaurantId: number;
+  reservationId: string;
+  restaurantId: string;
   restaurantName: string;
   thumbnailUrl: string;
   date: string;
@@ -35,9 +34,9 @@ export interface ReservationsResponse {
 // DELETE /api/v1/members/me/reservations/{reservationId}
 
 export interface CancelReservationResponse {
-  reservationId: number;
-  status: ReservationStatus;
-  cancelReason: CancelReason;
+  reservationId: string;
+  status: 'CANCELLED';
+  cancelReason: 'USER_CANCEL';
 }
 
 // ─── 3. 주문 내역 목록 조회 ───────────────────────────────────────────────────

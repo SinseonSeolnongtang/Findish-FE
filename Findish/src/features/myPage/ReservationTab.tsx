@@ -28,7 +28,7 @@ function ReservationCard({
   onCancelClick,
 }: {
   item: ReservationItem;
-  onCancelClick: (id: number) => void;
+  onCancelClick: (id: string) => void;
 }) {
   return (
     <div className="bg-white rounded-xl border border-neutral-300 flex gap-3 p-4">
@@ -71,7 +71,7 @@ function ReservationCard({
 
 export default function ReservationTab({ initialFilter = "방문예정" }: ReservationTabProps) {
   const [filter, setFilter] = useState<ReservationFilter>(initialFilter);
-  const [cancelTargetId, setCancelTargetId] = useState<number | null>(null);
+  const [cancelTargetId, setCancelTargetId] = useState<string | null>(null);
 
   const status = FILTER_TO_STATUS[filter];
   const { data } = useMyReservationsQuery(status);

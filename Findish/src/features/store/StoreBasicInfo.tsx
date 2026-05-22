@@ -7,7 +7,7 @@ const DAYS = ["월", "화", "수", "목", "금", "토", "일"] as const;
 
 interface StoreBasicInfoProps {
   store: StoreCardData;
-  restaurantId: number;
+  restaurantId: string;
 }
 
 export default function StoreBasicInfo({ store, restaurantId }: StoreBasicInfoProps) {

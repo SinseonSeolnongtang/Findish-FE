@@ -32,7 +32,7 @@ export const usePresetHistoryQuery = () => {
 };
 
 // GET /api/v1/ai-pick/presets/{presetId}
-export const usePresetDetailQuery = (presetId: number) => {
+export const usePresetDetailQuery = (presetId: string) => {
   return useQuery({
     queryKey: ['preset-detail', presetId],
     queryFn: () => getPresetDetail(presetId),
@@ -73,7 +73,7 @@ export const useCreatePresetMutation = () => {
 export const useUpdatePresetMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ presetId, body }: { presetId: number; body: UpdateAiPickPresetRequest }) =>
+    mutationFn: ({ presetId, body }: { presetId: string; body: UpdateAiPickPresetRequest }) =>
       updatePreset(presetId, body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: PRESET_HISTORY_KEY });
@@ -109,7 +109,7 @@ export const useRespondFriendRequestMutation = () => {
 export const useDeleteFriendMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (memberId: number) => deleteFriend(memberId),
+    mutationFn: (memberId: string) => deleteFriend(memberId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: FRIENDS_KEY });
     },

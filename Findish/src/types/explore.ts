@@ -6,7 +6,7 @@ export interface ExploreSearchRequest {
   lng?: number;
 }
 export interface ExploreRestaurantItem {
-  restaurantId: number;
+  restaurantId: string;
   name: string;
   category: string;
   address: string;
@@ -40,10 +40,10 @@ export interface GetCardSummaryResponse {
 // GET  /api/v1/explore/selections
 // DELETE /api/v1/explore/selections/{restaurantId}
 export interface AddSelectionRequest {
-  restaurantId: number;
+  restaurantId: string;
 }
 export interface SelectionItem {
-  restaurantId: number;
+  restaurantId: string;
   name: string;
   thumbnailUrl: string;
 }
@@ -51,4 +51,37 @@ export interface SelectionsResponse {
   selectedCount: number;
   isCompleted: boolean;
   selections: SelectionItem[];
+}
+
+// ─── 6. 가게 비교 분석 ───────────────────────────────────────────────────────
+// GET /api/v1/explore/analysis
+export interface AnalysisTopKeyword {
+  keyword: string;
+  positiveRatio: number;
+  negativeRatio: number;
+}
+export interface AnalysisRestaurant {
+  restaurantId: string | null;
+  name: string;
+  category: string;
+  thumbnailUrl: string;
+  topKeywords: AnalysisTopKeyword[];
+}
+export interface AnalysisSummary {
+  commonText: string;
+  tradeOffText: string;
+}
+export interface AnalysisKeywordScore {
+  restaurantId: string | null;
+  ratio: number;
+}
+export interface AnalysisKeyword {
+  keyword: string;
+  scores: AnalysisKeywordScore[];
+}
+export interface GetAnalysisResponse {
+  restaurants: AnalysisRestaurant[];
+  summary: AnalysisSummary;
+  commonKeywords: AnalysisKeyword[];
+  tradeOffKeywords: AnalysisKeyword[];
 }

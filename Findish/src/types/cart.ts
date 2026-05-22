@@ -1,7 +1,7 @@
 // ─── 0. 공통 ──────────────────────────────────────────────────────────────────
 export interface CartItem {
-  cartItemId: number;
-  menuId: number;
+  cartItemId: string;
+  menuId: string;
   name: string;
   price: number;
   quantity: number;
@@ -11,7 +11,7 @@ export interface CartItem {
 // ─── 1. 장바구니 조회 ─────────────────────────────────────────────────────────
 // GET /api/v1/cart
 export interface GetCartResponse {
-  restaurantId: number;
+  restaurantId: string;
   restaurantName: string;
   items: CartItem[];
   totalPrice: number;
@@ -20,12 +20,12 @@ export interface GetCartResponse {
 // ─── 2. 메뉴 담기 ─────────────────────────────────────────────────────────────
 // POST /api/v1/cart
 export interface AddCartItemRequest {
-  restaurantId: number;
-  menuId: number;
+  restaurantId: string;
+  menuId: string;
   quantity: number;
 }
 export interface AddCartItemResponse {
-  cartItemId: number;
+  cartItemId: string;
   totalCount: number;
   totalPrice: number;
 }
@@ -36,7 +36,7 @@ export interface UpdateCartItemRequest {
   quantity: number;
 }
 export interface UpdateCartItemResponse {
-  cartItemId: number;
+  cartItemId: string;
   quantity: number;
   totalPrice: number;
 }
@@ -56,7 +56,7 @@ export interface OrderItem {
   price: number;
 }
 export interface PlaceOrderResponse {
-  orderId: number;
+  orderId: string;
   restaurantName: string;
   items: OrderItem[];
   totalPrice: number;

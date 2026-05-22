@@ -11,7 +11,7 @@ import {
 
 export default function FriendList() {
   const [loginId, setLoginId] = useState('');
-  const [targetMemberId, setTargetMemberId] = useState<number | null>(null);
+  const [targetMemberId, setTargetMemberId] = useState<string | null>(null);
   const [targetName, setTargetName] = useState('');
 
   const { data, isLoading } = useFriendsQuery();

@@ -39,7 +39,7 @@ export const handlers = [
 
   http.get('/api/v1/members/me', () => {
     return HttpResponse.json({
-      memberId: 1,
+      memberId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
       loginId: 'mockuser123',
       name: '홍길동',
       email: 'mock@example.com',
@@ -80,9 +80,9 @@ export const handlers = [
     const size = Number(url.searchParams.get('size') ?? 10);
 
     const liked = MOCK_SEARCH_RESTAURANTS.filter((r) =>
-      likedRestaurantIds.has(r.restaurantId),
+      likedRestaurantIds.has(String(r.restaurantId)),
     ).map((r) => ({
-      restaurantId: r.restaurantId,
+      restaurantId: String(r.restaurantId),
       name: r.name,
       category: r.category,
       address: r.address,

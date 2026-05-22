@@ -17,23 +17,23 @@ import type {
   GetMyLikesResponse,
 } from '@/types/restaurant';
 
-export const getRestaurantBasic = async (restaurantId: number): Promise<GetRestaurantResponse> => {
+export const getRestaurantBasic = async (restaurantId: string): Promise<GetRestaurantResponse> => {
   const { data } = await axiosInstance.get<GetRestaurantResponse>(`/api/v1/restaurants/${restaurantId}`);
   return data;
 };
 
-export const getRestaurantAiSummary = async (restaurantId: number): Promise<GetAiSummaryResponse> => {
+export const getRestaurantAiSummary = async (restaurantId: string): Promise<GetAiSummaryResponse> => {
   const { data } = await axiosInstance.get<GetAiSummaryResponse>(`/api/v1/restaurants/${restaurantId}/ai-summary`);
   return data;
 };
 
-export const getRestaurantMenus = async (restaurantId: number): Promise<GetMenusResponse> => {
+export const getRestaurantMenus = async (restaurantId: string): Promise<GetMenusResponse> => {
   const { data } = await axiosInstance.get<GetMenusResponse>(`/api/v1/restaurants/${restaurantId}/menus`);
   return data;
 };
 
 export const getRestaurantReviews = async (
-  restaurantId: number,
+  restaurantId: string,
   params: GetReviewsRequest,
 ): Promise<GetReviewsResponse> => {
   const { data } = await axiosInstance.get<GetReviewsResponse>(`/api/v1/restaurants/${restaurantId}/reviews`, {
@@ -42,13 +42,13 @@ export const getRestaurantReviews = async (
   return data;
 };
 
-export const getRestaurantInfo = async (restaurantId: number): Promise<GetRestaurantInfoResponse> => {
+export const getRestaurantInfo = async (restaurantId: string): Promise<GetRestaurantInfoResponse> => {
   const { data } = await axiosInstance.get<GetRestaurantInfoResponse>(`/api/v1/restaurants/${restaurantId}/info`);
   return data;
 };
 
 export const getAvailableSlots = async (
-  restaurantId: number,
+  restaurantId: string,
   params: GetAvailableSlotsRequest,
 ): Promise<GetAvailableSlotsResponse> => {
   const { data } = await axiosInstance.get<GetAvailableSlotsResponse>(
@@ -59,7 +59,7 @@ export const getAvailableSlots = async (
 };
 
 export const createReservation = async (
-  restaurantId: number,
+  restaurantId: string,
   body: CreateReservationRequest,
 ): Promise<CreateReservationResponse> => {
   const { data } = await axiosInstance.post<CreateReservationResponse>(
@@ -79,7 +79,7 @@ export const searchRestaurants = async (
   return data;
 };
 
-export const toggleLike = async (restaurantId: number): Promise<ToggleLikeResponse> => {
+export const toggleLike = async (restaurantId: string): Promise<ToggleLikeResponse> => {
   const { data } = await axiosInstance.post<ToggleLikeResponse>(
     `/api/v1/restaurants/${restaurantId}/like`,
   );

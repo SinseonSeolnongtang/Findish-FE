@@ -4,15 +4,15 @@ import { useRestaurantMenusQuery } from "@/hooks/useRestaurant";
 import { useAddToCartMutation } from "@/hooks/useCart";
 
 interface MenuTabProps {
-  restaurantId: number;
+  restaurantId: string;
 }
 
 export default function MenuTab({ restaurantId }: MenuTabProps) {
   const { data, isLoading, isError } = useRestaurantMenusQuery(restaurantId);
   const { mutate: addToCart } = useAddToCartMutation();
-  const [addingMenuId, setAddingMenuId] = useState<number | null>(null);
+  const [addingMenuId, setAddingMenuId] = useState<string | null>(null);
 
-  const handleAdd = (menuId: number) => {
+  const handleAdd = (menuId: string) => {
     setAddingMenuId(menuId);
     addToCart(
       { restaurantId, menuId, quantity: 1 },

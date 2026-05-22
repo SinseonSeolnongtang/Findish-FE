@@ -22,10 +22,10 @@ export default function AIPickPage() {
   const [view, setView] = useState<View>('home');
   const [presetStep, setPresetStep] = useState<1 | 2 | 3 | 4>(1);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [selectedPresetId, setSelectedPresetId] = useState<number | null>(null);
+  const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
 
   // 폼 상태 — API enum 타입으로 관리
-  const [companions, setCompanions] = useState<number[]>([]);
+  const [companions, setCompanions] = useState<string[]>([]);
   const [situation, setSituation] = useState<AiPickSituation | ''>('');
   const [budgetMin, setBudgetMin] = useState(10000);
   const [budgetMax, setBudgetMax] = useState(38000);
@@ -36,10 +36,10 @@ export default function AIPickPage() {
 
   const createPresetMutation = useCreatePresetMutation();
   const updatePresetMutation = useUpdatePresetMutation();
-  const { data: presetDetail } = usePresetDetailQuery(selectedPresetId ?? 0);
+  const { data: presetDetail } = usePresetDetailQuery(selectedPresetId ?? '');
 
   // 사이드바에서 히스토리 클릭 → 프리셋 상세 조회 후 결과 뷰 진입
-  const handlePresetSelect = (presetId: number) => {
+  const handlePresetSelect = (presetId: string) => {
     setSelectedPresetId(presetId);
     setResult(null);
     setView('result');

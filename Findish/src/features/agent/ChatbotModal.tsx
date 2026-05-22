@@ -24,7 +24,7 @@ interface LocalMessage {
   text: string;
   intent?: AgentIntent;
   step?: AgentStep;
-  targetId?: number | null;
+  targetId?: string | null;
   reservation?: AgentReservationInfo | null;
   menus?: AgentMenuInfo[] | null;
   confirmed?: boolean;
@@ -117,7 +117,7 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
   const idPrefix = useId();
   const nextId = useRef(0);
   const makeId = () => `${idPrefix}-${nextId.current++}`;
-  const activeRestaurantId = useRef<number>(0);
+  const activeRestaurantId = useRef<string>('');
 
   const sendMutation = useSendMessageMutation();
   const confirmReservationMutation = useConfirmReservationMutation();
@@ -210,7 +210,7 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
       confirmOrderMutation.mutate(
         {
           restaurantId: activeRestaurantId.current,
-          items: msg.menus.map((m) => ({ menuId: m.menuId, quantity: 1 })),
+          items: msg.menus.filter((m): m is typeof m & { menuId: string } => m.menuId !== null).map((m) => ({ menuId: m.menuId, quantity: 1 })),
         },
         {
           onSuccess: () =>

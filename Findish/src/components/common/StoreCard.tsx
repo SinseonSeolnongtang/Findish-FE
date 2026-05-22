@@ -8,7 +8,7 @@ import ClockIcon from "@/assets/icons/common/clock.svg?react";
 import FavoriteIcon from "@/assets/icons/common/favorite.svg?react";
 
 export interface StoreCardData {
-  id: number;
+  id: string;
   name: string;
   category: string;
   summary?: string;

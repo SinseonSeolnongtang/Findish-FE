@@ -49,7 +49,7 @@ export const useConfirmOrderMutation = () => {
 export const useCancelReservationMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (reservationId: number) => cancelAgentReservation(reservationId),
+    mutationFn: (reservationId: string) => cancelAgentReservation(reservationId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CHAT_HISTORY_QUERY_KEY });
     },
@@ -59,7 +59,7 @@ export const useCancelReservationMutation = () => {
 export const useCancelOrderMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (orderId: number) => cancelAgentOrder(orderId),
+    mutationFn: (orderId: string) => cancelAgentOrder(orderId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: CHAT_HISTORY_QUERY_KEY });
     },
