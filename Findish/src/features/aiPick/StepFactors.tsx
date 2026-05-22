@@ -1,13 +1,15 @@
-import type { AiPickPriority } from '@/types/aiPick';
-import StepLayout from './StepLayout';
+import Input from "@/components/common/Input";
+import ToggleTag from "@/components/common/ToggleTag";
+import type { AiPickPriority } from "@/types/aiPick";
+import StepLayout from "./StepLayout";
 
 const FACTORS: { label: string; value: AiPickPriority }[] = [
-  { label: '맛', value: 'TASTE' },
-  { label: '분위기', value: 'ATMOSPHERE' },
-  { label: '가성비', value: 'PRICE' },
-  { label: '청결도', value: 'CLEANLINESS' },
-  { label: '서비스', value: 'SERVICE' },
-  { label: '주차', value: 'PARKING' },
+  { label: "맛", value: "TASTE" },
+  { label: "분위기", value: "ATMOSPHERE" },
+  { label: "가성비", value: "PRICE" },
+  { label: "청결도", value: "CLEANLINESS" },
+  { label: "서비스", value: "SERVICE" },
+  { label: "주차", value: "PARKING" },
 ];
 
 interface Props {
@@ -42,37 +44,43 @@ export default function StepFactors({
       onNext={onNext}
       loading={loading}
     >
-      <div className="w-119 flex flex-col items-center gap-4">
+      <div className="w-full flex flex-col items-center gap-15">
         <div className="flex flex-wrap justify-center gap-2">
-          {FACTORS.map(({ label, value }) => (
-            <button
-              key={value}
-              onClick={() => toggle(value)}
-              className={`px-5 py-1.75 rounded-[17px] typo-body-lg cursor-pointer transition-colors ${
-                selected.includes(value)
-                  ? 'bg-primary text-white font-bold'
-                  : 'bg-orange-100 text-primary-dark'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+          {FACTORS.map(({ label, value }) => {
+            const orderIndex = selected.indexOf(value);
+            return (
+              <ToggleTag
+                key={value}
+                label={label}
+                active={orderIndex !== -1}
+                onClick={() => toggle(value)}
+                size="sm"
+                order={orderIndex !== -1 ? orderIndex + 1 : undefined}
+              />
+            );
+          })}
         </div>
 
-        {selected.length > 0 && (
-          <div className="w-full flex flex-col gap-2">
+        <div
+          className={`grid transition-all duration-300 ease-in-out w-full ${
+            selected.length > 0
+              ? "grid-rows-[1fr] opacity-100"
+              : "grid-rows-[0fr] opacity-0"
+          }`}
+        >
+          <div className="overflow-hidden flex flex-col gap-2">
             <p className="typo-body-sm text-neutral-900">
               (선택) 추가적으로 고려해야 할 사항이 있다면 알려주세요.
             </p>
-            <input
+            <Input
               type="text"
               value={additionalNote}
               onChange={(e) => onNoteChange(e.target.value)}
               placeholder="조용하고 사람이 적은 곳이면 좋겠다."
-              className="w-full h-9.5 px-3.5 bg-orange-100 border border-primary rounded-lg typo-body-sm text-neutral-900 placeholder:text-neutral-400 outline-none"
+              className="h-10 px-4 bg-orange-100 border-primary rounded-lg typo-body-sm text-neutral-900 placeholder:text-neutral-400"
             />
           </div>
-        )}
+        </div>
       </div>
     </StepLayout>
   );

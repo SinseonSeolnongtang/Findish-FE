@@ -32,7 +32,7 @@ export default function StepSituation({
             label={label}
             active={selected === value}
             onClick={() => onSelect(selected === value ? "" : value)}
-            size="md"
+            size="sm"
           />
         ))}
       </div>

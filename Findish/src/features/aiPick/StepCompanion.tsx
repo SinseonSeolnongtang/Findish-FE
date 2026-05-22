@@ -1,7 +1,7 @@
-import CheckFilled from '@/assets/icons/common/check_filled.svg?react';
-import { cn } from '@/lib/utils';
-import { useFriendsQuery } from '@/hooks/useAiPick';
-import StepLayout from './StepLayout';
+import CheckFilled from "@/assets/icons/common/check_filled.svg?react";
+import { cn } from "@/lib/utils";
+import { useFriendsQuery } from "@/hooks/useAiPick";
+import StepLayout from "./StepLayout";
 
 interface Props {
   selected: string[]; // friendIds (UUID)
@@ -39,9 +39,14 @@ export default function StepCompanion({ selected, onSelect, onNext }: Props) {
               onClick={() => onSelect([])}
               className="flex items-center justify-between w-full py-3 cursor-pointer"
             >
-              <span className="typo-t2 text-neutral-900 tracking-[0.4px]">동행인 없음</span>
+              <span className="typo-t2 text-neutral-900 tracking-[0.4px]">
+                동행인 없음
+              </span>
               <CheckFilled
-                className={cn('shrink-0 w-8 h-8 transition-opacity', !isNone && 'opacity-20')}
+                className={cn(
+                  "shrink-0 w-8 h-8 transition-opacity",
+                  !isNone && "opacity-20",
+                )}
               />
             </button>
             <div className="h-px bg-orange-300" />
@@ -53,11 +58,13 @@ export default function StepCompanion({ selected, onSelect, onNext }: Props) {
                 onClick={() => toggle(friend.memberId)}
                 className="flex items-center justify-between w-full py-3 cursor-pointer"
               >
-                <span className="typo-t2 text-neutral-900 tracking-[0.4px]">{friend.name}</span>
+                <span className="typo-t2 text-neutral-900 tracking-[0.4px]">
+                  {friend.name}
+                </span>
                 <CheckFilled
                   className={cn(
-                    'shrink-0 w-8 h-8 transition-opacity',
-                    !selected.includes(friend.memberId) && 'opacity-20',
+                    "shrink-0 w-8 h-8 transition-opacity",
+                    !selected.includes(friend.memberId) && "opacity-20",
                   )}
                 />
               </button>
