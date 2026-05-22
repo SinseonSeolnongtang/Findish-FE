@@ -12,7 +12,7 @@ export const getExploreSearch = async (params: ExploreSearchRequest): Promise<Ex
   return data;
 };
 
-export const getCardSummary = async (restaurantId: number): Promise<GetCardSummaryResponse> => {
+export const getCardSummary = async (restaurantId: string): Promise<GetCardSummaryResponse> => {
   const { data } = await axiosInstance.get<GetCardSummaryResponse>(`/api/v1/explore/${restaurantId}/card-summary`);
   return data;
 };
@@ -27,7 +27,7 @@ export const getSelections = async (): Promise<SelectionsResponse> => {
   return data;
 };
 
-export const removeSelection = async (restaurantId: number): Promise<SelectionsResponse> => {
+export const removeSelection = async (restaurantId: string): Promise<SelectionsResponse> => {
   const { data } = await axiosInstance.delete<SelectionsResponse>(`/api/v1/explore/selections/${restaurantId}`);
   return data;
 };

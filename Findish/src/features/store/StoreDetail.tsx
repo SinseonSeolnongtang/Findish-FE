@@ -56,7 +56,7 @@ export default function StoreDetail({ store, onClose }: StoreDetailProps) {
 
       {/* 스크롤 영역 */}
       <div className="flex-1 overflow-y-auto">
-        <StoreBasicInfo store={store} restaurantId={restaurantId} />
+        <StoreBasicInfo store={store} restaurantId={String(restaurantId)} />
 
         {showReservation ? (
           <ReservationPanel

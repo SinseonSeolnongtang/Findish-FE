@@ -15,7 +15,7 @@ export type AiPickPriority =
 
 // ─── 추천 식당 공통 아이템 ────────────────────────────────────────────────────
 export interface AiPickRestaurantItem {
-  restaurantId: number;
+  restaurantId: string;
   name: string;
   category: string;
   address: string;
@@ -27,7 +27,7 @@ export interface AiPickRestaurantItem {
 
 // ─── 1. 프리셋 생성 (POST /api/v1/ai-pick/presets) ───────────────────────────
 export interface CreateAiPickPresetRequest {
-  friendIds?: number[];
+  friendIds?: string[];
   situation: AiPickSituation;
   budgetMin: number;
   budgetMax: number;
@@ -38,7 +38,7 @@ export interface CreateAiPickPresetRequest {
 }
 
 export interface CreateAiPickPresetResponse {
-  presetId: number;
+  presetId: string;
   title: string;
   aiMessage: string;
   restaurants: AiPickRestaurantItem[];
@@ -47,7 +47,7 @@ export interface CreateAiPickPresetResponse {
 
 // ─── 2. 프리셋 수정 (PATCH /api/v1/ai-pick/presets/{presetId}) ───────────────
 export interface UpdateAiPickPresetRequest {
-  friendIds?: number[];
+  friendIds?: string[];
   situation?: AiPickSituation;
   budgetMin?: number;
   budgetMax?: number;
@@ -56,7 +56,7 @@ export interface UpdateAiPickPresetRequest {
 }
 
 export interface UpdateAiPickPresetResponse {
-  presetId: number;
+  presetId: string;
   title: string;
   aiMessage: string;
   restaurants: AiPickRestaurantItem[];
@@ -65,7 +65,7 @@ export interface UpdateAiPickPresetResponse {
 
 // ─── 3. 프리셋 히스토리 목록 조회 (GET /api/v1/ai-pick/presets) ──────────────
 export interface AiPickPresetHistoryItem {
-  presetId: number;
+  presetId: string;
   title: string;
   createdAt: string;
 }
@@ -75,11 +75,11 @@ export interface GetAiPickPresetsResponse {
 
 // ─── 4. 프리셋 상세 조회 (GET /api/v1/ai-pick/presets/{presetId}) ─────────────
 export interface AiPickPresetFriend {
-  memberId: number;
+  memberId: string;
   name: string;
 }
 export interface GetAiPickPresetDetailResponse {
-  presetId: number;
+  presetId: string;
   title: string;
   friends: AiPickPresetFriend[];
   situation: AiPickSituation;
@@ -94,7 +94,7 @@ export interface GetAiPickPresetDetailResponse {
 
 // ─── Friend 1. 친구 목록 조회 (GET /api/v1/friends) ──────────────────────────
 export interface FriendItem {
-  memberId: number;
+  memberId: string;
   loginId: string;
   name: string;
 }
@@ -107,7 +107,7 @@ export interface SendFriendRequestBody {
   loginId: string;
 }
 export interface SendFriendRequestResponse {
-  requestId: number;
+  requestId: string;
   toName: string;
   status: "PENDING";
 }

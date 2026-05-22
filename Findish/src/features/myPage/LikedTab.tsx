@@ -46,7 +46,7 @@ export default function LikedTab() {
     setPage(1);
   };
 
-  const handleUnlike = (restaurantId: number) => {
+  const handleUnlike = (restaurantId: string) => {
     toggleLike(restaurantId, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["likes", "me"] });

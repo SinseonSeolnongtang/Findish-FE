@@ -18,7 +18,7 @@ export const useExploreSearchQuery = (params: ExploreSearchRequest) => {
   });
 };
 
-export const useCardSummaryQuery = (restaurantId: number) => {
+export const useCardSummaryQuery = (restaurantId: string) => {
   return useQuery({
     queryKey: ['explore', restaurantId, 'card-summary'],
     queryFn: () => getCardSummary(restaurantId),
@@ -46,7 +46,7 @@ export const useAddSelectionMutation = () => {
 export const useRemoveSelectionMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (restaurantId: number) => removeSelection(restaurantId),
+    mutationFn: (restaurantId: string) => removeSelection(restaurantId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: SELECTIONS_KEY });
     },

@@ -2,7 +2,7 @@ import { type StoreCardData } from "@/components/common/StoreCard";
 
 export const MOCK_RESTAURANTS: StoreCardData[] = [
   {
-    id: 1,
+    id: "1",
     name: "고기굽는마을",
     category: "한식",
     isOpen: true,
@@ -16,7 +16,7 @@ export const MOCK_RESTAURANTS: StoreCardData[] = [
     lng: 127.0028,
   },
   {
-    id: 2,
+    id: "2",
     name: "방목",
     category: "한식",
     isOpen: true,
@@ -30,7 +30,7 @@ export const MOCK_RESTAURANTS: StoreCardData[] = [
     lng: 127.0208,
   },
   {
-    id: 3,
+    id: "3",
     name: "착한돼지집",
     category: "한식",
     isOpen: false,
@@ -44,7 +44,7 @@ export const MOCK_RESTAURANTS: StoreCardData[] = [
     lng: 127.0015,
   },
   {
-    id: 4,
+    id: "4",
     name: "육식주 혜화점",
     category: "한식",
     isOpen: true,
@@ -58,7 +58,7 @@ export const MOCK_RESTAURANTS: StoreCardData[] = [
     lng: 127.0018,
   },
   {
-    id: 5,
+    id: "5",
     name: "명삼 성신여대고깃집",
     category: "한식",
     isOpen: true,
@@ -72,7 +72,7 @@ export const MOCK_RESTAURANTS: StoreCardData[] = [
     lng: 127.0230,
   },
   {
-    id: 6,
+    id: "6",
     name: "방목 2호점",
     category: "한식",
     isOpen: true,
@@ -87,11 +87,11 @@ export const MOCK_RESTAURANTS: StoreCardData[] = [
   },
 ];
 
-export const PIN_POSITIONS: Record<number, { left: string; top: string }> = {
-  1: { left: "76%", top: "35%" },
-  2: { left: "39%", top: "85%" },
-  3: { left: "51%", top: "24%" },
-  4: { left: "42%", top: "60%" },
-  5: { left: "68%", top: "82%" },
-  6: { left: "54%", top: "67%" },
+export const PIN_POSITIONS: Record<string, { left: string; top: string }> = {
+  "1": { left: "76%", top: "35%" },
+  "2": { left: "39%", top: "85%" },
+  "3": { left: "51%", top: "24%" },
+  "4": { left: "42%", top: "60%" },
+  "5": { left: "68%", top: "82%" },
+  "6": { left: "54%", top: "67%" },
 };

@@ -11,7 +11,7 @@ interface AISidebarProps {
   onToggle: () => void;
   onFriendClick?: () => void;
   onNewChat?: () => void;
-  onPresetSelect?: (presetId: number) => void;
+  onPresetSelect?: (presetId: string) => void;
 }
 
 export default function AISidebar({ open, onToggle, onFriendClick, onNewChat, onPresetSelect }: AISidebarProps) {

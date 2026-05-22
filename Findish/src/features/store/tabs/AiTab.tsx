@@ -13,8 +13,8 @@ interface AiTabProps {
 export default function AiTab({ store, restaurantId, onMoreClick }: AiTabProps) {
   const [selectedKeyword, setSelectedKeyword] = useState<string | null>(null);
 
-  const { data: aiData, isLoading: aiLoading } = useRestaurantAiSummaryQuery(restaurantId);
-  const { data: menuData, isLoading: menuLoading } = useRestaurantMenusQuery(restaurantId);
+  const { data: aiData, isLoading: aiLoading } = useRestaurantAiSummaryQuery(String(restaurantId));
+  const { data: menuData, isLoading: menuLoading } = useRestaurantMenusQuery(String(restaurantId));
 
   const positiveKeywords = aiData?.positiveKeywords ?? [];
   const negativeKeywords = aiData?.negativeKeywords ?? [];

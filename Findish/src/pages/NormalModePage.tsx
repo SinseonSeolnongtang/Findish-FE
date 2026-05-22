@@ -16,7 +16,7 @@ import type { SearchRestaurantItem } from "@/types/restaurant";
 
 function toStoreCard(item: SearchRestaurantItem): StoreCardData {
   return {
-    id: item.restaurantId,
+    id: String(item.restaurantId),
     name: item.name,
     category: item.category,
     isOpen: item.isOpen,
@@ -30,27 +30,27 @@ function toStoreCard(item: SearchRestaurantItem): StoreCardData {
 
 export default function NormalModePage() {
   const navigate = useNavigate();
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [keyword, setKeyword] = useState("");
   // id → true(좋아요) / false(취소) 낙관적 오버라이드
-  const [toggledIds, setToggledIds] = useState<Record<number, boolean>>({});
+  const [toggledIds, setToggledIds] = useState<Record<string, boolean>>({});
 
   const { data, isLoading } = useSearchRestaurantsQuery({ keyword });
   const { data: likesData } = useMyLikesQuery();
   const { mutate: toggleLikeMutate } = useToggleLikeMutation();
 
   const likedIds = useMemo(() => {
-    const base = new Set<number>(
+    const base = new Set<string>(
       likesData?.restaurants.map((r) => r.restaurantId) ?? [],
     );
     Object.entries(toggledIds).forEach(([id, isLiked]) => {
-      if (isLiked) base.add(Number(id));
-      else base.delete(Number(id));
+      if (isLiked) base.add(id);
+      else base.delete(id);
     });
     return base;
   }, [likesData, toggledIds]);
 
-  const handleToggleLike = (id: number) => {
+  const handleToggleLike = (id: string) => {
     const currentlyLiked = likedIds.has(id);
     setToggledIds((prev) => ({ ...prev, [id]: !currentlyLiked }));
     toggleLikeMutate(id, {
@@ -75,8 +75,8 @@ export default function NormalModePage() {
   const selected = restaurants.find((r) => r.id === selectedId);
   const searched = !!keyword.trim();
 
-  const handlePinClick = (id: number) => setSelectedId(id === selectedId ? null : id);
-  const handleCardSelect = (id: number) => setSelectedId(id === selectedId ? null : id);
+  const handlePinClick = (id: string) => setSelectedId(id === selectedId ? null : id);
+  const handleCardSelect = (id: string) => setSelectedId(id === selectedId ? null : id);
 
   return (
     <div className="h-screen overflow-hidden">

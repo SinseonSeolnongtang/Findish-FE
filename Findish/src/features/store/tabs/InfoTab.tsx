@@ -3,7 +3,7 @@ import PhoneIcon from "@/assets/icons/review/phone.svg?react";
 import LocationIcon from "@/assets/icons/review/location.svg?react";
 
 interface InfoTabProps {
-  restaurantId: number;
+  restaurantId: string;
 }
 
 export default function InfoTab({ restaurantId }: InfoTabProps) {

@@ -34,7 +34,7 @@ export const getPresetHistory = async (): Promise<GetAiPickPresetsResponse> => {
 
 // GET /api/v1/ai-pick/presets/{presetId}
 export const getPresetDetail = async (
-  presetId: number,
+  presetId: string,
 ): Promise<GetAiPickPresetDetailResponse> => {
   const { data } = await axiosInstance.get<GetAiPickPresetDetailResponse>(
     `/api/v1/ai-pick/presets/${presetId}`,
@@ -44,7 +44,7 @@ export const getPresetDetail = async (
 
 // PATCH /api/v1/ai-pick/presets/{presetId}
 export const updatePreset = async (
-  presetId: number,
+  presetId: string,
   body: UpdateAiPickPresetRequest,
 ): Promise<UpdateAiPickPresetResponse> => {
   const { data } = await axiosInstance.patch<UpdateAiPickPresetResponse>(
@@ -92,7 +92,7 @@ export const respondFriendRequest = async (
 };
 
 // DELETE /api/v1/friends/{memberId}
-export const deleteFriend = async (memberId: number): Promise<DeleteFriendResponse> => {
+export const deleteFriend = async (memberId: string): Promise<DeleteFriendResponse> => {
   const { data } = await axiosInstance.delete<DeleteFriendResponse>(
     `/api/v1/friends/${memberId}`,
   );

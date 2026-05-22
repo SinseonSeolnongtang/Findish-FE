@@ -4,28 +4,28 @@ const BASE = "/api/v1/restaurants/:restaurantId";
 
 export const MOCK_MENUS = [
   {
-    menuId: 1,
+    menuId: "m1a2b3c4-d5e6-7890-abcd-ef1234567890",
     name: "한우 꽃등심 200g",
     price: 65000,
     imageUrl: "https://picsum.photos/seed/menu1/400/300",
     description: "1++ 등급 한우 꽃등심을 직화로 구워드립니다.",
   },
   {
-    menuId: 2,
+    menuId: "m2a2b3c4-d5e6-7890-abcd-ef1234567890",
     name: "한우 안심 150g",
     price: 72000,
     imageUrl: "https://picsum.photos/seed/menu2/400/300",
     description: "부드럽고 담백한 한우 안심.",
   },
   {
-    menuId: 3,
+    menuId: "m3a2b3c4-d5e6-7890-abcd-ef1234567890",
     name: "된장찌개",
     price: 8000,
     imageUrl: "https://picsum.photos/seed/menu3/400/300",
     description: "직접 담근 된장으로 끓인 구수한 찌개.",
   },
   {
-    menuId: 4,
+    menuId: "m4a2b3c4-d5e6-7890-abcd-ef1234567890",
     name: "공기밥",
     price: 2000,
     imageUrl: "https://picsum.photos/seed/menu4/400/300",
@@ -33,14 +33,14 @@ export const MOCK_MENUS = [
   },
 ];
 
-export const likedRestaurantIds = new Set<number>([2, 4]);
-export const likeCounts: Record<number, number> = {
-  1: 127,
-  2: 46,
-  3: 32,
-  4: 89,
-  5: 20,
-  6: 15,
+export const likedRestaurantIds = new Set<string>(["2", "4"]);
+export const likeCounts: Record<string, number> = {
+  "1": 127,
+  "2": 46,
+  "3": 32,
+  "4": 89,
+  "5": 20,
+  "6": 15,
 };
 
 export const MOCK_SEARCH_RESTAURANTS = [
@@ -168,13 +168,12 @@ export const restaurantHandlers = [
   // 1. 식당 기본 정보
   http.get(BASE, () => {
     return HttpResponse.json({
-      restaurantId: 1,
+      restaurantId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
       name: "미슐랭 한우 구이",
       category: "한식",
       address: "서울 강남구 테헤란로 123",
       lat: 37.5012,
       lng: 127.0396,
-      rating: 4.7,
       reviewCount: 312,
       priceRange: "50,000~80,000원",
       businessHours: "11:30 - 22:00",
@@ -212,7 +211,7 @@ export const restaurantHandlers = [
     const size = Number(url.searchParams.get("size") ?? 10);
 
     const allReviews = Array.from({ length: 25 }, (_, i) => ({
-      reviewId: i + 1,
+      reviewId: crypto.randomUUID(),
       author: `리뷰어${i + 1}`,
       content:
         i % 3 === 0
@@ -287,7 +286,7 @@ export const restaurantHandlers = [
     };
     return HttpResponse.json(
       {
-        reservationId: Math.floor(Math.random() * 10000),
+        reservationId: crypto.randomUUID(),
         restaurantName: "미슐랭 한우 구이",
         date: body.date,
         time: body.time,
@@ -301,7 +300,7 @@ export const restaurantHandlers = [
 
   // 8. 좋아요 토글
   http.post(`${BASE}/like`, ({ params }) => {
-    const id = Number(params.restaurantId);
+    const id = params.restaurantId as string;
     const isLiked = !likedRestaurantIds.has(id);
     if (isLiked) {
       likedRestaurantIds.add(id);

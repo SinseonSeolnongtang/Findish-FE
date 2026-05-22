@@ -15,7 +15,7 @@ const SITUATION_TITLE_MAP: Record<string, string> = {
 
 const MOCK_AIPICK_RESTAURANTS = [
   {
-    restaurantId: 1,
+    restaurantId: "a1b2c3d4-0001-0000-0000-000000000001",
     name: "고기굽는마을",
     category: "삼겹살",
     address: "서울 성북구 동소문로 45",
@@ -25,7 +25,7 @@ const MOCK_AIPICK_RESTAURANTS = [
     lng: 127.016,
   },
   {
-    restaurantId: 2,
+    restaurantId: "a1b2c3d4-0001-0000-0000-000000000002",
     name: "방목 2호점",
     category: "삼겹살",
     address: "서울 성북구 삼선동 67",
@@ -35,7 +35,7 @@ const MOCK_AIPICK_RESTAURANTS = [
     lng: 127.018,
   },
   {
-    restaurantId: 3,
+    restaurantId: "a1b2c3d4-0001-0000-0000-000000000003",
     name: "이탈리아노 성북",
     category: "이탈리안",
     address: "서울 성북구 보문동 101",
@@ -47,19 +47,19 @@ const MOCK_AIPICK_RESTAURANTS = [
 ];
 
 const MOCK_FRIENDS = [
-  { memberId: 1, loginId: "dawon01", name: "다원" },
-  { memberId: 2, loginId: "yunseo02", name: "윤서" },
-  { memberId: 3, loginId: "minji03", name: "민지" },
+  { memberId: "f0000001-0000-0000-0000-000000000001", loginId: "dawon01", name: "다원" },
+  { memberId: "f0000001-0000-0000-0000-000000000002", loginId: "yunseo02", name: "윤서" },
+  { memberId: "f0000001-0000-0000-0000-000000000003", loginId: "minji03", name: "민지" },
 ];
 
 const MOCK_PRESET_HISTORY = [
   {
-    presetId: 1,
+    presetId: "p0000001-0000-0000-0000-000000000001",
     title: "다원님 외 2명과 함께하는 식사",
     createdAt: "2026-05-01T10:00:00",
   },
   {
-    presetId: 2,
+    presetId: "p0000001-0000-0000-0000-000000000002",
     title: "혼자 즐기는 나만의 식사",
     createdAt: "2026-05-10T18:00:00",
   },
@@ -80,7 +80,7 @@ export const aiPickHandlers = [
 
     return HttpResponse.json(
       {
-        presetId: Date.now(),
+        presetId: crypto.randomUUID(),
         title,
         aiMessage: `Findish AI가 ${situationLabel}에 딱 맞는 가게를 골라봤어요!`,
         restaurants: [MOCK_AIPICK_RESTAURANTS[0]],
@@ -97,13 +97,13 @@ export const aiPickHandlers = [
 
   // GET /api/v1/ai-pick/presets/{presetId}
   http.get("/api/v1/ai-pick/presets/:presetId", ({ params }) => {
-    const presetId = Number(params.presetId);
+    const presetId = params.presetId as string;
     return HttpResponse.json({
       presetId,
       title: "다원님 외 3명과 함께하는 식사",
       friends: [
-        { memberId: 2, name: "다원" },
-        { memberId: 5, name: "윤서" },
+        { memberId: "f0000001-0000-0000-0000-000000000001", name: "다원" },
+        { memberId: "f0000001-0000-0000-0000-000000000002", name: "윤서" },
       ],
       situation: "FRIEND",
       budgetMin: 10000,
@@ -118,7 +118,7 @@ export const aiPickHandlers = [
 
   // PATCH /api/v1/ai-pick/presets/{presetId}
   http.patch("/api/v1/ai-pick/presets/:presetId", async ({ request, params }) => {
-    const presetId = Number(params.presetId);
+    const presetId = params.presetId as string;
     const body = (await request.json()) as UpdateAiPickPresetRequest;
     const situationLabel = body.situation
       ? SITUATION_TITLE_MAP[body.situation]
@@ -164,7 +164,7 @@ export const aiPickHandlers = [
   http.post("/api/v1/friends/requests", async ({ request }) => {
     const { loginId } = (await request.json()) as { loginId: string };
     return HttpResponse.json(
-      { requestId: Date.now(), toName: loginId, status: "PENDING" },
+      { requestId: crypto.randomUUID(), toName: loginId, status: "PENDING" },
       { status: 201 },
     );
   }),

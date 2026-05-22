@@ -5,8 +5,8 @@ const THUMBNAIL = 'https://placehold.co/120x120?text=식당';
 
 const PENDING_RESERVATIONS: ReservationItem[] = [
   {
-    reservationId: 1,
-    restaurantId: 101,
+    reservationId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567801',
+    restaurantId: 'r1b2c3d4-e5f6-7890-abcd-ef1234567801',
     restaurantName: '방목 2호점',
     thumbnailUrl: THUMBNAIL,
     date: '2026-06-10',
@@ -16,8 +16,8 @@ const PENDING_RESERVATIONS: ReservationItem[] = [
     cancelReason: null,
   },
   {
-    reservationId: 2,
-    restaurantId: 102,
+    reservationId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567802',
+    restaurantId: 'r1b2c3d4-e5f6-7890-abcd-ef1234567802',
     restaurantName: '고기굽는마을',
     thumbnailUrl: THUMBNAIL,
     date: '2026-06-15',
@@ -30,8 +30,8 @@ const PENDING_RESERVATIONS: ReservationItem[] = [
 
 const COMPLETED_RESERVATIONS: ReservationItem[] = [
   {
-    reservationId: 3,
-    restaurantId: 103,
+    reservationId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567803',
+    restaurantId: 'r1b2c3d4-e5f6-7890-abcd-ef1234567803',
     restaurantName: '청담 순두부',
     thumbnailUrl: THUMBNAIL,
     date: '2026-05-01',
@@ -41,8 +41,8 @@ const COMPLETED_RESERVATIONS: ReservationItem[] = [
     cancelReason: null,
   },
   {
-    reservationId: 4,
-    restaurantId: 104,
+    reservationId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567804',
+    restaurantId: 'r1b2c3d4-e5f6-7890-abcd-ef1234567804',
     restaurantName: '참치왕국',
     thumbnailUrl: THUMBNAIL,
     date: '2026-04-20',
@@ -55,8 +55,8 @@ const COMPLETED_RESERVATIONS: ReservationItem[] = [
 
 const CANCELLED_RESERVATIONS: ReservationItem[] = [
   {
-    reservationId: 5,
-    restaurantId: 101,
+    reservationId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567805',
+    restaurantId: 'r1b2c3d4-e5f6-7890-abcd-ef1234567801',
     restaurantName: '방목 2호점',
     thumbnailUrl: THUMBNAIL,
     date: '2026-04-10',
@@ -66,8 +66,8 @@ const CANCELLED_RESERVATIONS: ReservationItem[] = [
     cancelReason: 'USER_CANCEL',
   },
   {
-    reservationId: 6,
-    restaurantId: 105,
+    reservationId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567806',
+    restaurantId: 'r1b2c3d4-e5f6-7890-abcd-ef1234567805',
     restaurantName: '이자카야 하나',
     thumbnailUrl: THUMBNAIL,
     date: '2026-03-22',
@@ -142,7 +142,6 @@ export const myPageHandlers = [
     } else if (status === 'CANCELLED') {
       reservations = CANCELLED_RESERVATIONS;
     } else {
-      // status=PENDING 또는 파라미터 없음
       reservations = PENDING_RESERVATIONS;
     }
 
@@ -151,7 +150,7 @@ export const myPageHandlers = [
 
   // 2. 예약 직접 취소
   http.patch('/api/v1/members/me/reservations/:reservationId/cancel', ({ params }) => {
-    const reservationId = Number(params.reservationId);
+    const reservationId = params.reservationId as string;
     return HttpResponse.json({ reservationId, status: 'CANCELLED', cancelReason: 'USER_CANCEL' });
   }),
 

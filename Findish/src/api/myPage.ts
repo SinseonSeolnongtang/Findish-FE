@@ -7,12 +7,12 @@ import type {
   OrdersResponse,
 } from '@/types/myPage';
 
-export const getMyReservations = async (params?: GetReservationsRequest): Promise<ReservationsResponse> => {
+export const getMyReservations = async (params: GetReservationsRequest): Promise<ReservationsResponse> => {
   const { data } = await axiosInstance.get<ReservationsResponse>('/api/v1/members/me/reservations', { params });
   return data;
 };
 
-export const cancelMyReservation = async (reservationId: number): Promise<CancelReservationResponse> => {
+export const cancelMyReservation = async (reservationId: string): Promise<CancelReservationResponse> => {
   const { data } = await axiosInstance.patch<CancelReservationResponse>(
     `/api/v1/members/me/reservations/${reservationId}/cancel`,
   );

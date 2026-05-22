@@ -6,7 +6,7 @@ export interface ExploreSearchRequest {
   lng?: number;
 }
 export interface ExploreRestaurantItem {
-  restaurantId: number;
+  restaurantId: string;
   name: string;
   category: string;
   address: string;
@@ -40,10 +40,10 @@ export interface GetCardSummaryResponse {
 // GET  /api/v1/explore/selections
 // DELETE /api/v1/explore/selections/{restaurantId}
 export interface AddSelectionRequest {
-  restaurantId: number;
+  restaurantId: string;
 }
 export interface SelectionItem {
-  restaurantId: number;
+  restaurantId: string;
   name: string;
   thumbnailUrl: string;
 }

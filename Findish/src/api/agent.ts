@@ -32,12 +32,12 @@ export const getChatHistory = async (params?: GetChatHistoryRequest): Promise<Ge
   return data;
 };
 
-export const cancelAgentReservation = async (reservationId: number): Promise<CancelReservationResponse> => {
+export const cancelAgentReservation = async (reservationId: string): Promise<CancelReservationResponse> => {
   const { data } = await axiosInstance.patch<CancelReservationResponse>(`/api/v1/agent/reservations/${reservationId}/cancel`);
   return data;
 };
 
-export const cancelAgentOrder = async (orderId: number): Promise<CancelOrderResponse> => {
+export const cancelAgentOrder = async (orderId: string): Promise<CancelOrderResponse> => {
   const { data } = await axiosInstance.patch<CancelOrderResponse>(`/api/v1/agent/orders/${orderId}/cancel`);
   return data;
 };

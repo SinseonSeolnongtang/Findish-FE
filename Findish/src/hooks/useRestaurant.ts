@@ -28,7 +28,7 @@ export const useSearchRestaurantsQuery = (params: SearchRestaurantsRequest) => {
   });
 };
 
-export const useRestaurantBasicQuery = (restaurantId: number) => {
+export const useRestaurantBasicQuery = (restaurantId: string) => {
   return useQuery({
     queryKey: ['restaurant', restaurantId],
     queryFn: () => getRestaurantBasic(restaurantId),
@@ -36,7 +36,7 @@ export const useRestaurantBasicQuery = (restaurantId: number) => {
   });
 };
 
-export const useRestaurantAiSummaryQuery = (restaurantId: number) => {
+export const useRestaurantAiSummaryQuery = (restaurantId: string) => {
   return useQuery({
     queryKey: ['restaurant', restaurantId, 'ai-summary'],
     queryFn: () => getRestaurantAiSummary(restaurantId),
@@ -44,7 +44,7 @@ export const useRestaurantAiSummaryQuery = (restaurantId: number) => {
   });
 };
 
-export const useRestaurantMenusQuery = (restaurantId: number) => {
+export const useRestaurantMenusQuery = (restaurantId: string) => {
   return useQuery({
     queryKey: ['restaurant', restaurantId, 'menus'],
     queryFn: () => getRestaurantMenus(restaurantId),
@@ -52,7 +52,7 @@ export const useRestaurantMenusQuery = (restaurantId: number) => {
   });
 };
 
-export const useRestaurantReviewsQuery = (restaurantId: number, params: GetReviewsRequest) => {
+export const useRestaurantReviewsQuery = (restaurantId: string, params: GetReviewsRequest) => {
   return useQuery({
     queryKey: ['restaurant', restaurantId, 'reviews', params],
     queryFn: () => getRestaurantReviews(restaurantId, params),
@@ -60,7 +60,7 @@ export const useRestaurantReviewsQuery = (restaurantId: number, params: GetRevie
   });
 };
 
-export const useRestaurantInfoQuery = (restaurantId: number) => {
+export const useRestaurantInfoQuery = (restaurantId: string) => {
   return useQuery({
     queryKey: ['restaurant', restaurantId, 'info'],
     queryFn: () => getRestaurantInfo(restaurantId),
@@ -68,7 +68,7 @@ export const useRestaurantInfoQuery = (restaurantId: number) => {
   });
 };
 
-export const useAvailableSlotsQuery = (restaurantId: number, params: GetAvailableSlotsRequest) => {
+export const useAvailableSlotsQuery = (restaurantId: string, params: GetAvailableSlotsRequest) => {
   return useQuery({
     queryKey: ['restaurant', restaurantId, 'available-slots', params.date],
     queryFn: () => getAvailableSlots(restaurantId, params),
@@ -76,7 +76,7 @@ export const useAvailableSlotsQuery = (restaurantId: number, params: GetAvailabl
   });
 };
 
-export const useCreateReservationMutation = (restaurantId: number) => {
+export const useCreateReservationMutation = (restaurantId: string) => {
   return useMutation({
     mutationFn: (body: CreateReservationRequest) => createReservation(restaurantId, body),
   });
@@ -84,7 +84,7 @@ export const useCreateReservationMutation = (restaurantId: number) => {
 
 export const useToggleLikeMutation = () => {
   return useMutation({
-    mutationFn: (restaurantId: number) => toggleLike(restaurantId),
+    mutationFn: (restaurantId: string) => toggleLike(restaurantId),
   });
 };
 
