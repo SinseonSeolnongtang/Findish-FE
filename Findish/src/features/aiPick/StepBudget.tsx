@@ -1,5 +1,5 @@
-import { useRef, useCallback } from 'react';
-import StepLayout from './StepLayout';
+import { useRef, useCallback } from "react";
+import StepLayout from "./StepLayout";
 
 const MAX = 100000;
 const STEP = 1000;
@@ -31,15 +31,20 @@ export default function StepBudget({
       const rect = track.getBoundingClientRect();
 
       const valueFromX = (clientX: number) => {
-        const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        const pct = Math.max(
+          0,
+          Math.min(1, (clientX - rect.left) / rect.width),
+        );
         return Math.round((pct * MAX) / STEP) * STEP;
       };
 
       const clickVal = valueFromX(e.clientX);
-      const which: 'min' | 'max' =
-        Math.abs(clickVal - minBudget) <= Math.abs(clickVal - maxBudget) ? 'min' : 'max';
+      const which: "min" | "max" =
+        Math.abs(clickVal - minBudget) <= Math.abs(clickVal - maxBudget)
+          ? "min"
+          : "max";
 
-      if (which === 'min') {
+      if (which === "min") {
         onMinChange(Math.min(clickVal, maxBudget - STEP));
       } else {
         onMaxChange(Math.max(clickVal, minBudget + STEP));
@@ -49,7 +54,7 @@ export default function StepBudget({
 
       const onMove = (ev: PointerEvent) => {
         const v = valueFromX(ev.clientX);
-        if (which === 'min') {
+        if (which === "min") {
           onMinChange(Math.min(v, maxBudget - STEP));
         } else {
           onMaxChange(Math.max(v, minBudget + STEP));
@@ -57,12 +62,12 @@ export default function StepBudget({
       };
 
       const onUp = () => {
-        track.removeEventListener('pointermove', onMove);
-        track.removeEventListener('pointerup', onUp);
+        track.removeEventListener("pointermove", onMove);
+        track.removeEventListener("pointerup", onUp);
       };
 
-      track.addEventListener('pointermove', onMove);
-      track.addEventListener('pointerup', onUp);
+      track.addEventListener("pointermove", onMove);
+      track.addEventListener("pointerup", onUp);
     },
     [minBudget, maxBudget, onMinChange, onMaxChange],
   );
@@ -75,12 +80,14 @@ export default function StepBudget({
       onNext={onNext}
     >
       <div className="w-119 flex flex-col gap-2">
-        <p className="typo-body-lg text-neutral-900 text-center">1인당 금액</p>
+        <p className="typo-body-lg text-neutral-900 text-center pb-5">
+          1인당 금액
+        </p>
 
         <div
           ref={trackRef}
           className="relative h-8 flex items-center cursor-pointer"
-          style={{ touchAction: 'none' }}
+          style={{ touchAction: "none" }}
           onPointerDown={startDrag}
         >
           <div className="relative w-full h-1.75 rounded-full pointer-events-none">
@@ -101,17 +108,23 @@ export default function StepBudget({
         </div>
 
         <div className="relative h-6">
+          <span className="absolute -translate-x-1/2 typo-body-md text-neutral-400" style={{ left: "0%" }}>
+            0
+          </span>
+          <span className="absolute -translate-x-1/2 typo-body-md text-neutral-400" style={{ left: "100%" }}>
+            100,000
+          </span>
           <span
             className="absolute typo-body-md text-neutral-900 -translate-x-1/2"
             style={{ left: `${minPct}%` }}
           >
-            {minBudget.toLocaleString('ko-KR')}
+            {minBudget.toLocaleString("ko-KR")}
           </span>
           <span
             className="absolute typo-body-md text-neutral-900 -translate-x-1/2"
             style={{ left: `${maxPct}%` }}
           >
-            {maxBudget.toLocaleString('ko-KR')}
+            {maxBudget.toLocaleString("ko-KR")}
           </span>
         </div>
       </div>
