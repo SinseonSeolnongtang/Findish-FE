@@ -21,8 +21,8 @@ export default function StepLayout({
   children,
 }: Props) {
   return (
-    <div className="flex flex-col items-center h-full pt-35 pb-20">
-      <div className="flex flex-col items-center gap-30">
+    <div className="flex flex-col items-center flex-1 pt-30 pb-12">
+      <div className="flex flex-col items-center gap-30 w-full">
         <div className="text-center">
           <h1 className="typo-h2 font-bold text-neutral-900">{title}</h1>
           {subtitle && (
@@ -34,9 +34,7 @@ export default function StepLayout({
         {children}
       </div>
 
-      <div className="flex-1" />
-
-      <div className="flex gap-3">
+      <div className="flex gap-3 mt-auto">
         {onPrev && (
           <Button
             variant="outline"

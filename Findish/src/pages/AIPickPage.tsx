@@ -7,6 +7,7 @@ import StepSituation from '@/features/aiPick/StepSituation';
 import StepBudget from '@/features/aiPick/StepBudget';
 import StepFactors from '@/features/aiPick/StepFactors';
 import StepResult from '@/features/aiPick/StepResult';
+import StepProgressBar from '@/features/aiPick/StepProgressBar';
 import FriendList from '@/features/aiPick/FriendList';
 import { useCreatePresetMutation, useUpdatePresetMutation, usePresetDetailQuery } from '@/hooks/useAiPick';
 import type { AiPickSituation, AiPickPriority, AiPickRestaurantItem } from '@/types/aiPick';
@@ -21,6 +22,7 @@ interface ResultData {
 export default function AIPickPage() {
   const [view, setView] = useState<View>('home');
   const [presetStep, setPresetStep] = useState<1 | 2 | 3 | 4>(1);
+  const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
 
@@ -83,11 +85,13 @@ export default function AIPickPage() {
   };
 
   const handleNextStep = () => {
+    setDirection('forward');
     if (presetStep < 4) setPresetStep((s) => (s + 1) as 2 | 3 | 4);
     else handlePick();
   };
 
   const handlePrevStep = () => {
+    setDirection('backward');
     if (presetStep > 1) setPresetStep((s) => (s - 1) as 1 | 2 | 3);
   };
 
@@ -154,48 +158,53 @@ export default function AIPickPage() {
             </div>
           )}
 
-          {/* 프리셋 Step 1 — 동행인 */}
-          {view === 'preset' && presetStep === 1 && (
-            <StepCompanion
-              selected={companions}
-              onSelect={setCompanions}
-              onNext={handleNextStep}
-            />
-          )}
+          {/* 프리셋 — ProgressBar + Step */}
+          {view === 'preset' && (
+            <div className="flex flex-col h-full">
+              <StepProgressBar
+                key={presetStep}
+                currentStep={presetStep}
+                totalSteps={4}
+                direction={direction}
+              />
 
-          {/* 프리셋 Step 2 — 상황 */}
-          {view === 'preset' && presetStep === 2 && (
-            <StepSituation
-              selected={situation}
-              onSelect={setSituation}
-              onPrev={handlePrevStep}
-              onNext={handleNextStep}
-            />
-          )}
-
-          {/* 프리셋 Step 3 — 예산 */}
-          {view === 'preset' && presetStep === 3 && (
-            <StepBudget
-              minBudget={budgetMin}
-              maxBudget={budgetMax}
-              onMinChange={setBudgetMin}
-              onMaxChange={setBudgetMax}
-              onPrev={handlePrevStep}
-              onNext={handleNextStep}
-            />
-          )}
-
-          {/* 프리셋 Step 4 — 우선순위 (마지막 단계, 여기서 API 호출) */}
-          {view === 'preset' && presetStep === 4 && (
-            <StepFactors
-              selected={priorities}
-              onSelect={setPriorities}
-              additionalNote={additionalNote}
-              onNoteChange={setAdditionalNote}
-              onPrev={handlePrevStep}
-              onNext={handleNextStep}
-              loading={createPresetMutation.isPending || updatePresetMutation.isPending}
-            />
+              {presetStep === 1 && (
+                <StepCompanion
+                  selected={companions}
+                  onSelect={setCompanions}
+                  onNext={handleNextStep}
+                />
+              )}
+              {presetStep === 2 && (
+                <StepSituation
+                  selected={situation}
+                  onSelect={setSituation}
+                  onPrev={handlePrevStep}
+                  onNext={handleNextStep}
+                />
+              )}
+              {presetStep === 3 && (
+                <StepBudget
+                  minBudget={budgetMin}
+                  maxBudget={budgetMax}
+                  onMinChange={setBudgetMin}
+                  onMaxChange={setBudgetMax}
+                  onPrev={handlePrevStep}
+                  onNext={handleNextStep}
+                />
+              )}
+              {presetStep === 4 && (
+                <StepFactors
+                  selected={priorities}
+                  onSelect={setPriorities}
+                  additionalNote={additionalNote}
+                  onNoteChange={setAdditionalNote}
+                  onPrev={handlePrevStep}
+                  onNext={handleNextStep}
+                  loading={createPresetMutation.isPending || updatePresetMutation.isPending}
+                />
+              )}
+            </div>
           )}
 
           {/* 친구 관리 */}

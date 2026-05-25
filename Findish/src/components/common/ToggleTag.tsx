@@ -30,9 +30,9 @@ export default function ToggleTag({
       type="button"
       onClick={onClick}
       className={cn(
-        "inline-flex items-center justify-center gap-2.5 rounded-6 transition-colors whitespace-nowrap cursor-pointer hover:bg-orange-300",
+        "inline-flex items-center justify-center gap-2.5 rounded-6 transition-colors whitespace-nowrap cursor-pointer",
         SIZE_CLASS[size],
-        active ? "bg-primary text-white" : "bg-orange-100 text-primary-dark",
+        active ? "bg-primary text-white" : "bg-orange-100 text-primary-dark hover:bg-orange-300",
         className,
       )}
     >
