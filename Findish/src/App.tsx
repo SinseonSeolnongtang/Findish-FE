@@ -28,9 +28,9 @@ export default function App() {
           <Route path="/normal" element={<NormalModePage />} />
           <Route path="/pick" element={<PickModePage />} />
           <Route path="/compare" element={<ComparePage />} />
-          <Route path="/ai-pick" element={<AIPickPage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route element={<PrivateRoute />}>
+            <Route path="/ai-pick" element={<AIPickPage />} />
             <Route path="/mypage" element={<MyPage />} />
           </Route>
           <Route path="/about" element={<MapTestPage />} />
