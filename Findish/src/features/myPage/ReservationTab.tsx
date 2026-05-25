@@ -1,16 +1,22 @@
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 import Button from "@/components/common/Button";
 import ConfirmModal from "@/components/common/ConfirmModal";
-import { useMyReservationsQuery, useCancelReservationMutation } from "@/hooks/useMyPage";
+import {
+  useMyReservationsQuery,
+  useCancelReservationMutation,
+} from "@/hooks/useMyPage";
 import type { ReservationStatus, ReservationItem } from "@/types/myPage";
 
 type ReservationFilter = "방문예정" | "방문완료" | "취소/노쇼";
-const RESERVATION_FILTERS: ReservationFilter[] = ["방문예정", "방문완료", "취소/노쇼"];
+const RESERVATION_FILTERS: ReservationFilter[] = [
+  "방문예정",
+  "방문완료",
+  "취소/노쇼",
+];
 
 const FILTER_TO_STATUS: Record<ReservationFilter, ReservationStatus> = {
-  "방문예정": "PENDING",
-  "방문완료": "COMPLETED",
+  방문예정: "PENDING",
+  방문완료: "COMPLETED",
   "취소/노쇼": "CANCELLED",
 };
 
@@ -42,7 +48,9 @@ function ReservationCard({
 
       <div className="flex-1 flex flex-col gap-1.5 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <p className="typo-body-lg font-bold text-neutral-900">{item.restaurantName}</p>
+          <p className="typo-body-lg font-bold text-neutral-900">
+            {item.restaurantName}
+          </p>
           {item.status === "PENDING" && (
             <Button
               variant="outline"
@@ -69,7 +77,9 @@ function ReservationCard({
   );
 }
 
-export default function ReservationTab({ initialFilter = "방문예정" }: ReservationTabProps) {
+export default function ReservationTab({
+  initialFilter = "방문예정",
+}: ReservationTabProps) {
   const [filter, setFilter] = useState<ReservationFilter>(initialFilter);
   const [cancelTargetId, setCancelTargetId] = useState<string | null>(null);
 
@@ -79,7 +89,9 @@ export default function ReservationTab({ initialFilter = "방문예정" }: Reser
 
   const handleConfirmCancel = () => {
     if (cancelTargetId === null) return;
-    cancelReservation(cancelTargetId, { onSuccess: () => setCancelTargetId(null) });
+    cancelReservation(cancelTargetId, {
+      onSuccess: () => setCancelTargetId(null),
+    });
   };
 
   return (
@@ -95,29 +107,17 @@ export default function ReservationTab({ initialFilter = "방문예정" }: Reser
         />
       )}
 
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="typo-h2 text-neutral-900">예약 내역</h2>
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-primary border-primary hover:bg-orange-100 text-[18px] h-auto py-2"
-        >
-          예약 일자 ∨
-        </Button>
-      </div>
-
       <div className="flex items-center gap-4 mb-10">
         {RESERVATION_FILTERS.map((f) => (
-          <button
+          <Button
             key={f}
+            shape="pill"
+            size="sm"
+            variant={filter === f ? "primary" : "outline"}
             onClick={() => setFilter(f)}
-            className={cn(
-              "bg-orange-100 text-primary typo-body-lg px-7 py-2.5 rounded-3xl transition-colors cursor-pointer",
-              filter === f ? "border border-primary" : "border border-transparent",
-            )}
           >
             {f}
-          </button>
+          </Button>
         ))}
       </div>
 

@@ -27,15 +27,17 @@ const SUB_TAB_PARAM_MAP: Record<string, ReservationFilter> = {
 
 export default function MyPage() {
   const [searchParams] = useSearchParams();
-  const initialTab = TAB_PARAM_MAP[searchParams.get("tab") ?? ""] ?? "좋아요 내역";
-  const initialReservationFilter = SUB_TAB_PARAM_MAP[searchParams.get("subTab") ?? ""] ?? "방문예정";
+  const initialTab =
+    TAB_PARAM_MAP[searchParams.get("tab") ?? ""] ?? "좋아요 내역";
+  const initialReservationFilter =
+    SUB_TAB_PARAM_MAP[searchParams.get("subTab") ?? ""] ?? "방문예정";
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const { data, isLoading, isError } = useGetMeQuery();
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#FAFAFA]">
+      <div className="min-h-screen bg-neutral-100">
         <Header />
         <div className="flex items-center justify-center min-h-screen">
           <p className="typo-body-lg text-neutral-400">불러오는 중...</p>
@@ -46,28 +48,28 @@ export default function MyPage() {
 
   if (isError) {
     return (
-      <div className="min-h-screen bg-[#FAFAFA]">
+      <div className="min-h-screen bg-neutral-100">
         <Header />
         <div className="flex items-center justify-center min-h-screen">
-          <p className="typo-body-lg text-red-400">정보를 불러오지 못했습니다.</p>
+          <p className="typo-body-lg text-error">정보를 불러오지 못했습니다.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA]">
+    <div className="min-h-screen bg-neutral-100">
       <Header />
 
       <div className="pt-17 flex min-h-screen">
-        <aside className="w-44 bg-white border-r border-[#E5E7EB] py-8 px-4 shrink-0">
+        <aside className="w-44 bg-white border-r border-neutral-300 py-8 px-4 shrink-0">
           <nav className="flex flex-col gap-2">
             {TABS.map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={cn(
-                  "text-left text-[16px] py-2 px-2 rounded-lg transition-colors cursor-pointer",
+                  "text-left typo-body-md py-2 px-2 rounded-lg transition-colors cursor-pointer",
                   activeTab === tab
                     ? "text-primary font-medium"
                     : "text-neutral-900 hover:text-neutral-500",
@@ -81,34 +83,31 @@ export default function MyPage() {
 
         <main className="flex-1 px-8 py-8">
           {isEditingProfile && data ? (
-            <EditProfileTab user={data} onBack={() => setIsEditingProfile(false)} />
+            <EditProfileTab
+              user={data}
+              onBack={() => setIsEditingProfile(false)}
+            />
           ) : (
             <>
-              <div className="bg-white border border-[#E5E7EB] rounded-xl p-5 flex items-center gap-5 mb-8">
-                <div className="w-21.25 h-21.25 bg-[#F3F1EF] rounded-full flex items-center justify-center shrink-0">
-                  <svg
-                    width="36"
-                    height="36"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#99A1AF"
-                    strokeWidth="1.5"
-                  >
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
+              <div className="bg-white border border-neutral-300 rounded-6 p-5 flex items-center gap-5 mb-8">
+                <div className="w-20 h-20 bg-neutral-100 rounded-full flex items-center justify-center shrink-0">
+                  사람아이콘
                 </div>
                 <div className="flex-1">
-                  <p className="typo-t1-medium leading-9 text-neutral-900">
+                  <p className="typo-t2-medium leading-9 text-neutral-900">
                     {data?.name} 님, 안녕하세요
                   </p>
                   <p className="typo-body-sm text-neutral-400">{data?.email}</p>
                 </div>
-                <Button onClick={() => setIsEditingProfile(true)}>개인정보 수정</Button>
+                <Button onClick={() => setIsEditingProfile(true)} size="sm">
+                  수정하기
+                </Button>
               </div>
 
               {activeTab === "좋아요 내역" && <LikedTab />}
-              {activeTab === "예약 내역" && <ReservationTab initialFilter={initialReservationFilter} />}
+              {activeTab === "예약 내역" && (
+                <ReservationTab initialFilter={initialReservationFilter} />
+              )}
               {activeTab === "주문 내역" && <OrderTab />}
             </>
           )}

@@ -6,7 +6,10 @@ import type { OrderItem, OrderType } from "@/types/myPage";
 
 const ITEMS_PER_PAGE = 10;
 
-const ORDER_TYPE_BADGE: Record<OrderType, { label: string; className: string }> = {
+const ORDER_TYPE_BADGE: Record<
+  OrderType,
+  { label: string; className: string }
+> = {
   CART: { label: "장바구니", className: "bg-orange-100 text-primary" },
   AGENT: { label: "AI 에이전트", className: "bg-blue-100 text-blue-600" },
 };
@@ -16,35 +19,44 @@ function formatDate(isoString: string) {
   return `${d.getMonth() + 1}.${d.getDate()}`;
 }
 
-function OrderDetailView({ order, onBack }: { order: OrderItem; onBack: () => void }) {
+function OrderDetailView({
+  order,
+  onBack,
+}: {
+  order: OrderItem;
+  onBack: () => void;
+}) {
   return (
     <>
-      <div className="flex items-center gap-3 mb-5">
+      <div className="mb-5">
         <Button
           variant="ghost"
           size="sm"
           onClick={onBack}
-          className="h-auto p-1 text-neutral-500 hover:text-neutral-900"
+          className="h-auto p-1 mb-5 text-neutral-500 hover:text-neutral-900"
         >
           ← 뒤로
         </Button>
-        <h2 className="typo-h1 text-neutral-900">주문 상세</h2>
+        <h2 className="typo-body-lg text-neutral-900 mt-1">주문 상세</h2>
       </div>
-      <p className="typo-t1-medium text-neutral-900 mb-4">주문 메뉴</p>
+
       <div className="border border-primary rounded-[10px] overflow-hidden">
         {order.items.map((item, i) => (
           <div key={i}>
-            <div className="px-6 py-5">
-              <p className="typo-t1-medium text-neutral-900">{item.name}</p>
-              <p className="typo-t2 text-neutral-900 mt-1">
-                가격: {item.price.toLocaleString()}원
+            <div className="flex items-center px-5 py-4 gap-3">
+              <p className="typo-body-md text-neutral-900 flex-1">
+                {item.name}
               </p>
-              <p className="typo-t2 text-neutral-900 mt-1">
-                {(item.price * item.quantity).toLocaleString()}원{" "}
-                <span className="text-neutral-400">{item.quantity}개</span>
+              <p className="typo-body-md text-neutral-400 w-8 text-center shrink-0">
+                {item.quantity}
+              </p>
+              <p className="typo-body-md text-neutral-900 w-20 text-right shrink-0">
+                {(item.price * item.quantity).toLocaleString()}원
               </p>
             </div>
-            {i < order.items.length - 1 && <div className="border-t border-neutral-300" />}
+            {i < order.items.length - 1 && (
+              <div className="border-t border-neutral-300" />
+            )}
           </div>
         ))}
       </div>
@@ -64,40 +76,45 @@ function OrderCard({
   const badge = ORDER_TYPE_BADGE[order.orderType];
 
   return (
-    <div className="bg-white rounded-xl border border-neutral-300 flex gap-3 p-3">
-      <div className="w-30 h-30 shrink-0">
-        <img
-          src={order.thumbnailUrl}
-          alt={order.restaurantName}
-          className="w-full h-full object-cover rounded-2xl"
-        />
-      </div>
-
-      <div className="flex-1 flex flex-col gap-1.5 min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <p className="typo-body-lg font-bold text-neutral-900">{order.restaurantName}</p>
+    <div className="bg-white rounded-xl border border-neutral-300 flex gap-3 px-3 py-4">
+      <div className="flex-1 flex flex-col gap-3 min-w-0">
+        <div className="flex items-center gap-2">
+          <span
+            className={`typo-micro px-1.5 py-0.5 rounded-full font-medium ${badge.className}`}
+          >
+            {badge.label}
+          </span>
+          <p className="typo-micro text-neutral-400">
+            {formatDate(order.orderedAt)}
+          </p>
           <Button
             variant="primary"
             size="sm"
             onClick={onDetailClick}
-            className="shrink-0 typo-caption px-3 h-auto py-1 rounded-lg"
+            className="ml-auto shrink-0 typo-caption px-3 h-auto py-1 rounded-lg"
           >
             주문 상세
           </Button>
         </div>
-
-        <div className="flex items-center gap-2">
-          <p className="typo-micro text-neutral-400">{formatDate(order.orderedAt)}</p>
-          <span className={`typo-micro px-2 py-0.5 rounded-full font-medium ${badge.className}`}>
-            {badge.label}
-          </span>
+        <div className="flex items-start justify-between gap-2">
+          <p className="typo-body-lg font-bold text-neutral-900">
+            {order.restaurantName}
+          </p>
         </div>
 
         <div className="flex flex-col gap-0.5">
           {visibleItems.map((item, i) => (
-            <p key={i} className="typo-caption text-neutral-900">
-              {item.name} <span className="text-neutral-400">{item.quantity}개</span>
-            </p>
+            <div key={i} className="flex items-center gap-2">
+              <p className="typo-caption text-neutral-900 flex-1 min-w-0 truncate">
+                {item.name}
+              </p>
+              <p className="typo-caption text-neutral-400 w-6 text-center shrink-0">
+                {item.quantity}
+              </p>
+              <p className="typo-caption text-neutral-900 w-20 text-right shrink-0">
+                {(item.price * item.quantity).toLocaleString()}원
+              </p>
+            </div>
           ))}
         </div>
 
@@ -133,17 +150,16 @@ export default function OrderTab() {
     const selected = data.orders.find((o) => o.orderId === selectedOrderId);
     if (selected) {
       return (
-        <OrderDetailView order={selected} onBack={() => setSelectedOrderId(null)} />
+        <OrderDetailView
+          order={selected}
+          onBack={() => setSelectedOrderId(null)}
+        />
       );
     }
   }
 
   return (
     <>
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="typo-h2 text-neutral-900">주문 내역</h2>
-      </div>
-
       {!data || data.totalCount === 0 ? (
         <div className="flex flex-col items-center gap-5 py-16">
           <p className="typo-h1-medium text-neutral-900 text-center leading-tight">
