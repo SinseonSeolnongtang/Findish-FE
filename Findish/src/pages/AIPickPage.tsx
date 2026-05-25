@@ -6,7 +6,7 @@ import StepCompanion from '@/features/aiPick/StepCompanion';
 import StepSituation from '@/features/aiPick/StepSituation';
 import StepBudget from '@/features/aiPick/StepBudget';
 import StepFactors from '@/features/aiPick/StepFactors';
-import StepResult from '@/features/aiPick/StepResult';
+import StepResult, { type SelectedConditions } from '@/features/aiPick/StepResult';
 import StepProgressBar from '@/features/aiPick/StepProgressBar';
 import FriendList from '@/features/aiPick/FriendList';
 import { useCreatePresetMutation, useUpdatePresetMutation, usePresetDetailQuery } from '@/hooks/useAiPick';
@@ -15,7 +15,7 @@ import type { AiPickSituation, AiPickPriority, AiPickRestaurantItem } from '@/ty
 type View = 'home' | 'preset' | 'result' | 'friends';
 
 interface ResultData {
-  aiMessage: string;
+  title: string;
   restaurants: AiPickRestaurantItem[];
 }
 
@@ -69,7 +69,7 @@ export default function AIPickPage() {
         { presetId: selectedPresetId, body },
         {
           onSuccess: (data) => {
-            setResult({ aiMessage: data.aiMessage, restaurants: data.restaurants });
+            setResult({ title: data.title, restaurants: data.restaurants });
             setView('result');
           },
         },
@@ -77,7 +77,7 @@ export default function AIPickPage() {
     } else {
       createPresetMutation.mutate(body, {
         onSuccess: (data) => {
-          setResult({ aiMessage: data.aiMessage, restaurants: data.restaurants });
+          setResult({ title: data.title, restaurants: data.restaurants });
           setView('result');
         },
       });
@@ -118,8 +118,29 @@ export default function AIPickPage() {
   // 사이드바 히스토리 선택 시 presetDetail이 로드되면 표시
   const displayResult: ResultData | null =
     selectedPresetId !== null && presetDetail
-      ? { aiMessage: presetDetail.aiMessage, restaurants: presetDetail.restaurants }
+      ? { title: presetDetail.title, restaurants: presetDetail.restaurants }
       : result;
+
+  const displayConditions: SelectedConditions | undefined =
+    selectedPresetId !== null && presetDetail
+      ? {
+          situation: presetDetail.situation,
+          budgetMin: presetDetail.budgetMin,
+          budgetMax: presetDetail.budgetMax,
+          priorities: presetDetail.priorities,
+          extraCondition: presetDetail.extraCondition || undefined,
+          companionCount: presetDetail.friends.length > 0 ? presetDetail.friends.length : undefined,
+        }
+      : result
+        ? {
+            situation,
+            budgetMin,
+            budgetMax,
+            priorities,
+            extraCondition: additionalNote.trim() || undefined,
+            companionCount: companions.length > 0 ? companions.length : undefined,
+          }
+        : undefined;
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
@@ -213,8 +234,9 @@ export default function AIPickPage() {
           {/* 추천 결과 — 새 프리셋 또는 히스토리 상세 */}
           {view === 'result' && displayResult && (
             <StepResult
-              aiMessage={displayResult.aiMessage}
+              title={displayResult.title}
               restaurants={displayResult.restaurants}
+              conditions={displayConditions}
               onReset={handleReset}
             />
           )}

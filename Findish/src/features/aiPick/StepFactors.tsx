@@ -1,16 +1,8 @@
 import Input from "@/components/common/Input";
 import ToggleTag from "@/components/common/ToggleTag";
+import { PRIORITY_OPTIONS } from "@/constants/aiPick";
 import type { AiPickPriority } from "@/types/aiPick";
 import StepLayout from "./StepLayout";
-
-const FACTORS: { label: string; value: AiPickPriority }[] = [
-  { label: "맛", value: "TASTE" },
-  { label: "분위기", value: "ATMOSPHERE" },
-  { label: "가성비", value: "PRICE" },
-  { label: "청결도", value: "CLEANLINESS" },
-  { label: "서비스", value: "SERVICE" },
-  { label: "주차", value: "PARKING" },
-];
 
 interface Props {
   selected: AiPickPriority[];
@@ -46,7 +38,7 @@ export default function StepFactors({
     >
       <div className="w-full flex flex-col items-center gap-15">
         <div className="flex flex-wrap justify-center gap-2">
-          {FACTORS.map(({ label, value }) => {
+          {PRIORITY_OPTIONS.map(({ label, value }) => {
             const orderIndex = selected.indexOf(value);
             return (
               <ToggleTag
