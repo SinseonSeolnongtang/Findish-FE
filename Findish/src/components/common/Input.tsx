@@ -25,10 +25,10 @@ export default function Input({
       <div className="relative flex items-center w-full">
         <input
           className={cn(
-            "w-full h-14 px-4 rounded-[10px] border border-neutral-400 bg-white",
-            "typo-body-lg text-neutral-800 placeholder:text-neutral-400",
+            "w-full h-11 px-4 rounded-[10px] border border-neutral-400 bg-white",
+            "typo-body-md text-neutral-800 placeholder:text-neutral-400",
             "outline-none focus:border-primary transition-colors",
-            rightElement && "pr-32",
+            rightElement && "pr-28",
             className,
           )}
           {...props}
