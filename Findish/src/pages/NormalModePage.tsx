@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Header from "@/components/common/Header";
 import SearchBar from "@/components/common/SearchBar";
 import ChatbotFAB from "@/features/agent/ChatbotFAB";
@@ -10,6 +10,7 @@ import {
   useSearchRestaurantsQuery,
   useMyLikesQuery,
   useToggleLikeMutation,
+  useRestaurantBasicQuery,
 } from "@/hooks/useRestaurant";
 import type { StoreCardData } from "@/components/common/StoreCard";
 import type { SearchRestaurantItem } from "@/types/restaurant";
@@ -30,7 +31,11 @@ function toStoreCard(item: SearchRestaurantItem): StoreCardData {
 
 export default function NormalModePage() {
   const navigate = useNavigate();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const location = useLocation();
+  const locationState = location.state as { preSelectedStore?: StoreCardData; openReservation?: boolean } | null;
+  const preSelectedStore = locationState?.preSelectedStore ?? null;
+  const openReservation = locationState?.openReservation ?? false;
+  const [selectedId, setSelectedId] = useState<string | null>(preSelectedStore?.id ?? null);
   const [keyword, setKeyword] = useState("");
   // id → true(좋아요) / false(취소) 낙관적 오버라이드
   const [toggledIds, setToggledIds] = useState<Record<string, boolean>>({});
@@ -38,6 +43,18 @@ export default function NormalModePage() {
   const { data, isLoading } = useSearchRestaurantsQuery({ keyword });
   const { data: likesData } = useMyLikesQuery();
   const { mutate: toggleLikeMutate } = useToggleLikeMutation();
+
+  const { data: pinnedBasic } = useRestaurantBasicQuery(preSelectedStore?.id ?? "");
+  const pinnedStore: StoreCardData | null = preSelectedStore && pinnedBasic
+    ? {
+        ...preSelectedStore,
+        lat: pinnedBasic.lat,
+        lng: pinnedBasic.lng,
+        isOpen: pinnedBasic.isOpen,
+        reviewCount: String(pinnedBasic.reviewCount),
+        keywords: pinnedBasic.tags,
+      }
+    : null;
 
   const likedIds = useMemo(() => {
     const base = new Set<string>(
@@ -72,7 +89,8 @@ export default function NormalModePage() {
     [data],
   );
 
-  const selected = restaurants.find((r) => r.id === selectedId);
+  const selected = restaurants.find((r) => r.id === selectedId)
+    ?? (preSelectedStore?.id === selectedId ? preSelectedStore : null);
   const searched = !!keyword.trim();
 
   const handlePinClick = (id: string) => setSelectedId(id === selectedId ? null : id);
@@ -100,6 +118,7 @@ export default function NormalModePage() {
         selectedId={selectedId}
         onPinClick={handlePinClick}
         searched={searched && !isLoading}
+        pinnedStore={pinnedStore}
       />
 
       {searched && !isLoading && (
@@ -115,7 +134,7 @@ export default function NormalModePage() {
 
       {selected && (
         <div className="absolute right-0 top-17 bottom-0 w-95 bg-white shadow-[-4px_0px_12px_rgba(0,0,0,0.08)] z-20 rounded-tl-2xl overflow-hidden">
-          <StoreDetail store={selected} onClose={() => setSelectedId(null)} />
+          <StoreDetail store={selected} onClose={() => setSelectedId(null)} initialShowReservation={openReservation} />
         </div>
       )}
 

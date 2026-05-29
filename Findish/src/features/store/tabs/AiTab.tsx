@@ -6,15 +6,15 @@ import { useRestaurantAiSummaryQuery, useRestaurantMenusQuery } from "@/hooks/us
 
 interface AiTabProps {
   store: StoreCardData;
-  restaurantId: number;
+  restaurantId: string;
   onMoreClick?: () => void;
 }
 
 export default function AiTab({ store, restaurantId, onMoreClick }: AiTabProps) {
   const [selectedKeyword, setSelectedKeyword] = useState<string | null>(null);
 
-  const { data: aiData, isLoading: aiLoading } = useRestaurantAiSummaryQuery(String(restaurantId));
-  const { data: menuData, isLoading: menuLoading } = useRestaurantMenusQuery(String(restaurantId));
+  const { data: aiData, isLoading: aiLoading } = useRestaurantAiSummaryQuery(restaurantId);
+  const { data: menuData, isLoading: menuLoading } = useRestaurantMenusQuery(restaurantId);
 
   const positiveKeywords = aiData?.positiveKeywords ?? [];
   const negativeKeywords = aiData?.negativeKeywords ?? [];

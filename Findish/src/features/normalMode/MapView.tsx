@@ -8,6 +8,7 @@ interface MapViewProps {
   selectedId: string | null;
   onPinClick: (id: string) => void;
   searched: boolean;
+  pinnedStore?: StoreCardData | null;
 }
 
 function pinHtml(name: string, rating: number, imageUrl: string | undefined, isSelected: boolean): string {
@@ -27,10 +28,12 @@ export default function MapView({
   selectedId,
   onPinClick,
   searched,
+  pinnedStore,
 }: MapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<naver.maps.Map | null>(null);
   const markersRef = useRef<naver.maps.Marker[]>([]);
+  const pinnedMarkerRef = useRef<naver.maps.Marker | null>(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -70,6 +73,34 @@ export default function MapView({
   }, []);
 
   useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    pinnedMarkerRef.current?.setMap(null);
+    pinnedMarkerRef.current = null;
+
+    if (!pinnedStore || pinnedStore.lat == null || pinnedStore.lng == null) return;
+
+    const isSelected = selectedId === pinnedStore.id;
+    const alreadyInResults = searched && restaurants.some((r) => r.id === pinnedStore.id);
+    if (alreadyInResults) return;
+
+    const marker = new naver.maps.Marker({
+      position: new naver.maps.LatLng(pinnedStore.lat, pinnedStore.lng),
+      map,
+      title: pinnedStore.name,
+      icon: {
+        content: pinHtml(pinnedStore.name, pinnedStore.rating ?? 0, pinnedStore.imageUrl, isSelected),
+        anchor: new naver.maps.Point(46, 120),
+      },
+    });
+    marker.addListener("click", () => onPinClick(pinnedStore.id));
+    pinnedMarkerRef.current = marker;
+
+    map.setCenter(new naver.maps.LatLng(pinnedStore.lat, pinnedStore.lng));
+  }, [pinnedStore, selectedId, searched, restaurants, onPinClick]);
+
+  useEffect(() => {
     if (!mapRef.current) return;
 
     markersRef.current.forEach((m) => m.setMap(null));
@@ -86,7 +117,7 @@ export default function MapView({
         map: mapRef.current!,
         title: r.name,
         icon: {
-          content: pinHtml(r.name, r.rating, r.imageUrl, isSelected),
+          content: pinHtml(r.name, r.rating ?? 0, r.imageUrl, isSelected),
           anchor: new naver.maps.Point(46, 120),
         },
       });

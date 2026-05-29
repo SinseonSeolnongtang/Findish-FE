@@ -22,11 +22,12 @@ const TAB_LABELS: Record<TabType, string> = {
 interface StoreDetailProps {
   store: StoreCardData;
   onClose: () => void;
+  initialShowReservation?: boolean;
 }
 
-export default function StoreDetail({ store, onClose }: StoreDetailProps) {
+export default function StoreDetail({ store, onClose, initialShowReservation = false }: StoreDetailProps) {
   const [activeTab, setActiveTab] = useState<TabType>("ai");
-  const [showReservation, setShowReservation] = useState(false);
+  const [showReservation, setShowReservation] = useState(initialShowReservation);
 
   const restaurantId = store.id;
 
