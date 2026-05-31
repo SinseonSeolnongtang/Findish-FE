@@ -29,60 +29,65 @@ export default function PickModePage() {
   const [searched, setSearched] = useState(false);
 
   const { data: searchData, isLoading: searchLoading } = useExploreSearchQuery({ keyword: query });
-  const restaurants = searchData?.restaurants ?? [];
+  const restaurants = searchData?.data ?? [];
   const currentRestaurant = restaurants.length > 0
     ? restaurants[currentIdx % restaurants.length]
     : null;
 
-  const { data: cardSummary } = useCardSummaryQuery(currentRestaurant?.restaurantId ?? '');
+  const { data: aiSummary, isLoading: summaryLoading } = useCardSummaryQuery(currentRestaurant?.restaurantId ?? '');
   const { data: selectionsData } = useSelectionsQuery();
   const addMutation = useAddSelectionMutation();
   const removeMutation = useRemoveSelectionMutation();
 
+  const aiData = aiSummary?.data;
+  const thumbnail = currentRestaurant?.thumbnailUrl ?? "";
+  const distanceRaw = currentRestaurant?.distance;
+  const distanceLabel = distanceRaw != null
+    ? distanceRaw >= 1000
+      ? `${(distanceRaw / 1000).toFixed(1)}km`
+      : `${distanceRaw}m`
+    : "";
+
   const restaurant: Restaurant | null = currentRestaurant
     ? {
-        id: currentRestaurant.restaurantId,
-        name: currentRestaurant.name,
-        category: currentRestaurant.category,
-        distance:
-          currentRestaurant.distance >= 1000
-            ? `${(currentRestaurant.distance / 1000).toFixed(1)}km`
-            : `${currentRestaurant.distance}m`,
-        station: currentRestaurant.address,
-        priceRange: currentRestaurant.priceRange,
-        keywords: currentRestaurant.tags,
-        positiveKeywords: cardSummary?.taste.positiveKeywords ?? [],
-        negativeKeywords: cardSummary?.taste.negativeKeywords ?? [],
-        tasteSummary: cardSummary?.taste.summary ?? "",
-        vibeSummary: cardSummary?.atmosphere.summary ?? "",
-        serviceSummary: cardSummary?.service.summary ?? "",
-        imageUrl: currentRestaurant.imageUrls[0] ?? "",
-        tasteImages: currentRestaurant.imageUrls,
-        vibeImage: currentRestaurant.imageUrls[0] ?? "",
-        serviceImage: currentRestaurant.imageUrls[0] ?? "",
+        id: currentRestaurant.restaurantId as unknown as number,
+        name: currentRestaurant.name ?? "",
+        category: currentRestaurant.category ?? "",
+        distance: distanceLabel,
+        station: currentRestaurant.address ?? "",
+        priceRange: currentRestaurant.priceRange ?? "",
+        keywords: currentRestaurant.tags ?? [],
+        tasteSummary: aiData?.tasteSummary ?? "",
+        vibeSummary: aiData?.ambianceSummary ?? "",
+        serviceSummary: aiData?.serviceSummary ?? "",
+        imageUrl: thumbnail,
+        tasteImages: aiData?.tasteImages?.length ? aiData.tasteImages : (thumbnail ? [thumbnail] : []),
+        vibeImages: aiData?.moodImages?.length ? aiData.moodImages : (thumbnail ? [thumbnail] : []),
+        serviceImages: aiData?.serviceImages?.length ? aiData.serviceImages : (thumbnail ? [thumbnail] : []),
         currentIndex: currentIdx + 1,
-        total: searchData?.totalCount ?? 0,
+        total: searchData?.data?.length ?? 0,
         lat: currentRestaurant.lat,
         lng: currentRestaurant.lng,
       }
     : null;
 
-  const selectedCount = selectionsData?.selectedCount ?? 0;
-  const isCompleted = selectionsData?.isCompleted ?? false;
+  const selectionsPayload = selectionsData?.data;
+  const selectedCount = selectionsPayload?.selectedCount ?? 0;
+  const isCompleted = selectionsPayload?.isCompleted ?? false;
   const isAlreadySaved =
-    selectionsData?.selections.some(
+    selectionsPayload?.selections?.some(
       (s) => s.restaurantId === currentRestaurant?.restaurantId,
     ) ?? false;
 
   const slots: ({ restaurantId: string; thumbnailUrl: string } | null)[] = [null, null, null];
-  (selectionsData?.selections ?? []).forEach((s, i) => {
-    if (i < 3) slots[i] = { restaurantId: s.restaurantId, thumbnailUrl: s.thumbnailUrl };
+  (selectionsPayload?.selections ?? []).forEach((s, i) => {
+    if (i < 3) slots[i] = { restaurantId: s.restaurantId ?? "", thumbnailUrl: s.thumbnailUrl ?? "" };
   });
 
   const handleSave = () => {
     if (!currentRestaurant || isAlreadySaved || selectedCount >= 3) return;
     addMutation.mutate(
-      { restaurantId: currentRestaurant.restaurantId },
+      { naverPlaceId: currentRestaurant.restaurantId ?? "" },
       {
         onSuccess: () => {
           setCurrentIdx((i) => i + 1);
@@ -158,10 +163,20 @@ export default function PickModePage() {
               {/* 가게 카드 */}
               {restaurant && (
                 <div className="bg-[#fff7ed] rounded-[10px] shadow-[0px_4px_10px_0px_rgba(0,0,0,0.15)] border border-[#fff1df] flex flex-col overflow-hidden flex-1">
-                  {section === 0 && <HomeSection restaurant={restaurant} />}
-                  {section === 1 && <TasteSection restaurant={restaurant} />}
-                  {section === 2 && <VibeSection restaurant={restaurant} atmosphere={cardSummary?.atmosphere} />}
-                  {section === 3 && <ServiceSection restaurant={restaurant} service={cardSummary?.service} />}
+                  {summaryLoading ? (
+                    <div className="flex-1 flex flex-col gap-3 p-4">
+                      <div className="h-65 rounded-[10px] bg-neutral-200 animate-pulse" />
+                      <div className="h-4 rounded bg-neutral-200 animate-pulse w-3/4" />
+                      <div className="h-4 rounded bg-neutral-200 animate-pulse w-1/2" />
+                    </div>
+                  ) : (
+                    <>
+                      {section === 0 && <HomeSection restaurant={restaurant} />}
+                      {section === 1 && <TasteSection restaurant={restaurant} />}
+                      {section === 2 && <VibeSection restaurant={restaurant} />}
+                      {section === 3 && <ServiceSection restaurant={restaurant} />}
+                    </>
+                  )}
 
                   <div className="flex items-center justify-between px-4 pt-3 pb-4 shrink-0">
                     <button

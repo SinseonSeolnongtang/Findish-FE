@@ -1,4 +1,4 @@
-// ─── 0. 공통 ──────────────────────────────────────────────────────────────────
+// ─── 공통 유니언 타입 ─────────────────────────────────────────────────────────
 export type AgentIntent =
   | "RESERVATION"
   | "ORDER"
@@ -9,8 +9,6 @@ export type AgentIntent =
 
 export type AgentStep = "COLLECTING" | "CONFIRMING" | "COMPLETED";
 
-export type MessageRole = "USER" | "AGENT";
-
 // ─── 1. 챗 메시지 전송 ────────────────────────────────────────────────────────
 // POST /api/v1/agent/chat
 export interface SendMessageRequest {
@@ -19,27 +17,27 @@ export interface SendMessageRequest {
 }
 
 export interface AgentReservationInfo {
-  reservationId: string | null;
-  restaurantName: string;
-  date: string;
-  time: string;
-  partySize: number;
+  reservationId?: string;
+  restaurantName?: string;
+  date?: string;
+  time?: string;
+  partySize?: number;
 }
 
 export interface AgentMenuInfo {
-  menuId: string | null;
-  name: string;
-  price: number;
-  imageUrl: string;
+  menuId?: string;
+  name?: string;
+  price?: number;
+  imageUrl?: string;
 }
 
 export interface ChatResponse {
-  message: string;
-  intent: AgentIntent;
-  step: AgentStep;
-  targetId: string | null;
-  reservation: AgentReservationInfo | null;
-  menus: AgentMenuInfo[] | null;
+  message?: string;
+  intent?: string;
+  step?: string;
+  targetId?: string;
+  reservation?: AgentReservationInfo;
+  menus?: AgentMenuInfo[];
 }
 
 // ─── 2. 예약 확정 ─────────────────────────────────────────────────────────────
@@ -49,16 +47,13 @@ export interface ConfirmReservationRequest {
   date: string;
   time: string;
   partySize: number;
-  saveToCalendar: boolean;
 }
-
 export interface ConfirmReservationResponse {
-  reservationId: string;
-  restaurantName: string;
-  date: string;
-  time: string;
-  partySize: number;
-  calendarEventId: string | null;
+  reservationId?: string;
+  restaurantName?: string;
+  date?: string;
+  time?: string;
+  partySize?: number;
 }
 
 // ─── 3. 주문 확정 ─────────────────────────────────────────────────────────────
@@ -67,23 +62,15 @@ export interface ConfirmOrderItem {
   menuId: string;
   quantity: number;
 }
-
 export interface ConfirmOrderRequest {
   restaurantId: string;
   items: ConfirmOrderItem[];
 }
-
-export interface ConfirmedOrderItem {
-  name: string;
-  quantity: number;
-  price: number;
-}
-
 export interface ConfirmOrderResponse {
-  orderId: string;
-  restaurantName: string;
-  items: ConfirmedOrderItem[];
-  totalPrice: number;
+  orderId?: string;
+  restaurantName?: string;
+  items?: Array<{ name?: string; quantity?: number; price?: number }>;
+  totalPrice?: number;
 }
 
 // ─── 4. 대화 내역 조회 ────────────────────────────────────────────────────────
@@ -92,28 +79,19 @@ export interface GetChatHistoryRequest {
   page?: number;
   size?: number;
 }
+export type GetChatHistoryResponse = ChatResponse[];
 
-export interface ChatHistoryMessage {
-  role: MessageRole;
-  content: string;
-  createdAt: string;
-}
-
-export interface GetChatHistoryResponse {
-  messages: ChatHistoryMessage[];
-}
-
-// ─── 5. 예약 취소 ─────────────────────────────────────────────────────────────
+// ─── 3. 예약 취소 ─────────────────────────────────────────────────────────────
 // PATCH /api/v1/agent/reservations/{reservationId}/cancel
 export interface CancelReservationResponse {
-  reservationId: string;
-  status: "CANCELLED";
-  cancelReason: string;
+  reservationId?: string;
+  status?: string;
+  cancelReason?: string;
 }
 
-// ─── 6. 주문 취소 ─────────────────────────────────────────────────────────────
+// ─── 4. 주문 취소 ─────────────────────────────────────────────────────────────
 // PATCH /api/v1/agent/orders/{orderId}/cancel
 export interface CancelOrderResponse {
-  orderId: string;
-  status: "CANCELLED";
+  orderId?: string;
+  status?: string;
 }

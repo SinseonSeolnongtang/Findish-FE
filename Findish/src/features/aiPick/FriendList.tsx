@@ -8,31 +8,45 @@ import {
   useRespondFriendRequestMutation,
   useDeleteFriendMutation,
 } from '@/hooks/useAiPick';
+import { useSearchMemberMutation } from '@/hooks/useAuth';
 
 export default function FriendList() {
   const [loginId, setLoginId] = useState('');
   const [targetMemberId, setTargetMemberId] = useState<string | null>(null);
   const [targetName, setTargetName] = useState('');
+  const [searchError, setSearchError] = useState<string | null>(null);
 
   const { data, isLoading } = useFriendsQuery();
-  const friends = data?.friends ?? [];
+  const friends = data ?? [];
 
   const { data: receivedData, isLoading: receivedLoading } = useReceivedFriendRequestsQuery();
   const receivedRequests = receivedData ?? [];
 
+  const searchMemberMutation = useSearchMemberMutation();
   const requestFriendMutation = useRequestFriendMutation();
   const respondFriendRequestMutation = useRespondFriendRequestMutation();
   const deleteFriendMutation = useDeleteFriendMutation();
 
-  const handleRespond = (requestId: string, status: 'ACCEPTED' | 'REJECTED') => {
-    respondFriendRequestMutation.mutate({ requestId, body: { status } });
+  const isPending = searchMemberMutation.isPending || requestFriendMutation.isPending;
+
+  const handleRespond = (requestId: string, action: 'ACCEPT' | 'REJECT') => {
+    respondFriendRequestMutation.mutate({ requestId, body: { action } });
   };
 
   const handleRequest = () => {
     const trimmed = loginId.trim();
     if (!trimmed) return;
-    requestFriendMutation.mutate({ loginId: trimmed }, {
-      onSuccess: () => setLoginId(''),
+    setSearchError(null);
+    searchMemberMutation.mutate(trimmed, {
+      onSuccess: (member) => {
+        requestFriendMutation.mutate(
+          { receiverId: member.memberId },
+          { onSuccess: () => { setLoginId(''); alert('친구 요청을 성공적으로 보냈습니다.'); } },
+        );
+      },
+      onError: () => {
+        setSearchError('해당 아이디의 회원을 찾을 수 없습니다.');
+      },
     });
   };
 
@@ -50,24 +64,32 @@ export default function FriendList() {
       </div>
 
       {/* 친구 추가 입력 */}
-      <div className="flex gap-2 mb-8">
-        <input
-          type="text"
-          value={loginId}
-          onChange={(e) => setLoginId(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleRequest()}
-          placeholder="친구 아이디를 입력하세요"
-          className="flex-1 h-10 px-4 border border-neutral-200 rounded-lg typo-body-sm text-neutral-900 placeholder:text-neutral-400 outline-none focus:border-primary transition-colors"
-        />
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={handleRequest}
-          disabled={requestFriendMutation.isPending || !loginId.trim()}
-          className="typo-body-sm px-5"
-        >
-          {requestFriendMutation.isPending ? '요청 중...' : '요청'}
-        </Button>
+      <div className="flex flex-col gap-1.5 mb-8">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={loginId}
+            onChange={(e) => { setLoginId(e.target.value); setSearchError(null); }}
+            onKeyDown={(e) => e.key === 'Enter' && handleRequest()}
+            placeholder="친구 아이디를 입력하세요"
+            className="flex-1 h-10 px-4 border border-neutral-200 rounded-lg typo-body-sm text-neutral-900 placeholder:text-neutral-400 outline-none focus:border-primary transition-colors"
+          />
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleRequest}
+            disabled={isPending || !loginId.trim()}
+            className="typo-body-sm px-5"
+          >
+            {isPending ? '요청 중...' : '요청'}
+          </Button>
+        </div>
+        {searchError && (
+          <p className="typo-caption text-error px-1">{searchError}</p>
+        )}
+        {requestFriendMutation.isError && (
+          <p className="typo-caption text-error px-1">친구 요청에 실패했습니다.</p>
+        )}
       </div>
 
       {/* 받은 친구 요청 */}
@@ -91,7 +113,7 @@ export default function FriendList() {
                       size="sm"
                       className="typo-body-sm"
                       disabled={respondFriendRequestMutation.isPending}
-                      onClick={() => handleRespond(req.requestId, 'ACCEPTED')}
+                      onClick={() => handleRespond(req.requestId, 'ACCEPT')}
                     >
                       수락
                     </Button>
@@ -100,7 +122,7 @@ export default function FriendList() {
                       size="sm"
                       className="typo-body-sm"
                       disabled={respondFriendRequestMutation.isPending}
-                      onClick={() => handleRespond(req.requestId, 'REJECTED')}
+                      onClick={() => handleRespond(req.requestId, 'REJECT')}
                     >
                       거절
                     </Button>

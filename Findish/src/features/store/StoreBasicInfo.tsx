@@ -1,9 +1,31 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { type StoreCardData } from "@/components/common/StoreCard";
-import { useRestaurantBasicQuery } from "@/hooks/useRestaurant";
+import { useRestaurantBasicQuery, useRestaurantInfoQuery } from "@/hooks/useRestaurant";
 
 const DAYS = ["월", "화", "수", "목", "금", "토", "일"] as const;
+
+interface BusinessHour {
+  day: string;
+  hours: string;
+  is_24h: boolean;
+  breaktime: string | null;
+  is_closed: boolean;
+}
+
+function parseBusinessHours(raw: string): BusinessHour[] {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
+function formatHours(hour: BusinessHour): string {
+  if (hour.is_closed) return "휴무";
+  if (hour.is_24h) return "24시간";
+  return hour.hours;
+}
 
 interface StoreBasicInfoProps {
   store: StoreCardData;
@@ -11,14 +33,28 @@ interface StoreBasicInfoProps {
 }
 
 export default function StoreBasicInfo({ store, restaurantId }: StoreBasicInfoProps) {
+  const todayIndex = (new Date().getDay() + 6) % 7;
   const [hoursOpen, setHoursOpen] = useState(false);
-  const [activeDay, setActiveDay] = useState(2);
+  const [activeDay, setActiveDay] = useState(todayIndex);
 
-  const { data: restaurantData } = useRestaurantBasicQuery(restaurantId);
+  const { data: basicData } = useRestaurantBasicQuery(restaurantId);
+  const { data: infoData } = useRestaurantInfoQuery(restaurantId);
 
-  const isOpen = restaurantData?.isOpen ?? store.isOpen;
-  const reviewCount = restaurantData?.reviewCount ?? store.reviewCount;
-  const businessHours = restaurantData?.businessHours;
+  const isOpen = infoData?.data?.isOpen ?? basicData?.data?.isOpen ?? store.isOpen;
+  const reviewCount = infoData?.data?.reviewCount ?? basicData?.data?.reviewCount ?? store.reviewCount;
+  const priceRange = basicData?.data?.priceRange;
+
+  const businessHoursList = infoData?.data?.businessHours
+    ? parseBusinessHours(infoData.data.businessHours)
+    : [];
+
+  const todayHoursStr = businessHoursList[todayIndex]
+    ? formatHours(businessHoursList[todayIndex])
+    : null;
+
+  const selectedHoursStr = businessHoursList[activeDay]
+    ? formatHours(businessHoursList[activeDay])
+    : null;
 
   return (
     <div className="px-4 pt-4 pb-2">
@@ -36,10 +72,10 @@ export default function StoreBasicInfo({ store, restaurantId }: StoreBasicInfoPr
             <span className={cn("text-[12px] font-bold", isOpen ? "text-[#00A63E]" : "text-[#FF4500]")}>
               {isOpen ? "영업중" : "영업전"}
             </span>
-            {businessHours && (
+            {todayHoursStr && (
               <>
                 <div className="w-px h-3 bg-[#D1D5DC]" />
-                <span className="text-[12px] text-black">{businessHours}</span>
+                <span className="text-[12px] text-black">{todayHoursStr}</span>
               </>
             )}
             <button
@@ -74,8 +110,8 @@ export default function StoreBasicInfo({ store, restaurantId }: StoreBasicInfoPr
                 ))}
               </div>
               <div className="text-[10px] text-black">
-                {businessHours ? (
-                  <p className="font-bold">{businessHours}</p>
+                {selectedHoursStr ? (
+                  <p className="font-bold">{selectedHoursStr}</p>
                 ) : (
                   <p className="text-neutral-400">영업시간 정보 없음</p>
                 )}
@@ -90,17 +126,17 @@ export default function StoreBasicInfo({ store, restaurantId }: StoreBasicInfoPr
             <rect x="2.5" y="1.5" width="12" height="14" rx="1.5" stroke="#6A7282" strokeWidth="1.2" />
             <path d="M5 6h7M5 9h7M5 12h4" stroke="#6A7282" strokeWidth="1.2" strokeLinecap="round" />
           </svg>
-          <span className="text-[12px] text-[#6A7282]">리뷰 {reviewCount}</span>
+          <span className="text-[12px] text-[#6A7282]">리뷰 {reviewCount ?? 0}</span>
         </div>
 
         {/* 가격대 */}
-        {restaurantData?.priceRange && (
+        {priceRange && (
           <div className="flex items-center gap-1.5">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="shrink-0">
               <circle cx="7" cy="7" r="5.5" stroke="#6A7282" strokeWidth="1.1" />
               <path d="M7 4v6M5 8.5c0 .828.895 1.5 2 1.5s2-.672 2-1.5S8.105 7 7 7s-2-.672-2-1.5S5.895 4 7 4s2 .672 2 1.5" stroke="#6A7282" strokeWidth="1.1" strokeLinecap="round" />
             </svg>
-            <span className="text-[12px] text-[#6A7282]">{restaurantData.priceRange}</span>
+            <span className="text-[12px] text-[#6A7282]">{priceRange}</span>
           </div>
         )}
       </div>

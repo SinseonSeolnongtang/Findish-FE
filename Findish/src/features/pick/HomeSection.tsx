@@ -19,7 +19,9 @@ export default function HomeSection({ restaurant }: Props) {
           <div className="absolute bottom-4 left-4 right-4">
             <span className="typo-body-sm text-white leading-tight">{restaurant.category}</span>
             <h2 className="typo-h1 font-bold text-white leading-tight">{restaurant.name}</h2>
-            <p className="typo-body-md text-neutral-300 mt-0.5 leading-tight">{restaurant.vibeSummary}</p>
+            {restaurant.vibeSummary && (
+              <p className="typo-body-md text-neutral-300 mt-0.5 leading-tight">{restaurant.vibeSummary}</p>
+            )}
           </div>
         </div>
       </div>

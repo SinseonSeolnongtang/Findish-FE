@@ -2,6 +2,7 @@ import { useState } from "react";
 import MenuItem from "@/components/common/MenuItem";
 import { useRestaurantMenusQuery } from "@/hooks/useRestaurant";
 import { useAddToCartMutation } from "@/hooks/useCart";
+import type { MenuItem as MenuItemType } from "@/types/restaurant";
 
 interface MenuTabProps {
   restaurantId: string;
@@ -10,13 +11,20 @@ interface MenuTabProps {
 export default function MenuTab({ restaurantId }: MenuTabProps) {
   const { data, isLoading, isError } = useRestaurantMenusQuery(restaurantId);
   const { mutate: addToCart } = useAddToCartMutation();
-  const [addingMenuId, setAddingMenuId] = useState<string | null>(null);
+  const [addingName, setAddingName] = useState<string | null>(null);
 
-  const handleAdd = (menuId: string) => {
-    setAddingMenuId(menuId);
+  const handleAdd = (m: MenuItemType) => {
+    const key = m.name ?? "";
+    setAddingName(key);
     addToCart(
-      { restaurantId, menuId, quantity: 1 },
-      { onSettled: () => setAddingMenuId(null) },
+      {
+        naverPlaceId: restaurantId,
+        menuName: m.name ?? "",
+        price: Number(m.price?.replace(/[^0-9]/g, "") || 0),
+        quantity: 1,
+        imageUrl: m.imageUrl,
+      },
+      { onSettled: () => setAddingName(null) },
     );
   };
 
@@ -40,14 +48,14 @@ export default function MenuTab({ restaurantId }: MenuTabProps) {
 
   return (
     <div className="flex flex-col gap-3 p-4">
-      {data?.menus.map((m) => (
+      {data?.data?.map((m, i) => (
         <MenuItem
-          key={m.menuId}
-          name={m.name}
-          price={m.price}
+          key={m.name ?? i}
+          name={m.name ?? ""}
+          price={Number(m.price?.replace(/[^0-9]/g, "") || 0)}
           imageUrl={m.imageUrl}
-          isAdding={addingMenuId === m.menuId}
-          onAdd={() => handleAdd(m.menuId)}
+          isAdding={addingName === (m.name ?? "")}
+          onAdd={() => handleAdd(m)}
         />
       ))}
     </div>

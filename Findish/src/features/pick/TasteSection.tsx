@@ -1,4 +1,3 @@
-import Keyword from '@/components/common/Keyword';
 import ImageCarousel from './ImageCarousel';
 import type { Restaurant } from './types';
 
@@ -17,24 +16,6 @@ export default function TasteSection({ restaurant }: Props) {
         <div>
           <p className="typo-t2 font-bold text-neutral-900 mb-2">음식 퀄리티</p>
           <p className="typo-body-md text-neutral-600">{restaurant.tasteSummary}</p>
-        </div>
-        <div className="flex justify-between">
-          <div>
-            <p className="typo-body-sm font-bold text-neutral-500 mb-1.5">좋아요</p>
-            <div className="flex flex-wrap gap-1">
-              {restaurant.positiveKeywords.map((k) => (
-                <Keyword key={k} label={k} colored />
-              ))}
-            </div>
-          </div>
-          <div>
-            <p className="typo-body-sm font-bold text-neutral-500 mb-1.5">아쉬워요</p>
-            <div className="flex flex-wrap gap-1">
-              {restaurant.negativeKeywords.map((k) => (
-                <Keyword key={k} label={k} colored />
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </div>

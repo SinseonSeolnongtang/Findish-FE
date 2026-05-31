@@ -1,26 +1,20 @@
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Pagination from "@/components/common/Pagination";
 import StoreCard, { type StoreCardData } from "@/components/common/StoreCard";
-import { useMyLikesQuery, useToggleLikeMutation } from "@/hooks/useRestaurant";
+import { getMyLikes, toggleLike } from "@/api/restaurant";
 import type { LikedRestaurantItem } from "@/types/restaurant";
 
 const PAGE_SIZE = 10;
 
-const SORT_OPTIONS = [
-  { label: "최신순", value: "LATEST" },
-  { label: "오래된순", value: "OLDEST" },
-] as const;
-
-type SortLabel = (typeof SORT_OPTIONS)[number]["label"];
-
 function toStoreCardData(item: LikedRestaurantItem): StoreCardData {
   return {
-    id: item.restaurantId,
-    name: item.name,
-    category: item.category,
-    summary: item.address,
-    imageUrl: item.thumbnailUrl,
+    id: item.naverPlaceId ?? "",
+    name: item.naverPlaceId ?? "",
+    category: "",
+    summary: "",
+    imageUrl: "",
     isOpen: false,
     reviewCount: "",
     keywords: [],
@@ -29,46 +23,38 @@ function toStoreCardData(item: LikedRestaurantItem): StoreCardData {
 
 export default function LikedTab() {
   const [page, setPage] = useState(1);
-  const [sortLabel, setSortLabel] = useState<SortLabel>("최신순");
-
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const sortValue = SORT_OPTIONS.find((o) => o.label === sortLabel)!.value;
-  const queryParams = { sort: sortValue, page: page - 1, size: PAGE_SIZE };
 
-  const { data, isLoading } = useMyLikesQuery(queryParams);
-  const { mutate: toggleLike } = useToggleLikeMutation();
+  const { data, isLoading } = useQuery({
+    queryKey: ["likes", "me", page, PAGE_SIZE],
+    queryFn: ({ signal }) => getMyLikes({ page: page - 1, size: PAGE_SIZE }, signal),
+  });
 
-  const stores = (data?.restaurants ?? []).map(toStoreCardData);
-  const totalPages = Math.max(1, Math.ceil((data?.totalCount ?? 0) / PAGE_SIZE));
+  const { mutate: handleToggleLike } = useMutation({
+    mutationFn: (naverPlaceId: string) => toggleLike(naverPlaceId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["likes", "me"] });
+    },
+  });
 
-  const handleSortToggle = () => {
-    setSortLabel((s) => (s === "최신순" ? "오래된순" : "최신순"));
-    setPage(1);
-  };
-
-  const handleUnlike = (restaurantId: string) => {
-    toggleLike(restaurantId, {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["likes", "me"] });
-      },
-    });
-  };
+  const items = data?.data?.content ?? [];
+  const stores = items.map(toStoreCardData);
+  const totalPages = Math.max(
+    1,
+    Math.ceil((data?.data?.totalElements ?? 0) / PAGE_SIZE),
+  );
 
   return (
     <>
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="typo-h1 text-neutral-900">좋아요 내역</h2>
-        <button
-          onClick={handleSortToggle}
-          className="typo-body-lg text-primary border border-primary bg-white rounded-xl px-4.5 py-2 hover:bg-orange-100 transition-colors cursor-pointer"
-        >
-          {sortLabel} ∨
-        </button>
-      </div>
       {isLoading ? (
-        <p className="typo-body-md text-neutral-400 py-10 text-center">불러오는 중...</p>
+        <p className="typo-body-md text-neutral-400 py-10 text-center">
+          불러오는 중...
+        </p>
       ) : stores.length === 0 ? (
-        <p className="typo-body-md text-neutral-400 py-10 text-center">좋아요한 식당이 없습니다.</p>
+        <p className="typo-body-md text-neutral-400 py-10 text-center">
+          좋아요한 식당이 없습니다.
+        </p>
       ) : (
         <>
           <div className="grid grid-cols-2 gap-4">
@@ -77,7 +63,9 @@ export default function LikedTab() {
                 key={store.id}
                 store={store}
                 isFavorited={true}
-                onFavorite={() => handleUnlike(store.id)}
+                onClick={() => navigate("/normal", { state: { preSelectedStore: store } })}
+                onReserve={() => navigate("/normal", { state: { preSelectedStore: store, openReservation: true } })}
+                onFavorite={() => handleToggleLike(store.id)}
                 className="border border-neutral-300 rounded-xl overflow-hidden"
               />
             ))}

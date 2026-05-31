@@ -1,3 +1,18 @@
+// ─── 공통 탐색 식당 아이템 ────────────────────────────────────────────────────
+export interface ExploreRestaurantItem {
+  restaurantId?: string;
+  name?: string;
+  category?: string;
+  address?: string;
+  priceRange?: string;
+  reviewCount?: number;
+  distance?: number;
+  lat?: number;
+  lng?: number;
+  thumbnailUrl?: string;
+  tags?: string[];
+}
+
 // ─── 1. 자연어 검색 ──────────────────────────────────────────────────────────
 // GET /api/v1/explore/search
 export interface ExploreSearchRequest {
@@ -5,83 +20,70 @@ export interface ExploreSearchRequest {
   lat?: number;
   lng?: number;
 }
-export interface ExploreRestaurantItem {
-  restaurantId: string;
-  name: string;
-  category: string;
-  address: string;
-  distance: number;
-  priceRange: string;
-  lat: number;
-  lng: number;
-  imageUrls: string[];
-  tags: string[];
-}
-export interface ExploreSearchResponse {
-  totalCount: number;
-  restaurants: ExploreRestaurantItem[];
-}
+export type ExploreSearchResponse = ExploreRestaurantItem[];
 
 // ─── 2. 카드 AI 요약 조회 ────────────────────────────────────────────────────
-// GET /api/v1/explore/{restaurantId}/card-summary
-export interface CategorySummary {
-  summary: string;
-  positiveKeywords: string[];
-  negativeKeywords: string[];
-}
+// GET /api/v1/explore/{naverPlaceId}/card-summary
 export interface GetCardSummaryResponse {
-  taste: CategorySummary;
-  atmosphere: CategorySummary;
-  service: CategorySummary;
+  naverPlaceId?: string;
+  name?: string;
+  tasteSummary?: string;
+  moodSummary?: string | null;
+  serviceSummary?: string;
+  tasteImages?: string[];
+  moodImages?: string[];
+  serviceImages?: string[];
+  ambianceSummary?: string;
+  priceSummary?: string;
+  facilitySummary?: string;
+  waitingSummary?: string;
+  overallSummary?: string;
 }
 
 // ─── 3/4/5. 선택 공통 ────────────────────────────────────────────────────────
 // POST /api/v1/explore/selections
 // GET  /api/v1/explore/selections
-// DELETE /api/v1/explore/selections/{restaurantId}
+// DELETE /api/v1/explore/selections/{naverPlaceId}
 export interface AddSelectionRequest {
-  restaurantId: string;
-}
-export interface SelectionItem {
-  restaurantId: string;
-  name: string;
-  thumbnailUrl: string;
+  naverPlaceId: string;
 }
 export interface SelectionsResponse {
-  selectedCount: number;
-  isCompleted: boolean;
-  selections: SelectionItem[];
+  selections?: ExploreRestaurantItem[];
+  selectedCount?: number;
+  isCompleted?: boolean;
 }
 
 // ─── 6. 가게 비교 분석 ───────────────────────────────────────────────────────
 // GET /api/v1/explore/analysis
-export interface AnalysisTopKeyword {
-  keyword: string;
-  positiveRatio: number;
-  negativeRatio: number;
+export interface TopKeywordItem {
+  keyword?: string;
+  positiveRatio?: number;
+  negativeRatio?: number;
 }
-export interface AnalysisRestaurant {
-  restaurantId: string | null;
-  name: string;
-  category: string;
-  thumbnailUrl: string;
-  topKeywords: AnalysisTopKeyword[];
+export interface RestaurantCardItem {
+  restaurantId?: string;
+  name?: string;
+  category?: string;
+  thumbnailUrl?: string;
+  topKeywords?: TopKeywordItem[];
 }
 export interface AnalysisSummary {
-  commonText: string;
-  tradeOffText: string;
+  commonText?: string;
+  tradeOffText?: string;
 }
-export interface AnalysisKeywordScore {
-  restaurantId: string | null;
-  ratio: number;
-}
-export interface AnalysisKeyword {
-  keyword: string;
-  scores: AnalysisKeywordScore[];
+export interface KeywordScoreItem {
+  keyword?: string;
+  scores?: Array<{
+    restaurantId?: string;
+    ratio?: number;
+    positiveRatio?: number;
+    negativeRatio?: number;
+    sentimentLabel?: string;
+  }>;
 }
 export interface GetAnalysisResponse {
-  restaurants: AnalysisRestaurant[];
-  summary: AnalysisSummary;
-  commonKeywords: AnalysisKeyword[];
-  tradeOffKeywords: AnalysisKeyword[];
+  restaurants?: RestaurantCardItem[];
+  summary?: AnalysisSummary;
+  commonKeywords?: KeywordScoreItem[];
+  tradeOffKeywords?: KeywordScoreItem[];
 }

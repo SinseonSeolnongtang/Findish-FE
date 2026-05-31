@@ -1,4 +1,5 @@
 import axiosInstance from '@/lib/axiosInstance';
+import type { ApiResponse } from '@/types/auth';
 import type {
   CreateAiPickPresetRequest,
   CreateAiPickPresetResponse,
@@ -6,95 +7,74 @@ import type {
   UpdateAiPickPresetResponse,
   GetAiPickPresetsResponse,
   GetAiPickPresetDetailResponse,
-  GetFriendsResponse,
-  ReceivedFriendRequestItem,
+  FriendItem,
   SendFriendRequestBody,
   SendFriendRequestResponse,
+  ReceivedFriendRequestItem,
   ResolveFriendRequestBody,
   ResolveFriendRequestResponse,
   DeleteFriendResponse,
 } from '@/types/aiPick';
 
-// POST /api/v1/ai-pick/presets
-export const createPreset = async (
-  body: CreateAiPickPresetRequest,
-): Promise<CreateAiPickPresetResponse> => {
-  const { data } = await axiosInstance.post<CreateAiPickPresetResponse>(
-    '/api/v1/ai-pick/presets',
-    body,
-  );
-  return data;
-};
-
+// ─── 1. 프리셋 목록 조회 ──────────────────────────────────────────────────────
 // GET /api/v1/ai-pick/presets
-export const getPresetHistory = async (): Promise<GetAiPickPresetsResponse> => {
-  const { data } = await axiosInstance.get<GetAiPickPresetsResponse>('/api/v1/ai-pick/presets');
-  return data;
+export const getPresetHistory = async (signal?: AbortSignal) => {
+  const { data } = await axiosInstance.get<ApiResponse<GetAiPickPresetsResponse>>('/api/v1/ai-pick/presets', { signal });
+  return data.data;
 };
 
+// ─── 2. 프리셋 생성 ────────────────────────────────────────────────────────────
+// POST /api/v1/ai-pick/presets
+export const createPreset = async (body: CreateAiPickPresetRequest) => {
+  const { data } = await axiosInstance.post<ApiResponse<CreateAiPickPresetResponse>>('/api/v1/ai-pick/presets', body);
+  return data.data;
+};
+
+// ─── 3. 프리셋 상세 조회 ──────────────────────────────────────────────────────
 // GET /api/v1/ai-pick/presets/{presetId}
-export const getPresetDetail = async (
-  presetId: string,
-): Promise<GetAiPickPresetDetailResponse> => {
-  const { data } = await axiosInstance.get<GetAiPickPresetDetailResponse>(
-    `/api/v1/ai-pick/presets/${presetId}`,
-  );
-  return data;
+export const getPresetDetail = async (presetId: string, signal?: AbortSignal) => {
+  const { data } = await axiosInstance.get<ApiResponse<GetAiPickPresetDetailResponse>>(`/api/v1/ai-pick/presets/${presetId}`, { signal });
+  return data.data;
 };
 
+// ─── 4. 프리셋 수정 ────────────────────────────────────────────────────────────
 // PATCH /api/v1/ai-pick/presets/{presetId}
-export const updatePreset = async (
-  presetId: string,
-  body: UpdateAiPickPresetRequest,
-): Promise<UpdateAiPickPresetResponse> => {
-  const { data } = await axiosInstance.patch<UpdateAiPickPresetResponse>(
-    `/api/v1/ai-pick/presets/${presetId}`,
-    body,
-  );
-  return data;
+export const updatePreset = async (presetId: string, body: UpdateAiPickPresetRequest) => {
+  const { data } = await axiosInstance.patch<ApiResponse<UpdateAiPickPresetResponse>>(`/api/v1/ai-pick/presets/${presetId}`, body);
+  return data.data;
 };
 
+// ─── Friend 1. 친구 목록 조회 ─────────────────────────────────────────────────
 // GET /api/v1/friends
-export const getFriends = async (): Promise<GetFriendsResponse> => {
-  const { data } = await axiosInstance.get<GetFriendsResponse>('/api/v1/friends');
-  return data;
+export const getFriends = async (signal?: AbortSignal) => {
+  const { data } = await axiosInstance.get<ApiResponse<FriendItem[]>>('/api/v1/friends', { signal });
+  return data.data;
 };
 
-// GET /api/v1/friends/requests/received
-export const getReceivedFriendRequests = async (): Promise<ReceivedFriendRequestItem[]> => {
-  const { data } = await axiosInstance.get<ReceivedFriendRequestItem[]>(
-    '/api/v1/friends/requests/received',
-  );
-  return data;
-};
-
+// ─── Friend 2. 친구 요청 ──────────────────────────────────────────────────────
 // POST /api/v1/friends/requests
-export const requestFriend = async (
-  body: SendFriendRequestBody,
-): Promise<SendFriendRequestResponse> => {
-  const { data } = await axiosInstance.post<SendFriendRequestResponse>(
-    '/api/v1/friends/requests',
-    body,
-  );
-  return data;
+export const requestFriend = async (body: SendFriendRequestBody) => {
+  const { data } = await axiosInstance.post<ApiResponse<SendFriendRequestResponse>>('/api/v1/friends/requests', body);
+  return data.data;
 };
 
+// ─── Friend 3. 받은 친구 요청 목록 조회 ───────────────────────────────────────
+// GET /api/v1/friends/requests/received
+export const getReceivedFriendRequests = async (signal?: AbortSignal) => {
+  const { data } = await axiosInstance.get<ApiResponse<ReceivedFriendRequestItem[]>>('/api/v1/friends/requests/received', { signal });
+  return data.data;
+};
+
+// ─── Friend 4. 친구 요청 수락/거절 ────────────────────────────────────────────
 // PATCH /api/v1/friends/requests/{requestId}
-export const respondFriendRequest = async (
-  requestId: string,
-  body: ResolveFriendRequestBody,
-): Promise<ResolveFriendRequestResponse> => {
-  const { data } = await axiosInstance.patch<ResolveFriendRequestResponse>(
-    `/api/v1/friends/requests/${requestId}`,
-    body,
-  );
-  return data;
+export const respondFriendRequest = async (requestId: string, body: ResolveFriendRequestBody) => {
+  const { data } = await axiosInstance.patch<ApiResponse<ResolveFriendRequestResponse>>(`/api/v1/friends/requests/${requestId}`, body);
+  return data.data;
 };
 
+// ─── Friend 5. 친구 삭제 ──────────────────────────────────────────────────────
 // DELETE /api/v1/friends/{memberId}
-export const deleteFriend = async (memberId: string): Promise<DeleteFriendResponse> => {
-  const { data } = await axiosInstance.delete<DeleteFriendResponse>(
-    `/api/v1/friends/${memberId}`,
-  );
-  return data;
+export const deleteFriend = async (memberId: string) => {
+  const { data } = await axiosInstance.delete<ApiResponse<DeleteFriendResponse>>(`/api/v1/friends/${memberId}`);
+  return data.data;
 };

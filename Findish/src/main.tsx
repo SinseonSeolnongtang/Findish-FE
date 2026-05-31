@@ -3,24 +3,8 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 
-async function prepare() {
-  if (import.meta.env.DEV) {
-    const { worker } = await import('./mocks/browser');
-    await worker.start({
-      onUnhandledRequest(request, print) {
-        const { pathname } = new URL(request.url);
-        if (pathname.startsWith('/api/')) {
-          print.warning();
-        }
-      },
-    });
-  }
-}
-
-prepare().then(() => {
-  createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-      <App />
-    </StrictMode>,
-  );
-});
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+);

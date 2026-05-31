@@ -27,7 +27,7 @@ const RECEIVED_REQUESTS_KEY = ['received-friend-requests'] as const;
 export const usePresetHistoryQuery = () => {
   return useQuery({
     queryKey: PRESET_HISTORY_KEY,
-    queryFn: getPresetHistory,
+    queryFn: ({ signal }) => getPresetHistory(signal),
   });
 };
 
@@ -35,7 +35,7 @@ export const usePresetHistoryQuery = () => {
 export const usePresetDetailQuery = (presetId: string) => {
   return useQuery({
     queryKey: ['preset-detail', presetId],
-    queryFn: () => getPresetDetail(presetId),
+    queryFn: ({ signal }) => getPresetDetail(presetId, signal),
     enabled: !!presetId,
   });
 };
@@ -44,7 +44,7 @@ export const usePresetDetailQuery = (presetId: string) => {
 export const useFriendsQuery = () => {
   return useQuery({
     queryKey: FRIENDS_KEY,
-    queryFn: getFriends,
+    queryFn: ({ signal }) => getFriends(signal),
   });
 };
 
@@ -52,7 +52,7 @@ export const useFriendsQuery = () => {
 export const useReceivedFriendRequestsQuery = () => {
   return useQuery({
     queryKey: RECEIVED_REQUESTS_KEY,
-    queryFn: getReceivedFriendRequests,
+    queryFn: ({ signal }) => getReceivedFriendRequests(signal),
   });
 };
 

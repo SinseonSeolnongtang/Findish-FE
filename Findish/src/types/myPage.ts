@@ -1,72 +1,65 @@
-// ─── 공통 ─────────────────────────────────────────────────────────────────────
-
-export type ReservationStatus = 'PENDING' | 'COMPLETED' | 'CANCELLED';
-export type CancelReason = 'USER_CANCEL' | 'NO_SHOW';
-export type OrderType = 'CART' | 'AGENT';
-
 // ─── 1. 예약 내역 목록 조회 ───────────────────────────────────────────────────
 // GET /api/v1/members/me/reservations
-
 export interface GetReservationsRequest {
-  status: ReservationStatus;
+  status?: string;
   page?: number;
   size?: number;
 }
-
 export interface ReservationItem {
-  reservationId: string;
-  restaurantId: string;
-  restaurantName: string;
-  thumbnailUrl: string;
-  date: string;
-  time: string;
-  partySize: number;
-  status: ReservationStatus;
-  cancelReason: CancelReason | null;
+  reservationId?: string;
+  naverPlaceId?: string;
+  date?: string;
+  time?: string;
+  partySize?: number;
+  status?: string;
 }
-
 export interface ReservationsResponse {
-  totalCount: number;
-  reservations: ReservationItem[];
+  totalElements?: number;
+  totalPages?: number;
+  content?: ReservationItem[];
 }
 
 // ─── 2. 예약 취소 ─────────────────────────────────────────────────────────────
-// DELETE /api/v1/members/me/reservations/{reservationId}
-
-export interface CancelReservationResponse {
-  reservationId: string;
-  status: 'CANCELLED';
-  cancelReason: 'USER_CANCEL';
-}
+// PATCH /api/v1/members/me/reservations/{reservationId}/cancel
+export type CancelReservationResponse = ReservationItem;
 
 // ─── 3. 주문 내역 목록 조회 ───────────────────────────────────────────────────
 // GET /api/v1/members/me/orders
-
 export interface GetOrdersRequest {
-  orderType?: OrderType;
-  sort?: string;
   page?: number;
   size?: number;
 }
-
-export interface OrderMenuItem {
-  name: string;
-  quantity: number;
-  price: number;
+export interface OrderItemInfo {
+  menuName?: string;
+  quantity?: number;
+  price?: number;
 }
-
 export interface OrderItem {
-  orderId: number;
-  restaurantId: number;
-  restaurantName: string;
-  thumbnailUrl: string;
-  items: OrderMenuItem[];
-  totalPrice: number;
-  orderType: OrderType;
-  orderedAt: string;
+  orderId?: string;
+  naverPlaceId?: string;
+  items?: OrderItemInfo[];
+  totalPrice?: number;
+  status?: string;
+  orderedAt?: string;
+}
+export interface OrdersResponse {
+  totalElements?: number;
+  totalPages?: number;
+  content?: OrderItem[];
 }
 
-export interface OrdersResponse {
-  totalCount: number;
-  orders: OrderItem[];
+// ─── 4. 좋아요 목록 조회 ──────────────────────────────────────────────────────
+// GET /api/v1/members/me/likes
+export interface GetLikesRequest {
+  page?: number;
+  size?: number;
+}
+export interface LikeItem {
+  naverPlaceId?: string;
+  likedAt?: string;
+}
+export interface LikesResponse {
+  totalElements?: number;
+  totalPages?: number;
+  content?: LikeItem[];
 }
