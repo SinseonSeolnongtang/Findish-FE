@@ -3,19 +3,14 @@ import { Link } from "react-router-dom";
 import chatbotUrl from "@/assets/chatbot.svg?url";
 import CloseIcon from "@/assets/icons/common/close_lg.svg?react";
 import MainMenuCard from "@/components/common/MainMenuCard";
-import {
-  useSendMessageMutation,
-  useConfirmReservationMutation,
-  useConfirmOrderMutation,
-  useCancelReservationMutation,
-  useCancelOrderMutation,
-} from "@/hooks/useAgent";
+import { useSendMessageMutation } from "@/hooks/useAgent";
 import { useAuthStore } from "@/stores/authStore";
 import type {
   AgentIntent,
   AgentStep,
   AgentReservationInfo,
   AgentMenuInfo,
+  ChatResponse,
 } from "@/types/agent";
 
 interface LocalMessage {
@@ -35,14 +30,11 @@ interface ChatbotModalProps {
   onClose: () => void;
 }
 
-function AgentLinkMessage({ message, to, linkText }: { message: string; to: string; linkText: string }) {
+function CompletionLink({ to, label }: { to: string; label: string }) {
   return (
-    <div className="typo-body-sm text-neutral-900">
-      <p>{message}</p>
-      <Link to={to} className="typo-body-sm text-neutral-500 mt-1 block hover:underline">
-        {linkText} &gt;
-      </Link>
-    </div>
+    <Link to={to} className="typo-body-sm text-neutral-500 mt-1.5 block hover:underline">
+      {label} &gt;
+    </Link>
   );
 }
 
@@ -87,9 +79,9 @@ function MenuSlider({ menus }: { menus: AgentMenuInfo[] }) {
   return (
     <div className="relative mt-3">
       <div ref={scrollRef} className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-        {menus.map((menu) => (
+        {menus.map((menu, idx) => (
           <MainMenuCard
-            key={menu.menuId}
+            key={menu.menuId ?? idx}
             name={menu.name}
             price={menu.price}
             imageUrl={menu.imageUrl}
@@ -110,6 +102,14 @@ function MenuSlider({ menus }: { menus: AgentMenuInfo[] }) {
   );
 }
 
+function buildMessageType(intent?: AgentIntent, step?: AgentStep): LocalMessage["messageType"] | undefined {
+  if (step !== "COMPLETED") return undefined;
+  if (intent === "RESERVATION") return "reservation_complete";
+  if (intent === "ORDER") return "order_complete";
+  if (intent === "CANCEL_RESERVATION") return "reservation_cancelled";
+  return undefined;
+}
+
 export default function ChatbotModal({ onClose }: ChatbotModalProps) {
   const [messages, setMessages] = useState<LocalMessage[]>([]);
   const [input, setInput] = useState("");
@@ -117,24 +117,35 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
   const idPrefix = useId();
   const nextId = useRef(0);
   const makeId = () => `${idPrefix}-${nextId.current++}`;
-  const activeRestaurantId = useRef<string>('');
+  const activeRestaurantId = useRef<string>("");
 
   const sendMutation = useSendMessageMutation();
-  const confirmReservationMutation = useConfirmReservationMutation();
-  const confirmOrderMutation = useConfirmOrderMutation();
-  const cancelReservationMutation = useCancelReservationMutation();
-  const cancelOrderMutation = useCancelOrderMutation();
-
   const isPending = sendMutation.isPending;
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
 
-  // 새 메시지마다 하단 자동 스크롤
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isPending]);
 
   const addAgentMessage = (text: string) => {
     setMessages((prev) => [...prev, { id: makeId(), role: "agent", text }]);
+  };
+
+  const appendAgentResponse = (res: ChatResponse) => {
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: makeId(),
+        role: "agent",
+        text: res.message ?? "",
+        intent: res.intent,
+        step: res.step,
+        targetId: res.targetId,
+        reservation: res.reservation,
+        menus: res.menus,
+        messageType: buildMessageType(res.intent, res.step),
+      },
+    ]);
   };
 
   const markConfirmed = (id: string) => {
@@ -153,27 +164,14 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
     sendMutation.mutate(
       { message: text, restaurantId: activeRestaurantId.current || undefined },
       {
-        onSuccess: (res) => {
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: makeId(),
-              role: "agent",
-              text: res.data.message ?? "",
-              intent: res.data.intent as AgentIntent | undefined,
-              step: res.data.step as AgentStep | undefined,
-              targetId: res.data.targetId,
-              reservation: res.data.reservation,
-              menus: res.data.menus,
-            },
-          ]);
-        },
-        onError: () =>
-          addAgentMessage("응답을 받지 못했습니다. 다시 시도해 주세요."),
+        onSuccess: (res) => appendAgentResponse(res.data),
+        onError: () => addAgentMessage("응답을 받지 못했습니다. 다시 시도해 주세요."),
       },
     );
   };
 
+  // 에이전트가 CONFIRMING 단계에서 보여주는 "확인" 버튼:
+  // "네"를 메시지로 전송해 에이전트가 예약/주문/취소를 처리하도록 위임
   const handleConfirm = (msg: LocalMessage) => {
     markConfirmed(msg.id);
 
@@ -185,63 +183,15 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
       return;
     }
 
-    if (msg.intent === "RESERVATION" && msg.reservation) {
-      confirmReservationMutation.mutate(
-        {
-          restaurantId: activeRestaurantId.current,
-          date: msg.reservation.date,
-          time: msg.reservation.time,
-          partySize: msg.reservation.partySize,
-          saveToCalendar: false,
-        },
-        {
-          onSuccess: () =>
-            setMessages((prev) => [
-              ...prev,
-              { id: makeId(), role: "agent", text: "", messageType: "reservation_complete" },
-            ]),
-          onError: () => addAgentMessage("예약 처리 중 오류가 발생했습니다."),
-        },
-      );
-      return;
-    }
+    setMessages((prev) => [...prev, { id: makeId(), role: "user", text: "네" }]);
 
-    if (msg.intent === "ORDER" && msg.menus) {
-      confirmOrderMutation.mutate(
-        {
-          restaurantId: activeRestaurantId.current,
-          items: msg.menus.filter((m): m is typeof m & { menuId: string } => m.menuId !== null).map((m) => ({ menuId: m.menuId, quantity: 1 })),
-        },
-        {
-          onSuccess: () =>
-            setMessages((prev) => [
-              ...prev,
-              { id: makeId(), role: "agent", text: "", messageType: "order_complete" },
-            ]),
-          onError: () => addAgentMessage("주문 처리 중 오류가 발생했습니다."),
-        },
-      );
-      return;
-    }
-
-    if (msg.intent === "CANCEL_RESERVATION" && msg.targetId != null) {
-      cancelReservationMutation.mutate(msg.targetId, {
-        onSuccess: () =>
-          setMessages((prev) => [
-            ...prev,
-            { id: makeId(), role: "agent", text: "", messageType: "reservation_cancelled" },
-          ]),
-        onError: () => addAgentMessage("취소 처리 중 오류가 발생했습니다."),
-      });
-      return;
-    }
-
-    if (msg.intent === "CANCEL_ORDER" && msg.targetId != null) {
-      cancelOrderMutation.mutate(msg.targetId, {
-        onSuccess: () => addAgentMessage("주문이 취소되었습니다."),
-        onError: () => addAgentMessage("취소 처리 중 오류가 발생했습니다."),
-      });
-    }
+    sendMutation.mutate(
+      { message: "네", restaurantId: activeRestaurantId.current || undefined },
+      {
+        onSuccess: (res) => appendAgentResponse(res.data),
+        onError: () => addAgentMessage("응답을 받지 못했습니다. 다시 시도해 주세요."),
+      },
+    );
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -286,11 +236,7 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
             className={`flex ${msg.role === "user" ? "justify-end" : "justify-start items-center gap-2"}`}
           >
             {msg.role === "agent" && (
-              <img
-                src={chatbotUrl}
-                alt=""
-                className="w-8 h-8 shrink-0"
-              />
+              <img src={chatbotUrl} alt="" className="w-8 h-8 shrink-0" />
             )}
 
             {msg.role === "user" ? (
@@ -300,32 +246,24 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
             ) : (
               <div className="max-w-[80%]">
                 {msg.messageType === "login_required" ? (
-                  <AgentLinkMessage
-                    message="주문/예약을 원하신다면 로그인을 먼저 진행해주세요!"
-                    to="/login"
-                    linkText="로그인/회원가입 바로가기"
-                  />
-                ) : msg.messageType === "reservation_complete" ? (
-                  <AgentLinkMessage
-                    message="예약 완료했습니다!"
-                    to="/mypage?tab=reservation"
-                    linkText="예약 내역 보러가기"
-                  />
-                ) : msg.messageType === "reservation_cancelled" ? (
-                  <AgentLinkMessage
-                    message="예약이 취소되었습니다."
-                    to="/mypage?tab=reservation&subTab=cancelled"
-                    linkText="예약 내역 바로가기"
-                  />
-                ) : msg.messageType === "order_complete" ? (
-                  <AgentLinkMessage
-                    message="주문 완료했습니다!"
-                    to="/mypage?tab=order"
-                    linkText="주문 내역 보러가기"
-                  />
+                  <div className="typo-body-sm text-neutral-900">
+                    <p>주문/예약을 원하신다면 로그인을 먼저 진행해주세요!</p>
+                    <CompletionLink to="/login" label="로그인/회원가입 바로가기" />
+                  </div>
                 ) : (
                   <>
                     <AgentText text={msg.text} />
+
+                    {/* 완료 시 마이페이지 바로가기 링크 */}
+                    {msg.messageType === "reservation_complete" && (
+                      <CompletionLink to="/mypage?tab=reservation" label="예약 내역 보러가기" />
+                    )}
+                    {msg.messageType === "reservation_cancelled" && (
+                      <CompletionLink to="/mypage?tab=reservation&subTab=cancelled" label="예약 내역 바로가기" />
+                    )}
+                    {msg.messageType === "order_complete" && (
+                      <CompletionLink to="/mypage?tab=order" label="주문 내역 보러가기" />
+                    )}
 
                     {/* 메뉴 슬라이더: 추천 또는 주문 요청 */}
                     {(msg.intent === "MENU_RECOMMEND" || msg.intent === "ORDER") &&
@@ -343,7 +281,6 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
                           확인
                         </button>
                       )}
-
                   </>
                 )}
               </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "@/components/common/Button";
 import Header from "@/components/common/Header";
@@ -21,12 +21,16 @@ import {
   useRemoveSelectionMutation,
 } from "@/hooks/useExplore";
 
+type SlotItem = { restaurantId: string; thumbnailUrl: string };
+
 export default function PickModePage() {
   const navigate = useNavigate();
   const [section, setSection] = useState(0);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [query, setQuery] = useState("");
   const [searched, setSearched] = useState(false);
+  const [localSelections, setLocalSelections] = useState<SlotItem[]>([]);
+  const serverSyncedRef = useRef(false);
 
   const { data: searchData, isLoading: searchLoading } = useExploreSearchQuery({ keyword: query });
   const restaurants = searchData?.data ?? [];
@@ -38,6 +42,22 @@ export default function PickModePage() {
   const { data: selectionsData } = useSelectionsQuery();
   const addMutation = useAddSelectionMutation();
   const removeMutation = useRemoveSelectionMutation();
+
+  // 서버에서 기존 저장 목록을 최초 1회 동기화
+  useEffect(() => {
+    if (selectionsData?.data?.selections && !serverSyncedRef.current) {
+      serverSyncedRef.current = true;
+      setLocalSelections(
+        selectionsData.data.selections
+          .filter((s) => s.restaurantId)
+          .slice(0, 3)
+          .map((s) => ({
+            restaurantId: s.restaurantId!,
+            thumbnailUrl: s.thumbnailUrl ?? "",
+          }))
+      );
+    }
+  }, [selectionsData]);
 
   const aiData = aiSummary?.data;
   const thumbnail = currentRestaurant?.thumbnailUrl ?? "";
@@ -71,21 +91,24 @@ export default function PickModePage() {
       }
     : null;
 
-  const selectionsPayload = selectionsData?.data;
-  const selectedCount = selectionsPayload?.selectedCount ?? 0;
-  const isCompleted = selectionsPayload?.isCompleted ?? false;
-  const isAlreadySaved =
-    selectionsPayload?.selections?.some(
-      (s) => s.restaurantId === currentRestaurant?.restaurantId,
-    ) ?? false;
+  const isAlreadySaved = localSelections.some(
+    (s) => s.restaurantId === currentRestaurant?.restaurantId
+  );
+  const localSelectedCount = localSelections.length;
+  const isCompleted = localSelectedCount >= 3;
 
-  const slots: ({ restaurantId: string; thumbnailUrl: string } | null)[] = [null, null, null];
-  (selectionsPayload?.selections ?? []).forEach((s, i) => {
-    if (i < 3) slots[i] = { restaurantId: s.restaurantId ?? "", thumbnailUrl: s.thumbnailUrl ?? "" };
+  const slots: (SlotItem | null)[] = [null, null, null];
+  localSelections.forEach((s, i) => {
+    if (i < 3) slots[i] = s;
   });
 
   const handleSave = () => {
-    if (!currentRestaurant || isAlreadySaved || selectedCount >= 3) return;
+    if (!currentRestaurant || isAlreadySaved || localSelectedCount >= 3) return;
+    const newEntry: SlotItem = {
+      restaurantId: currentRestaurant.restaurantId ?? "",
+      thumbnailUrl: currentRestaurant.thumbnailUrl ?? "",
+    };
+    setLocalSelections((prev) => [...prev, newEntry]);
     addMutation.mutate(
       { naverPlaceId: currentRestaurant.restaurantId ?? "" },
       {
@@ -93,8 +116,18 @@ export default function PickModePage() {
           setCurrentIdx((i) => i + 1);
           setSection(0);
         },
+        onError: () => {
+          setLocalSelections((prev) =>
+            prev.filter((s) => s.restaurantId !== currentRestaurant.restaurantId)
+          );
+        },
       },
     );
+  };
+
+  const handleRemove = (restaurantId: string) => {
+    setLocalSelections((prev) => prev.filter((s) => s.restaurantId !== restaurantId));
+    removeMutation.mutate(restaurantId);
   };
 
   const handleSkip = () => {
@@ -222,7 +255,7 @@ export default function PickModePage() {
                       variant="primary"
                       size="sm"
                       onClick={handleSave}
-                      disabled={isAlreadySaved || selectedCount >= 3 || addMutation.isPending}
+                      disabled={isAlreadySaved || localSelectedCount >= 3 || addMutation.isPending}
                       className="flex-1 rounded-[10px] font-bold"
                     >
                       {isAlreadySaved ? "저장됨" : "저장하기"}
@@ -238,7 +271,7 @@ export default function PickModePage() {
                     key={i}
                     liked={slot !== null}
                     imageUrl={slot?.thumbnailUrl}
-                    onClick={slot ? () => removeMutation.mutate(slot.restaurantId) : undefined}
+                    onClick={slot ? () => handleRemove(slot.restaurantId) : undefined}
                   />
                 ))}
               </div>
