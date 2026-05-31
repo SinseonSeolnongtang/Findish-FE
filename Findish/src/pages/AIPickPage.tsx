@@ -69,7 +69,7 @@ export default function AIPickPage() {
         { presetId: selectedPresetId, body },
         {
           onSuccess: (data) => {
-            setResult({ title: data.title, restaurants: data.restaurants });
+            setResult({ title: data.title ?? '', restaurants: data.restaurants ?? [] });
             setView('result');
           },
         },
@@ -77,7 +77,7 @@ export default function AIPickPage() {
     } else {
       createPresetMutation.mutate(body, {
         onSuccess: (data) => {
-          setResult({ title: data.title, restaurants: data.restaurants });
+          setResult({ title: data.title ?? '', restaurants: data.restaurants ?? [] });
           setView('result');
         },
       });
@@ -118,18 +118,18 @@ export default function AIPickPage() {
   // 사이드바 히스토리 선택 시 presetDetail이 로드되면 표시
   const displayResult: ResultData | null =
     selectedPresetId !== null && presetDetail
-      ? { title: presetDetail.title, restaurants: presetDetail.restaurants }
+      ? { title: presetDetail.title ?? '', restaurants: presetDetail.restaurants ?? [] }
       : result;
 
   const displayConditions: SelectedConditions | undefined =
     selectedPresetId !== null && presetDetail
       ? {
-          situation: presetDetail.situation,
-          budgetMin: presetDetail.budgetMin,
-          budgetMax: presetDetail.budgetMax,
-          priorities: presetDetail.priorities,
+          situation: presetDetail.situation ?? '',
+          budgetMin: presetDetail.budgetMin ?? 0,
+          budgetMax: presetDetail.budgetMax ?? 0,
+          priorities: presetDetail.priorities ?? [],
           extraCondition: presetDetail.extraCondition || undefined,
-          companionCount: presetDetail.friends.length > 0 ? presetDetail.friends.length : undefined,
+          companionCount: (presetDetail.friends?.length ?? 0) > 0 ? presetDetail.friends!.length : undefined,
         }
       : result
         ? {

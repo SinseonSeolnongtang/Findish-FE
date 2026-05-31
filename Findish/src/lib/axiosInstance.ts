@@ -1,10 +1,12 @@
-import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import axios, { type AxiosError, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios';
+import { useAuthStore } from '@/stores/authStore';
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
+    'ngrok-skip-browser-warning': 'true',
   },
 });
 
@@ -25,23 +27,31 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
     const isAuthEndpoint = originalRequest.url?.includes('/auth/');
-    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
+    const refreshToken = localStorage.getItem('refreshToken');
+
+    if (
+      (error.response?.status === 401 || error.response?.status === 403) &&
+      !originalRequest._retry &&
+      !isAuthEndpoint &&
+      refreshToken
+    ) {
       originalRequest._retry = true;
 
       try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/refresh`, {
-          refreshToken,
-        });
+        const { data } = await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/api/v1/auth/reissue`,
+          { refreshToken },
+        );
 
-        localStorage.setItem('accessToken', data.accessToken);
-        originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+        useAuthStore.getState().login(data.data.accessToken, data.data.refreshToken);
+        originalRequest.headers.Authorization = `Bearer ${data.data.accessToken}`;
 
         return axiosInstance(originalRequest);
       } catch {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
+        useAuthStore.getState().logout();
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
       }
     }
 
@@ -50,3 +60,7 @@ axiosInstance.interceptors.response.use(
 );
 
 export default axiosInstance;
+
+// orval mutator: AxiosInstance를 래핑하여 Promise<T>를 반환
+export const customAxiosMutator = <T>(config: AxiosRequestConfig): Promise<T> =>
+  axiosInstance<T>(config).then(({ data }) => data);

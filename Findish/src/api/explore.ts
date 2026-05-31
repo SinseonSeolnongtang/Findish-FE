@@ -1,4 +1,5 @@
 import axiosInstance from '@/lib/axiosInstance';
+import type { ApiResponse } from '@/types/auth';
 import type {
   ExploreSearchRequest,
   ExploreSearchResponse,
@@ -8,32 +9,44 @@ import type {
   GetAnalysisResponse,
 } from '@/types/explore';
 
-export const getExploreSearch = async (params: ExploreSearchRequest): Promise<ExploreSearchResponse> => {
-  const { data } = await axiosInstance.get<ExploreSearchResponse>('/api/v1/explore/search', { params });
+// ─── 1. 자연어 검색 ──────────────────────────────────────────────────────────
+// GET /api/v1/explore/search
+export const getExploreSearch = async (params: ExploreSearchRequest, signal?: AbortSignal) => {
+  const { data } = await axiosInstance.get<ApiResponse<ExploreSearchResponse>>('/api/v1/explore/search', { params, signal });
   return data;
 };
 
-export const getCardSummary = async (restaurantId: string): Promise<GetCardSummaryResponse> => {
-  const { data } = await axiosInstance.get<GetCardSummaryResponse>(`/api/v1/explore/${restaurantId}/card-summary`);
+// ─── 2. 카드 AI 요약 조회 ────────────────────────────────────────────────────
+// GET /api/v1/explore/{naverPlaceId}/card-summary
+export const getCardSummary = async (naverPlaceId: string, signal?: AbortSignal) => {
+  const { data } = await axiosInstance.get<ApiResponse<GetCardSummaryResponse>>(`/api/v1/explore/${naverPlaceId}/card-summary`, { signal });
   return data;
 };
 
-export const addSelection = async (body: AddSelectionRequest): Promise<SelectionsResponse> => {
-  const { data } = await axiosInstance.post<SelectionsResponse>('/api/v1/explore/selections', body);
+// ─── 3. 선택 목록 조회 ───────────────────────────────────────────────────────
+// GET /api/v1/explore/selections
+export const getSelections = async (signal?: AbortSignal) => {
+  const { data } = await axiosInstance.get<ApiResponse<SelectionsResponse>>('/api/v1/explore/selections', { signal });
   return data;
 };
 
-export const getSelections = async (): Promise<SelectionsResponse> => {
-  const { data } = await axiosInstance.get<SelectionsResponse>('/api/v1/explore/selections');
+// ─── 4. 선택 추가 ─────────────────────────────────────────────────────────────
+// POST /api/v1/explore/selections
+export const addSelection = async (body: AddSelectionRequest) => {
+  const { data } = await axiosInstance.post<ApiResponse<SelectionsResponse>>('/api/v1/explore/selections', body);
   return data;
 };
 
-export const removeSelection = async (restaurantId: string): Promise<SelectionsResponse> => {
-  const { data } = await axiosInstance.delete<SelectionsResponse>(`/api/v1/explore/selections/${restaurantId}`);
+// ─── 5. 선택 삭제 ─────────────────────────────────────────────────────────────
+// DELETE /api/v1/explore/selections/{naverPlaceId}
+export const removeSelection = async (naverPlaceId: string) => {
+  const { data } = await axiosInstance.delete<ApiResponse<null>>(`/api/v1/explore/selections/${naverPlaceId}`);
   return data;
 };
 
-export const getAnalysis = async (): Promise<GetAnalysisResponse> => {
-  const { data } = await axiosInstance.get<GetAnalysisResponse>('/api/v1/explore/analysis');
+// ─── 6. 가게 비교 분석 ───────────────────────────────────────────────────────
+// GET /api/v1/explore/analysis
+export const getAnalysis = async (signal?: AbortSignal) => {
+  const { data } = await axiosInstance.get<ApiResponse<GetAnalysisResponse>>('/api/v1/explore/analysis', { signal });
   return data;
 };

@@ -36,7 +36,7 @@ export default function ReservationPanel({
       { date, time: selectedSlot, partySize },
       {
         onSuccess: (data) => {
-          setConfirmData({ reservationId: data.reservationId, time: data.time });
+          setConfirmData({ reservationId: data.data.reservationId, time: data.data.time });
         },
       },
     );
@@ -114,15 +114,15 @@ export default function ReservationPanel({
           </span>
           <button
             onClick={() =>
-              setPartySize((v) => Math.min(slotsData?.maxPartySize ?? 8, v + 1))
+              setPartySize((v) => Math.min(slotsData?.data?.maxPartySize ?? 8, v + 1))
             }
             className="w-8 h-8 rounded-full border border-neutral-200 flex items-center justify-center typo-body-md font-bold text-neutral-600"
           >
             +
           </button>
-          {slotsData && (
+          {slotsData?.data && (
             <span className="typo-micro text-neutral-400">
-              최대 {slotsData.maxPartySize}명
+              최대 {slotsData.data.maxPartySize}명
             </span>
           )}
         </div>
@@ -140,17 +140,17 @@ export default function ReservationPanel({
               />
             ))}
           </div>
-        ) : slotsData?.isHoliday ? (
+        ) : slotsData?.data?.isHoliday ? (
           <p className="typo-caption text-error-dark font-bold">
             해당 날짜는 휴무일입니다.
           </p>
-        ) : !slotsData?.slots.length ? (
+        ) : !slotsData?.data?.slots?.length ? (
           <p className="typo-caption text-neutral-500">
             예약 가능한 시간이 없습니다.
           </p>
         ) : (
           <div className="grid grid-cols-4 gap-2">
-            {slotsData.slots.map((slot) => (
+            {slotsData.data.slots.map((slot) => (
               <button
                 key={slot}
                 onClick={() => setSelectedSlot(slot)}

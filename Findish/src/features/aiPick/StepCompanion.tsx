@@ -11,7 +11,7 @@ interface Props {
 
 export default function StepCompanion({ selected, onSelect, onNext }: Props) {
   const { data, isLoading } = useFriendsQuery();
-  const friends = data?.friends ?? [];
+  const friends = data ?? [];
   const isNone = selected.length === 0;
 
   const toggle = (memberId: string) => {

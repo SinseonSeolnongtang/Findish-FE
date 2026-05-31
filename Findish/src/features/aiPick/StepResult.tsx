@@ -101,7 +101,7 @@ export default function StepResult({
 
           {/* 태그 */}
           <div className="px-5 py-3 flex flex-wrap gap-1.5">
-            {r.tags.map((tag) => (
+            {(r.tags ?? []).map((tag) => (
               <Keyword key={tag} label={tag} />
             ))}
           </div>

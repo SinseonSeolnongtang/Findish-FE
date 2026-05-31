@@ -13,16 +13,16 @@ import {
   useRestaurantBasicQuery,
 } from "@/hooks/useRestaurant";
 import type { StoreCardData } from "@/components/common/StoreCard";
-import type { SearchRestaurantItem } from "@/types/restaurant";
+import type { RestaurantBasicItem } from "@/types/restaurant";
 
-function toStoreCard(item: SearchRestaurantItem): StoreCardData {
+function toStoreCard(item: RestaurantBasicItem): StoreCardData {
   return {
     id: String(item.restaurantId),
     name: item.name,
     category: item.category,
     isOpen: item.isOpen,
     reviewCount: String(item.reviewCount),
-    keywords: item.tags,
+    keywords: item.tags ?? [],
     imageUrl: item.thumbnailUrl,
     lat: item.lat,
     lng: item.lng,
@@ -58,7 +58,7 @@ export default function NormalModePage() {
 
   const likedIds = useMemo(() => {
     const base = new Set<string>(
-      likesData?.restaurants.map((r) => r.restaurantId) ?? [],
+      likesData?.data?.content?.map((r) => r.naverPlaceId ?? "") ?? [],
     );
     Object.entries(toggledIds).forEach(([id, isLiked]) => {
       if (isLiked) base.add(id);
@@ -72,7 +72,7 @@ export default function NormalModePage() {
     setToggledIds((prev) => ({ ...prev, [id]: !currentlyLiked }));
     toggleLikeMutate(id, {
       onSuccess: (res) => {
-        setToggledIds((prev) => ({ ...prev, [id]: res.isLiked }));
+        setToggledIds((prev) => ({ ...prev, [id]: res.data?.isLiked ?? !currentlyLiked }));
       },
       onError: () => {
         setToggledIds((prev) => {
@@ -85,7 +85,7 @@ export default function NormalModePage() {
   };
 
   const restaurants = useMemo(
-    () => (data?.restaurants ?? []).map(toStoreCard),
+    () => (data?.data ?? []).map(toStoreCard),
     [data],
   );
 
@@ -124,7 +124,7 @@ export default function NormalModePage() {
       {searched && !isLoading && (
         <SearchResultPanel
           restaurants={restaurants}
-          totalCount={data?.totalCount ?? 0}
+          totalCount={restaurants.length}
           selectedId={selectedId}
           onSelect={handleCardSelect}
           likedIds={likedIds}

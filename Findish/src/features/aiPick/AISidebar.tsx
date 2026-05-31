@@ -20,9 +20,9 @@ export default function AISidebar({ open, onToggle, onFriendClick, onNewChat, on
   const effectiveOpen = open || hovered;
 
   const { data } = usePresetHistoryQuery();
-  const presets = data?.presets ?? [];
+  const presets = data ?? [];
   const filtered = search
-    ? presets.filter((p) => p.title.includes(search))
+    ? presets.filter((p) => p.title?.includes(search))
     : presets;
 
   return (
@@ -78,7 +78,7 @@ export default function AISidebar({ open, onToggle, onFriendClick, onNewChat, on
             {filtered.map((preset) => (
               <li
                 key={preset.presetId}
-                onClick={() => onPresetSelect?.(preset.presetId)}
+                onClick={() => preset.presetId && onPresetSelect?.(preset.presetId)}
                 className="typo-caption text-neutral-900 cursor-pointer hover:text-primary transition-colors truncate"
               >
                 {preset.title}

@@ -49,7 +49,7 @@ function AgentLinkMessage({ message, to, linkText }: { message: string; to: stri
 function AgentText({ text }: { text: string }) {
   return (
     <div className="typo-body-sm text-neutral-900 leading-relaxed">
-      {text.split("\n").map((line, lineIdx) => {
+      {(text ?? "").split("\n").map((line, lineIdx) => {
         const parts = line.split(/(\*\*[^*]+\*\*)/g);
         return (
           <p key={lineIdx} className={lineIdx > 0 ? "mt-1" : ""}>
@@ -159,12 +159,12 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
             {
               id: makeId(),
               role: "agent",
-              text: res.message,
-              intent: res.intent,
-              step: res.step,
-              targetId: res.targetId,
-              reservation: res.reservation,
-              menus: res.menus,
+              text: res.data.message ?? "",
+              intent: res.data.intent as AgentIntent | undefined,
+              step: res.data.step as AgentStep | undefined,
+              targetId: res.data.targetId,
+              reservation: res.data.reservation,
+              menus: res.data.menus,
             },
           ]);
         },

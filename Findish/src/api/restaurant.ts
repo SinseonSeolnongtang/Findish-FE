@@ -1,4 +1,5 @@
 import axiosInstance from '@/lib/axiosInstance';
+import type { ApiResponse } from '@/types/auth';
 import type {
   SearchRestaurantsRequest,
   SearchRestaurantsResponse,
@@ -17,79 +18,72 @@ import type {
   GetMyLikesResponse,
 } from '@/types/restaurant';
 
-export const getRestaurantBasic = async (restaurantId: string): Promise<GetRestaurantResponse> => {
-  const { data } = await axiosInstance.get<GetRestaurantResponse>(`/api/v1/restaurants/${restaurantId}`);
+// ─── 0. 키워드 검색 (일반모드) ────────────────────────────────────────────────
+// GET /api/v1/restaurants/search
+export const searchRestaurants = async (params: SearchRestaurantsRequest, signal?: AbortSignal) => {
+  const { data } = await axiosInstance.get<ApiResponse<SearchRestaurantsResponse>>('/api/v1/restaurants/search', { params, signal });
   return data;
 };
 
-export const getRestaurantAiSummary = async (restaurantId: string): Promise<GetAiSummaryResponse> => {
-  const { data } = await axiosInstance.get<GetAiSummaryResponse>(`/api/v1/restaurants/${restaurantId}/ai-summary`);
+// ─── 1. 식당 기본 정보 ───────────────────────────────────────────────────────
+// GET /api/v1/restaurants/{naverPlaceId}
+export const getRestaurantBasic = async (naverPlaceId: string, signal?: AbortSignal) => {
+  const { data } = await axiosInstance.get<ApiResponse<GetRestaurantResponse>>(`/api/v1/restaurants/${naverPlaceId}`, { signal });
   return data;
 };
 
-export const getRestaurantMenus = async (restaurantId: string): Promise<GetMenusResponse> => {
-  const { data } = await axiosInstance.get<GetMenusResponse>(`/api/v1/restaurants/${restaurantId}/menus`);
+// ─── 2. AI 요약 조회 ──────────────────────────────────────────────────────────
+// GET /api/v1/restaurants/{naverPlaceId}/ai-summary
+export const getRestaurantAiSummary = async (naverPlaceId: string, signal?: AbortSignal) => {
+  const { data } = await axiosInstance.get<ApiResponse<GetAiSummaryResponse>>(`/api/v1/restaurants/${naverPlaceId}/ai-summary`, { signal });
   return data;
 };
 
-export const getRestaurantReviews = async (
-  restaurantId: string,
-  params: GetReviewsRequest,
-): Promise<GetReviewsResponse> => {
-  const { data } = await axiosInstance.get<GetReviewsResponse>(`/api/v1/restaurants/${restaurantId}/reviews`, {
-    params,
-  });
+// ─── 3. 메뉴 목록 조회 ───────────────────────────────────────────────────────
+// GET /api/v1/restaurants/{naverPlaceId}/menus
+export const getRestaurantMenus = async (naverPlaceId: string, signal?: AbortSignal) => {
+  const { data } = await axiosInstance.get<ApiResponse<GetMenusResponse>>(`/api/v1/restaurants/${naverPlaceId}/menus`, { signal });
   return data;
 };
 
-export const getRestaurantInfo = async (restaurantId: string): Promise<GetRestaurantInfoResponse> => {
-  const { data } = await axiosInstance.get<GetRestaurantInfoResponse>(`/api/v1/restaurants/${restaurantId}/info`);
+// ─── 4. 리뷰 목록 조회 ───────────────────────────────────────────────────────
+// GET /api/v1/restaurants/{naverPlaceId}/reviews
+export const getRestaurantReviews = async (naverPlaceId: string, params?: GetReviewsRequest, signal?: AbortSignal) => {
+  const { data } = await axiosInstance.get<ApiResponse<GetReviewsResponse>>(`/api/v1/restaurants/${naverPlaceId}/reviews`, { params, signal });
   return data;
 };
 
-export const getAvailableSlots = async (
-  restaurantId: string,
-  params: GetAvailableSlotsRequest,
-): Promise<GetAvailableSlotsResponse> => {
-  const { data } = await axiosInstance.get<GetAvailableSlotsResponse>(
-    `/api/v1/restaurants/${restaurantId}/reservations/available`,
-    { params },
-  );
+// ─── 5. 가게 정보 조회 ───────────────────────────────────────────────────────
+// GET /api/v1/restaurants/{naverPlaceId}/info
+export const getRestaurantInfo = async (naverPlaceId: string, signal?: AbortSignal) => {
+  const { data } = await axiosInstance.get<ApiResponse<GetRestaurantInfoResponse>>(`/api/v1/restaurants/${naverPlaceId}/info`, { signal });
   return data;
 };
 
-export const createReservation = async (
-  restaurantId: string,
-  body: CreateReservationRequest,
-): Promise<CreateReservationResponse> => {
-  const { data } = await axiosInstance.post<CreateReservationResponse>(
-    `/api/v1/restaurants/${restaurantId}/reservations`,
-    body,
-  );
+// ─── 6. 예약 가능 날짜/시간 ──────────────────────────────────────────────────
+// GET /api/v1/restaurants/{naverPlaceId}/reservations/available
+export const getAvailableSlots = async (naverPlaceId: string, params: GetAvailableSlotsRequest, signal?: AbortSignal) => {
+  const { data } = await axiosInstance.get<ApiResponse<GetAvailableSlotsResponse>>(`/api/v1/restaurants/${naverPlaceId}/reservations/available`, { params, signal });
   return data;
 };
 
-export const searchRestaurants = async (
-  params: SearchRestaurantsRequest,
-): Promise<SearchRestaurantsResponse> => {
-  const { data } = await axiosInstance.get<SearchRestaurantsResponse>(
-    '/api/v1/restaurants/search',
-    { params },
-  );
+// ─── 7. 예약 확정 ─────────────────────────────────────────────────────────────
+// POST /api/v1/restaurants/{naverPlaceId}/reservations
+export const createReservation = async (naverPlaceId: string, body: CreateReservationRequest) => {
+  const { data } = await axiosInstance.post<ApiResponse<CreateReservationResponse>>(`/api/v1/restaurants/${naverPlaceId}/reservations`, body);
   return data;
 };
 
-export const toggleLike = async (restaurantId: string): Promise<ToggleLikeResponse> => {
-  const { data } = await axiosInstance.post<ToggleLikeResponse>(
-    `/api/v1/restaurants/${restaurantId}/like`,
-  );
+// ─── 8. 좋아요 토글 ───────────────────────────────────────────────────────────
+// POST /api/v1/restaurants/{naverPlaceId}/like
+export const toggleLike = async (naverPlaceId: string) => {
+  const { data } = await axiosInstance.post<ApiResponse<ToggleLikeResponse>>(`/api/v1/restaurants/${naverPlaceId}/like`);
   return data;
 };
 
-export const getMyLikes = async (params?: GetMyLikesRequest): Promise<GetMyLikesResponse> => {
-  const { data } = await axiosInstance.get<GetMyLikesResponse>(
-    '/api/v1/members/me/likes',
-    { params },
-  );
+// ─── 9. 좋아요 목록 조회 ──────────────────────────────────────────────────────
+// GET /api/v1/members/me/likes
+export const getMyLikes = async (params?: GetMyLikesRequest, signal?: AbortSignal) => {
+  const { data } = await axiosInstance.get<ApiResponse<GetMyLikesResponse>>('/api/v1/members/me/likes', { params, signal });
   return data;
 };

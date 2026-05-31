@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
-import { checkId } from "@/api/auth";
-import { useUpdateMeMutation } from "@/hooks/useAuth";
-import type { GetMeResponse } from "@/types/auth";
+import { checkId, updateMyInfo } from "@/api/auth";
+import type { GetMeResponse, UpdateMeRequest } from "@/types/auth";
 
 interface EditProfileFormFields {
   loginId: string;
@@ -32,7 +31,9 @@ interface EditProfileTabProps {
 
 export default function EditProfileTab({ user, onBack }: EditProfileTabProps) {
   const queryClient = useQueryClient();
-  const { mutate: updateMe, isPending } = useUpdateMeMutation();
+  const { mutate: updateMe, isPending } = useMutation({
+    mutationFn: (body: UpdateMeRequest) => updateMyInfo(body),
+  });
 
   const {
     register,
@@ -41,9 +42,9 @@ export default function EditProfileTab({ user, onBack }: EditProfileTabProps) {
     formState: { errors },
   } = useForm<EditProfileFormFields>({
     defaultValues: {
-      loginId: user.loginId,
-      emailLocal: user.email.split("@")[0] ?? "",
-      emailDomain: user.email.split("@")[1] ?? "",
+      loginId: user.loginId ?? "",
+      emailLocal: user.email?.split("@")[0] ?? "",
+      emailDomain: user.email?.split("@")[1] ?? "",
     },
   });
 
@@ -56,19 +57,27 @@ export default function EditProfileTab({ user, onBack }: EditProfileTabProps) {
     if (!loginId) return;
     setIsCheckingId(true);
     try {
-      const result = await checkId(loginId);
-      setIdCheckStatus(result.isDuplicated ? "duplicated" : "available");
+      const result = await checkId({ loginId });
+      setIdCheckStatus(result.data?.isDuplicated ? "duplicated" : "available");
     } finally {
       setIsCheckingId(false);
     }
   };
 
   const onSubmit = (data: EditProfileFormFields) => {
+    const domain = selectedDomain === "직접 입력" ? data.emailDomain : selectedDomain;
+    const email = data.emailLocal ? `${data.emailLocal}@${domain}` : undefined;
+
     updateMe(
-      { loginId: data.loginId },
+      {
+        loginId: data.loginId || undefined,
+        password: data.password || undefined,
+        passwordCheck: data.passwordCheck || undefined,
+        email: email || undefined,
+      },
       {
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ["me"] });
+          queryClient.invalidateQueries({ queryKey: ["getMyInfo"] });
           onBack();
         },
       },
@@ -88,7 +97,7 @@ export default function EditProfileTab({ user, onBack }: EditProfileTabProps) {
             이름
           </span>
           <div className="w-px h-7 bg-neutral-300 mx-4 shrink-0" />
-          <span className="typo-body-md text-neutral-900">{user.name}</span>
+          <span className="typo-body-md text-neutral-900">{user.name ?? ""}</span>
         </div>
 
         {/* 아이디 */}

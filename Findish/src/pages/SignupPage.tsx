@@ -77,8 +77,8 @@ export default function SignupPage() {
     if (!loginId) return;
     setIsCheckingId(true);
     try {
-      const result = await checkId(loginId);
-      setIdCheckStatus(result.isDuplicated ? "duplicated" : "available");
+      const result = await checkId({ loginId });
+      setIdCheckStatus(result.data?.isDuplicated ? "duplicated" : "available");
     } finally {
       setIsCheckingId(false);
     }

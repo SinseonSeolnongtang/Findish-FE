@@ -7,6 +7,8 @@ import {
   useDeleteCartItemMutation,
   useOrderCartMutation,
 } from "@/hooks/useCart";
+import { useRestaurantBasicQuery } from "@/hooks/useRestaurant";
+import type { StoreCardData } from "@/components/common/StoreCard";
 
 export default function CartPage() {
   const navigate = useNavigate();
@@ -15,6 +17,27 @@ export default function CartPage() {
   const { mutate: updateQuantity } = useUpdateCartQuantityMutation();
   const { mutate: deleteItem } = useDeleteCartItemMutation();
   const { mutate: order, isPending: isOrdering } = useOrderCartMutation();
+
+  const naverPlaceId = data?.naverPlaceId ?? '';
+  const { data: restaurantData } = useRestaurantBasicQuery(naverPlaceId);
+  const restaurantName = restaurantData?.data?.name;
+
+  const handleGoToDetail = () => {
+    if (!naverPlaceId) return;
+    const rd = restaurantData?.data;
+    const preSelectedStore: StoreCardData = {
+      id: naverPlaceId,
+      name: rd?.name ?? '',
+      category: rd?.category ?? '',
+      isOpen: rd?.isOpen ?? false,
+      reviewCount: String(rd?.reviewCount ?? 0),
+      keywords: rd?.tags ?? [],
+      imageUrl: rd?.thumbnailUrl,
+      lat: rd?.lat,
+      lng: rd?.lng,
+    };
+    navigate('/normal', { state: { preSelectedStore } });
+  };
 
   const handleQuantityChange = (
     cartItemId: string,
@@ -30,7 +53,7 @@ export default function CartPage() {
     order(undefined, {
       onSuccess: (res) => {
         alert(
-          `주문이 완료되었습니다!\n주문번호: ${res.orderId}\n총 금액: ${res.totalPrice.toLocaleString()}원`,
+          `주문이 완료되었습니다!\n주문번호: ${res.orderId}\n총 금액: ${res.totalPrice?.toLocaleString() ?? 0}원`,
         );
         navigate("/");
       },
@@ -88,10 +111,29 @@ export default function CartPage() {
 
       <main className="pt-17 max-w-195 mx-auto px-8 py-10">
         {/* 레스토랑 헤더 */}
-        <div className="flex items-center gap-3 mb-4">
-          <span className="text-[20px] font-bold text-neutral-800">
-            {data?.restaurantName}
-          </span>
+        <div className="flex items-center gap-2 mb-4 mt-8">
+          <button
+            onClick={handleGoToDetail}
+            className="flex items-center gap-1 group cursor-pointer"
+          >
+            <span className="text-[20px] font-bold text-neutral-800 group-hover:text-primary transition-colors">
+              {restaurantName}
+            </span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-neutral-400 group-hover:text-primary transition-colors mt-0.5"
+            >
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </button>
         </div>
 
         {/* 아이템 목록 */}
@@ -103,7 +145,7 @@ export default function CartPage() {
                 {item.imageUrl ? (
                   <img
                     src={item.imageUrl}
-                    alt={item.name}
+                    alt={item.menuName}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -113,7 +155,7 @@ export default function CartPage() {
 
               {/* 메뉴명 */}
               <span className="flex-1 text-[18px] font-medium text-neutral-800">
-                {item.name}
+                {item.menuName}
               </span>
 
               {/* 우측 컨트롤 */}
@@ -163,7 +205,7 @@ export default function CartPage() {
         {/* 총합 */}
         <div className="border-t border-[#E5E7EB] mt-12 pt-4 flex justify-end">
           <span className="text-[18px] font-bold text-neutral-800">
-            총합 {data?.totalPrice.toLocaleString()}원
+            총합 {data?.totalPrice?.toLocaleString() ?? 0}원
           </span>
         </div>
 

@@ -4,14 +4,12 @@ import { useRestaurantReviewsQuery } from "@/hooks/useRestaurant";
 import SearchField from "@/components/common/SearchField";
 import CameraIcon from "@/assets/icons/review/camera.svg?react";
 
-const SORT_OPTIONS = ["최신순", "오래된 순", "별점 낮은순", "별점 높은순"] as const;
+const SORT_OPTIONS = ["최신순", "오래된 순"] as const;
 type SortOption = (typeof SORT_OPTIONS)[number];
 
 const SORT_MAP: Record<SortOption, string> = {
-  "최신순": "latest",
-  "오래된 순": "oldest",
-  "별점 낮은순": "rating_asc",
-  "별점 높은순": "rating_desc",
+  "최신순": "LATEST",
+  "오래된 순": "OLDEST",
 };
 
 interface ReviewTabProps {
@@ -33,7 +31,22 @@ export default function ReviewTab({ restaurantId }: ReviewTabProps) {
     keyword: submittedKeyword || undefined,
   });
 
-  const reviewImages = data?.reviews.flatMap((r) => r.imageUrls).filter(Boolean) ?? [];
+  const reviews = data?.data?.content ?? [];
+
+  const parseImages = (raw?: string): string[] => {
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => item.image_url).filter(Boolean);
+      }
+    } catch {
+      // ignore malformed JSON
+    }
+    return [];
+  };
+
+  const reviewImages = reviews.flatMap((r) => parseImages(r.images));
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -52,7 +65,7 @@ export default function ReviewTab({ restaurantId }: ReviewTabProps) {
         <p className="typo-caption text-neutral-900">
           전체 리뷰{" "}
           <span className="font-bold text-primary">
-            {data?.totalCount ?? "…"}
+            {data?.data?.totalElements ?? "…"}
           </span>
           개
         </p>
@@ -161,21 +174,65 @@ export default function ReviewTab({ restaurantId }: ReviewTabProps) {
       )}
 
       {!isLoading && !isError && (
-        <div className="flex flex-col gap-4">
-          {data?.reviews.length === 0 ? (
+        <div className="flex flex-col divide-y divide-neutral-100">
+          {reviews.length === 0 ? (
             <p className="typo-caption text-neutral-400">리뷰가 없습니다.</p>
           ) : (
-            data?.reviews.map((review) => (
-              <div key={review.reviewId}>
-                <p className="typo-caption text-neutral-900 leading-relaxed">
-                  {review.content}
-                </p>
-                <p className="typo-micro text-neutral-500 text-right mt-1">
-                  {review.author} ·{" "}
-                  {new Date(review.createdAt).toLocaleDateString("ko-KR")}
-                </p>
-              </div>
-            ))
+            reviews.map((review) => {
+              const images = parseImages(review.images);
+              return (
+                <div key={review.reviewId} className="flex flex-col gap-2 py-4 first:pt-0">
+                  {/* 작성자 · 날짜 */}
+                  <div className="flex items-center gap-1.5">
+                    <span className="typo-caption-medium text-neutral-900 font-semibold">
+                      {review.author}
+                    </span>
+                    {review.createdAt && (
+                      <span className="typo-micro text-neutral-400">
+                        · {new Date(review.createdAt).toLocaleDateString("ko-KR")}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* 리뷰 본문 */}
+                  {review.content && (
+                    <p className="typo-caption text-neutral-800 leading-relaxed whitespace-pre-line">
+                      {review.content}
+                    </p>
+                  )}
+
+                  {/* 리뷰 이미지 */}
+                  {images.length > 0 && (
+                    <div className="flex gap-2 overflow-x-auto pb-0.5">
+                      {images.map((url, i) => (
+                        <div
+                          key={i}
+                          className="shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-neutral-100"
+                        >
+                          <img
+                            src={url}
+                            alt={`리뷰 이미지 ${i + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* 원문 보기 링크 */}
+                  {review.sourceUrl && (
+                    <a
+                      href={review.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="typo-micro text-primary underline-offset-2 hover:underline self-start"
+                    >
+                      네이버 원문 보기
+                    </a>
+                  )}
+                </div>
+              );
+            })
           )}
         </div>
       )}

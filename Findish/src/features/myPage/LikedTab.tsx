@@ -1,20 +1,20 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Pagination from "@/components/common/Pagination";
 import StoreCard, { type StoreCardData } from "@/components/common/StoreCard";
-import { useMyLikesQuery, useToggleLikeMutation } from "@/hooks/useRestaurant";
+import { getMyLikes, toggleLike } from "@/api/restaurant";
 import type { LikedRestaurantItem } from "@/types/restaurant";
 
 const PAGE_SIZE = 10;
 
 function toStoreCardData(item: LikedRestaurantItem): StoreCardData {
   return {
-    id: item.restaurantId,
-    name: item.name,
-    category: item.category,
-    summary: item.address,
-    imageUrl: item.thumbnailUrl,
+    id: item.naverPlaceId ?? "",
+    name: item.naverPlaceId ?? "",
+    category: "",
+    summary: "",
+    imageUrl: "",
     isOpen: false,
     reviewCount: "",
     keywords: [],
@@ -24,26 +24,26 @@ function toStoreCardData(item: LikedRestaurantItem): StoreCardData {
 export default function LikedTab() {
   const [page, setPage] = useState(1);
   const navigate = useNavigate();
-
   const queryClient = useQueryClient();
-  const queryParams = { sort: "LATEST", page: page - 1, size: PAGE_SIZE };
 
-  const { data, isLoading } = useMyLikesQuery(queryParams);
-  const { mutate: toggleLike } = useToggleLikeMutation();
+  const { data, isLoading } = useQuery({
+    queryKey: ["likes", "me", page, PAGE_SIZE],
+    queryFn: ({ signal }) => getMyLikes({ page: page - 1, size: PAGE_SIZE }, signal),
+  });
 
-  const stores = (data?.restaurants ?? []).map(toStoreCardData);
+  const { mutate: handleToggleLike } = useMutation({
+    mutationFn: (naverPlaceId: string) => toggleLike(naverPlaceId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["likes", "me"] });
+    },
+  });
+
+  const items = data?.data?.content ?? [];
+  const stores = items.map(toStoreCardData);
   const totalPages = Math.max(
     1,
-    Math.ceil((data?.totalCount ?? 0) / PAGE_SIZE),
+    Math.ceil((data?.data?.totalElements ?? 0) / PAGE_SIZE),
   );
-
-  const handleUnlike = (restaurantId: string) => {
-    toggleLike(restaurantId, {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["likes", "me"] });
-      },
-    });
-  };
 
   return (
     <>
@@ -65,7 +65,7 @@ export default function LikedTab() {
                 isFavorited={true}
                 onClick={() => navigate("/normal", { state: { preSelectedStore: store } })}
                 onReserve={() => navigate("/normal", { state: { preSelectedStore: store, openReservation: true } })}
-                onFavorite={() => handleUnlike(store.id)}
+                onFavorite={() => handleToggleLike(store.id)}
                 className="border border-neutral-300 rounded-xl overflow-hidden"
               />
             ))}

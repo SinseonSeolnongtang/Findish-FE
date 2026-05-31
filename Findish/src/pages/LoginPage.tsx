@@ -17,7 +17,7 @@ export default function LoginPage() {
   const onSubmit = (data: LoginRequest) => {
     loginMutate(data, {
       onSuccess: (res) => {
-        loginToStore(res.accessToken);
+        loginToStore(res.accessToken, res.refreshToken);
         navigate("/");
       },
     });
