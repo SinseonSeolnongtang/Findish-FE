@@ -2,6 +2,7 @@ import Button from "@/components/common/Button";
 import Keyword from "@/components/common/Keyword";
 import { PRIORITY_LABEL, SITUATION_LABEL } from "@/constants/aiPick";
 import StarFilled from "@/assets/icons/common/star_filled.svg?react";
+import TrashIcon from "@/assets/icons/common/trash.svg?react";
 import type {
   AiPickPriority,
   AiPickRestaurantItem,
@@ -21,7 +22,9 @@ interface Props {
   title: string;
   restaurants: AiPickRestaurantItem[];
   conditions?: SelectedConditions;
+  presetId?: string;
   onReset: () => void;
+  onDelete?: () => void;
 }
 
 export default function StepResult({
@@ -29,6 +32,7 @@ export default function StepResult({
   restaurants,
   conditions,
   onReset,
+  onDelete,
 }: Props) {
   const chips: string[] = [];
   if (conditions) {
@@ -71,7 +75,7 @@ export default function StepResult({
       )}
 
       {/* 추천 식당 카드 목록 */}
-      {restaurants.map((r) => (
+      {restaurants.slice(0, 1).map((r) => (
         <div
           key={r.restaurantId}
           className="w-full max-w-130 bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden"
@@ -109,13 +113,22 @@ export default function StepResult({
       ))}
 
       {/* 액션 버튼 */}
-      <div className="flex gap-3 mt-2">
+      <div className="flex items-center gap-3 mt-2">
         <Button variant="outline" size="sm" onClick={onReset}>
           다시 설정
         </Button>
         <Button variant="primary" size="sm">
           가게 보러가기
         </Button>
+        {onDelete && (
+          <button
+            onClick={onDelete}
+            className="flex items-center justify-center w-9 h-9 rounded-full border border-neutral-200 text-neutral-400 hover:border-red-300 hover:text-red-400 transition-colors"
+            aria-label="프리셋 삭제"
+          >
+            <TrashIcon width={16} height={16} />
+          </button>
+        )}
       </div>
     </div>
   );

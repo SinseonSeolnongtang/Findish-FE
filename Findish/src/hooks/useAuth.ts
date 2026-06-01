@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { login, logout as logoutApi, join, getMyInfo, searchMember } from '@/api/auth';
+import { login, logout as logoutApi, join, getMyInfo, searchMember, deleteMe } from '@/api/auth';
 import { useAuthStore } from '@/stores/authStore';
 import type { LoginRequest } from '@/types/auth';
 
@@ -33,7 +33,20 @@ export const useLogoutMutation = () => {
       return logoutApi({ refreshToken });
     },
     onSuccess: () => {
-      queryClient.removeQueries({ queryKey: ['getMyInfo'] });
+      queryClient.clear();
+      logoutStore();
+    },
+  });
+};
+
+// ─── 회원 탈퇴 ─────────────────────────────────────────────────────────────────
+export const useDeleteMeMutation = () => {
+  const queryClient = useQueryClient();
+  const logoutStore = useAuthStore((s) => s.logout);
+  return useMutation({
+    mutationFn: () => deleteMe(),
+    onSuccess: () => {
+      queryClient.clear();
       logoutStore();
     },
   });

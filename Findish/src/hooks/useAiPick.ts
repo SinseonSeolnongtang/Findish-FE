@@ -4,6 +4,7 @@ import {
   getPresetHistory,
   getPresetDetail,
   updatePreset,
+  deletePreset,
   getFriends,
   getReceivedFriendRequests,
   requestFriend,
@@ -75,6 +76,17 @@ export const useUpdatePresetMutation = () => {
   return useMutation({
     mutationFn: ({ presetId, body }: { presetId: string; body: UpdateAiPickPresetRequest }) =>
       updatePreset(presetId, body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: PRESET_HISTORY_KEY });
+    },
+  });
+};
+
+// DELETE /api/v1/ai-pick/presets/{presetId}
+export const useDeletePresetMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (presetId: string) => deletePreset(presetId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: PRESET_HISTORY_KEY });
     },

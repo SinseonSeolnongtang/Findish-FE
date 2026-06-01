@@ -145,6 +145,8 @@ export interface GetMyLikesRequest {
 }
 export interface LikedRestaurantItem {
   naverPlaceId?: string;
+  name?: string;
+  thumbnail?: string;
   likedAt?: string;
 }
 export interface GetMyLikesResponse {

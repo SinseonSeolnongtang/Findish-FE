@@ -238,9 +238,10 @@ export default function PickModePage() {
                     variant="primary"
                     size="sm"
                     onClick={() => navigate("/compare")}
+                    disabled={addMutation.isPending}
                     className="w-full rounded-[10px] font-bold"
                   >
-                    AI 분석하러 가기 →
+                    {addMutation.isPending ? "저장 중..." : "AI 분석하러 가기 →"}
                   </Button>
                 ) : (
                   <div className="flex gap-2">

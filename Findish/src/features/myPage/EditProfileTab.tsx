@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import Button from "@/components/common/Button";
 import Input from "@/components/common/Input";
+import ConfirmModal from "@/components/common/ConfirmModal";
 import { checkId, updateMyInfo } from "@/api/auth";
+import { useDeleteMeMutation } from "@/hooks/useAuth";
 import type { GetMeResponse, UpdateMeRequest } from "@/types/auth";
 
 interface EditProfileFormFields {
@@ -30,10 +33,13 @@ interface EditProfileTabProps {
 }
 
 export default function EditProfileTab({ user, onBack }: EditProfileTabProps) {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { mutate: updateMe, isPending } = useMutation({
     mutationFn: (body: UpdateMeRequest) => updateMyInfo(body),
   });
+  const { mutate: deleteMe, isPending: isDeleting } = useDeleteMeMutation();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const {
     register,
@@ -84,8 +90,24 @@ export default function EditProfileTab({ user, onBack }: EditProfileTabProps) {
     );
   };
 
+  const handleDeleteConfirm = () => {
+    deleteMe(undefined, {
+      onSuccess: () => navigate("/login"),
+    });
+  };
+
   return (
-    <div className="bg-white border border-[#E5E7EB] rounded-xl p-6 overflow-hidden">
+    <div className="relative bg-white border border-[#E5E7EB] rounded-xl p-6 overflow-hidden">
+      {showDeleteConfirm && (
+        <ConfirmModal
+          title="회원 탈퇴"
+          message="정말 탈퇴하시겠습니까? 탈퇴 후에는 복구할 수 없습니다."
+          confirmLabel={isDeleting ? "처리 중..." : "탈퇴하기"}
+          cancelLabel="취소"
+          onConfirm={handleDeleteConfirm}
+          onClose={() => setShowDeleteConfirm(false)}
+        />
+      )}
       <h2 className="typo-t1-medium text-neutral-900 text-center mb-4">
         회원 정보 수정
       </h2>
@@ -209,25 +231,34 @@ export default function EditProfileTab({ user, onBack }: EditProfileTabProps) {
         </div>
 
         {/* 버튼 */}
-        <div className="flex justify-center gap-3 mt-6">
-          <Button
+        <div className="flex flex-col items-center gap-3 mt-6">
+          <div className="flex justify-center gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-28 border-primary text-primary hover:bg-orange-100"
+              onClick={onBack}
+            >
+              돌아가기
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              className="w-28"
+              disabled={isPending}
+            >
+              {isPending ? "저장 중..." : "저장하기"}
+            </Button>
+          </div>
+          <button
             type="button"
-            variant="outline"
-            size="sm"
-            className="w-28 border-primary text-primary hover:bg-orange-100"
-            onClick={onBack}
+            className="typo-body-sm text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer"
+            onClick={() => setShowDeleteConfirm(true)}
           >
-            돌아가기
-          </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            size="sm"
-            className="w-28"
-            disabled={isPending}
-          >
-            {isPending ? "저장 중..." : "저장하기"}
-          </Button>
+            탈퇴하기
+          </button>
         </div>
       </form>
     </div>

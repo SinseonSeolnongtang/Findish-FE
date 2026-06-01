@@ -44,6 +44,12 @@ export const updatePreset = async (presetId: string, body: UpdateAiPickPresetReq
   return data.data;
 };
 
+// ─── 5. 프리셋 삭제 ────────────────────────────────────────────────────────────
+// DELETE /api/v1/ai-pick/presets/{presetId}
+export const deletePreset = async (presetId: string) => {
+  await axiosInstance.delete(`/api/v1/ai-pick/presets/${presetId}`);
+};
+
 // ─── Friend 1. 친구 목록 조회 ─────────────────────────────────────────────────
 // GET /api/v1/friends
 export const getFriends = async (signal?: AbortSignal) => {

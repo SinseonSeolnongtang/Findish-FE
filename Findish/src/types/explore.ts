@@ -87,3 +87,6 @@ export interface GetAnalysisResponse {
   commonKeywords?: KeywordScoreItem[];
   tradeOffKeywords?: KeywordScoreItem[];
 }
+
+export type AnalysisRestaurant = RestaurantCardItem;
+export type AnalysisKeyword = KeywordScoreItem;

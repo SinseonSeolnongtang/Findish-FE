@@ -11,10 +11,10 @@ const PAGE_SIZE = 10;
 function toStoreCardData(item: LikedRestaurantItem): StoreCardData {
   return {
     id: item.naverPlaceId ?? "",
-    name: item.naverPlaceId ?? "",
+    name: item.name ?? item.naverPlaceId ?? "",
     category: "",
     summary: "",
-    imageUrl: "",
+    imageUrl: item.thumbnail ?? "",
     isOpen: false,
     reviewCount: "",
     keywords: [],
@@ -29,6 +29,7 @@ export default function LikedTab() {
   const { data, isLoading } = useQuery({
     queryKey: ["likes", "me", page, PAGE_SIZE],
     queryFn: ({ signal }) => getMyLikes({ page: page - 1, size: PAGE_SIZE }, signal),
+    staleTime: 0,
   });
 
   const { mutate: handleToggleLike } = useMutation({
