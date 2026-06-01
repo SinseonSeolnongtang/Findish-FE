@@ -10,12 +10,17 @@ const CARD_COLORS = ["#FF6900", "#FACC15", "#22C55E"] as const;
 function RestaurantCard({
   restaurant,
   color,
+  onClick,
 }: {
   restaurant: AnalysisRestaurant;
   color: string;
+  onClick?: () => void;
 }) {
   return (
-    <div className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden shadow-sm">
+    <div
+      className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden shadow-sm cursor-pointer hover:bg-orange-50 transition-colors"
+      onClick={onClick}
+    >
       <div className="w-full h-30 overflow-hidden">
         <img
           src={restaurant.thumbnailUrl}
@@ -129,6 +134,22 @@ export default function ComparePage() {
                   key={r.restaurantId ?? i}
                   restaurant={r}
                   color={CARD_COLORS[i]}
+                  onClick={() => {
+                    if (!r.restaurantId) return;
+                    navigate("/normal", {
+                      state: {
+                        preSelectedStore: {
+                          id: r.restaurantId,
+                          name: r.name ?? "",
+                          category: r.category ?? "",
+                          isOpen: false,
+                          reviewCount: "0",
+                          keywords: [],
+                          imageUrl: r.thumbnailUrl,
+                        },
+                      },
+                    });
+                  }}
                 />
               ))}
             </div>
