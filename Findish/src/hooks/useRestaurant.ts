@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   searchRestaurants,
   getRestaurantBasic,
@@ -83,8 +83,12 @@ export const useCreateReservationMutation = (restaurantId: string) => {
 };
 
 export const useToggleLikeMutation = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (restaurantId: string) => toggleLike(restaurantId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['likes', 'me'] });
+    },
   });
 };
 

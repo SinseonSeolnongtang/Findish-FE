@@ -9,12 +9,13 @@ import StepFactors from '@/features/aiPick/StepFactors';
 import StepResult, { type SelectedConditions } from '@/features/aiPick/StepResult';
 import StepProgressBar from '@/features/aiPick/StepProgressBar';
 import FriendList from '@/features/aiPick/FriendList';
-import { useCreatePresetMutation, useUpdatePresetMutation, usePresetDetailQuery } from '@/hooks/useAiPick';
+import { useCreatePresetMutation, useUpdatePresetMutation, usePresetDetailQuery, useDeletePresetMutation } from '@/hooks/useAiPick';
 import type { AiPickSituation, AiPickPriority, AiPickRestaurantItem } from '@/types/aiPick';
 
 type View = 'home' | 'preset' | 'result' | 'friends';
 
 interface ResultData {
+  presetId?: string;
   title: string;
   restaurants: AiPickRestaurantItem[];
 }
@@ -38,6 +39,7 @@ export default function AIPickPage() {
 
   const createPresetMutation = useCreatePresetMutation();
   const updatePresetMutation = useUpdatePresetMutation();
+  const deletePresetMutation = useDeletePresetMutation();
   const { data: presetDetail } = usePresetDetailQuery(selectedPresetId ?? '');
 
   // 사이드바에서 히스토리 클릭 → 프리셋 상세 조회 후 결과 뷰 진입
@@ -69,7 +71,7 @@ export default function AIPickPage() {
         { presetId: selectedPresetId, body },
         {
           onSuccess: (data) => {
-            setResult({ title: data.title ?? '', restaurants: data.restaurants ?? [] });
+            setResult({ presetId: data.presetId, title: data.title ?? '', restaurants: data.restaurants ?? [] });
             setView('result');
           },
         },
@@ -77,7 +79,7 @@ export default function AIPickPage() {
     } else {
       createPresetMutation.mutate(body, {
         onSuccess: (data) => {
-          setResult({ title: data.title ?? '', restaurants: data.restaurants ?? [] });
+          setResult({ presetId: data.presetId, title: data.title ?? '', restaurants: data.restaurants ?? [] });
           setView('result');
         },
       });
@@ -100,6 +102,14 @@ export default function AIPickPage() {
     setResult(null);
     setPresetStep(1);
     setView('preset');
+  };
+
+  const handleDelete = () => {
+    const presetId = selectedPresetId ?? result?.presetId;
+    if (!presetId) return;
+    deletePresetMutation.mutate(presetId, {
+      onSuccess: () => handleNewChat(),
+    });
   };
 
   const handleNewChat = () => {
@@ -238,6 +248,7 @@ export default function AIPickPage() {
               restaurants={displayResult.restaurants}
               conditions={displayConditions}
               onReset={handleReset}
+              onDelete={handleDelete}
             />
           )}
 

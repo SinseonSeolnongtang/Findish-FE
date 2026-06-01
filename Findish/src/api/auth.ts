@@ -70,3 +70,10 @@ export const updateMyInfo = async (body: UpdateMeRequest) => {
   const { data } = await axiosInstance.patch<ApiResponse<UpdateMeResponse>>('/api/v1/members/me', body);
   return data;
 };
+
+// ─── 회원 탈퇴 ─────────────────────────────────────────────────────────────────
+// DELETE /api/v1/members/me
+export const deleteMe = async () => {
+  const { data } = await axiosInstance.delete<ApiResponse<Record<string, never>>>('/api/v1/members/me');
+  return data;
+};

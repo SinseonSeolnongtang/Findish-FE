@@ -48,5 +48,5 @@ export const removeSelection = async (naverPlaceId: string) => {
 // GET /api/v1/explore/analysis
 export const getAnalysis = async (signal?: AbortSignal) => {
   const { data } = await axiosInstance.get<ApiResponse<GetAnalysisResponse>>('/api/v1/explore/analysis', { signal });
-  return data;
+  return data.data;
 };

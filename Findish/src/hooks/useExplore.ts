@@ -30,7 +30,7 @@ export const useCardSummaryQuery = (restaurantId: string) => {
 export const useSelectionsQuery = () => {
   return useQuery({
     queryKey: SELECTIONS_KEY,
-    queryFn: getSelections,
+    queryFn: ({ signal }) => getSelections(signal),
   });
 };
 
@@ -57,6 +57,6 @@ export const useRemoveSelectionMutation = () => {
 export const useAnalysisQuery = () => {
   return useQuery({
     queryKey: ['explore', 'analysis'] as const,
-    queryFn: getAnalysis,
+    queryFn: ({ signal }) => getAnalysis(signal),
   });
 };
