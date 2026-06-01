@@ -84,7 +84,7 @@ export default function PickModePage() {
         tasteImages: aiData?.tasteImages?.length ? aiData.tasteImages : (thumbnail ? [thumbnail] : []),
         vibeImages: aiData?.moodImages?.length ? aiData.moodImages : (thumbnail ? [thumbnail] : []),
         serviceImages: aiData?.serviceImages?.length ? aiData.serviceImages : (thumbnail ? [thumbnail] : []),
-        currentIndex: currentIdx + 1,
+        currentIndex: (currentIdx % restaurants.length) + 1,
         total: searchData?.data?.length ?? 0,
         lat: currentRestaurant.lat,
         lng: currentRestaurant.lng,
@@ -186,10 +186,10 @@ export default function PickModePage() {
             <>
               {/* 탐색 상태 */}
               <p className="text-[16px] font-bold text-[#4a5565]">
-                현재 <span className="text-[#ff6900]">{currentIdx + 1}</span>번째
+                현재 <span className="text-[#ff6900]">{(currentIdx % restaurants.length) + 1}</span>번째
                 가게 탐색중{" "}
                 <span className="font-normal text-[#99a1af]">
-                  (검색 결과: {searchData?.totalCount ?? 0}개)
+                  (검색 결과: {searchData?.data?.length ?? 0}개)
                 </span>
               </p>
 
