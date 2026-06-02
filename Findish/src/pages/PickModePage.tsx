@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import RightIcon from "@/assets/icons/common/right.svg?react";
 import { useNavigate } from "react-router-dom";
 import Button from "@/components/common/Button";
 import Header from "@/components/common/Header";
@@ -196,15 +197,16 @@ export default function PickModePage() {
               {/* 가게 카드 */}
               {restaurant && (
                 <div className="bg-[#fff7ed] rounded-[10px] shadow-[0px_4px_10px_0px_rgba(0,0,0,0.15)] border border-[#fff1df] flex flex-col overflow-hidden flex-1">
-                  {summaryLoading ? (
+                  {section === 0 ? (
+                    <HomeSection restaurant={restaurant} />
+                  ) : summaryLoading ? (
                     <div className="flex-1 flex flex-col gap-3 p-4">
-                      <div className="h-65 rounded-[10px] bg-neutral-200 animate-pulse" />
+                      <div className="h-90 rounded-[10px] bg-neutral-200 animate-pulse" />
                       <div className="h-4 rounded bg-neutral-200 animate-pulse w-3/4" />
                       <div className="h-4 rounded bg-neutral-200 animate-pulse w-1/2" />
                     </div>
                   ) : (
                     <>
-                      {section === 0 && <HomeSection restaurant={restaurant} />}
                       {section === 1 && <TasteSection restaurant={restaurant} />}
                       {section === 2 && <VibeSection restaurant={restaurant} />}
                       {section === 3 && <ServiceSection restaurant={restaurant} />}
@@ -215,17 +217,17 @@ export default function PickModePage() {
                     <button
                       onClick={() => handleSwipe("prev")}
                       disabled={section === 0}
-                      className="text-neutral-400 disabled:opacity-30 hover:text-[#ff6900] transition-colors p-1 cursor-pointer"
+                      className="w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center disabled:opacity-30 transition-opacity cursor-pointer"
                     >
-                      ←
+                      <RightIcon width={10} height={10} className="text-neutral-700 rotate-180" />
                     </button>
                     <SectionDots active={section} />
                     <button
                       onClick={() => handleSwipe("next")}
                       disabled={section === SECTIONS.length - 1}
-                      className="text-neutral-400 disabled:opacity-30 hover:text-[#ff6900] transition-colors p-1 cursor-pointer"
+                      className="w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center disabled:opacity-30 transition-opacity cursor-pointer"
                     >
-                      →
+                      <RightIcon width={10} height={10} className="text-neutral-700" />
                     </button>
                   </div>
                 </div>

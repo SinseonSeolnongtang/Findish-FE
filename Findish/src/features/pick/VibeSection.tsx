@@ -7,7 +7,7 @@ interface Props {
 
 export default function VibeSection({ restaurant }: Props) {
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col flex-1 min-h-0">
       <div className="px-3.75 pt-5 shrink-0 flex justify-center">
         <ImageCarousel images={restaurant.vibeImages} alt="분위기 사진" />
       </div>
