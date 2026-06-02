@@ -4,7 +4,8 @@ export type AiPickSituation =
   | "FRIEND"
   | "ALONE"
   | "MEETING"
-  | "FAMILY";
+  | "FAMILY"
+  | "OTHER";
 
 // ─── Evidence 관련 타입 ───────────────────────────────────────────────────────
 export interface AiPickEvidenceKeywordEvidence {

@@ -92,7 +92,7 @@ export default function StoreCard({
         {/* 가게명 + 카테고리 + 예약하기 */}
         <div className="flex items-start justify-between gap-1">
           <div className="flex items-center gap-1.25 min-w-0">
-            <span className="text-[18px] font-bold text-black leading-none shrink-0">
+            <span className="text-[15px] font-bold text-black leading-none shrink-0">
               {store.name}
             </span>
             <span className="typo-micro text-neutral-400 shrink-0">
@@ -131,7 +131,7 @@ export default function StoreCard({
 
         {/* 요약 */}
         {store.summary && (
-          <p className="typo-caption text-neutral-600 mt-1.5 overflow-hidden whitespace-nowrap text-ellipsis">
+          <p className="typo-micro text-neutral-600 mt-1.5 overflow-hidden whitespace-nowrap text-ellipsis">
             {store.summary}
           </p>
         )}

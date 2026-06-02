@@ -1,17 +1,19 @@
-import React, { useState, useRef } from 'react';
-import { cn } from '@/lib/utils';
+import React, { useState, useRef } from "react";
+import { cn } from "@/lib/utils";
+import RightIcon from "@/assets/icons/common/right.svg?react";
 
 interface Props {
   images: string[];
   alt?: string;
 }
 
-export default function ImageCarousel({ images, alt = '사진' }: Props) {
+export default function ImageCarousel({ images, alt = "사진" }: Props) {
   const [activeIndex, setActiveIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
 
   const handlePrev = () => setActiveIndex((i) => Math.max(i - 1, 0));
-  const handleNext = () => setActiveIndex((i) => Math.min(i + 1, images.length - 1));
+  const handleNext = () =>
+    setActiveIndex((i) => Math.min(i + 1, images.length - 1));
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -29,40 +31,47 @@ export default function ImageCarousel({ images, alt = '사진' }: Props) {
 
   return (
     <div
-      className="relative w-75 h-75 rounded-[10px] overflow-hidden"
+      className="relative w-90 h-90 rounded-[10px] overflow-hidden"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      <img src={images[activeIndex]} className="w-full h-full object-cover" alt={alt} />
+      <img
+        src={images[activeIndex]}
+        className="w-full h-full object-cover"
+        alt={alt}
+      />
       <div className="absolute inset-0 shadow-[inset_0px_-30px_20px_0px_rgba(0,0,0,0.4)]" />
       {images.length > 1 && (
-        <>
-          <button
-            onClick={handlePrev}
-            disabled={activeIndex === 0}
-            className="absolute left-2 top-1/2 -translate-y-1/2 text-white opacity-70 disabled:opacity-0 text-xl"
-          >
-            ‹
-          </button>
-          <button
-            onClick={handleNext}
-            disabled={activeIndex === images.length - 1}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-white opacity-70 disabled:opacity-0 text-xl"
-          >
-            ›
-          </button>
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1 items-center">
-            {images.map((_, i) => (
-              <div
-                key={i}
-                className={cn(
-                  'h-1.5 rounded-[10px]',
-                  i === activeIndex ? 'w-4 bg-[#ff6900]' : 'w-2 bg-[#ffd9c4]',
-                )}
-              />
-            ))}
-          </div>
-        </>
+        <div className="absolute top-3 left-3 bg-black/40 text-white text-[11px] font-medium px-2 py-0.5 rounded-full">
+          {activeIndex + 1} / {images.length}
+        </div>
+      )}
+      <button
+        onClick={handlePrev}
+        disabled={activeIndex === 0}
+        className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-orange-200 cursor-pointer shadow-md flex items-center justify-center disabled:opacity-30 transition-opacity hover:bg-orange-300 duration-400 ease-in-out"
+      >
+        <RightIcon width={10} height={10} className="text-primary rotate-180" />
+      </button>
+      <button
+        onClick={handleNext}
+        disabled={activeIndex === images.length - 1}
+        className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-orange-200 shadow-md flex items-center justify-center disabled:opacity-30 transition-opacity cursor-pointer hover:bg-orange-300 duration-400 ease-in-out"
+      >
+        <RightIcon width={10} height={10} className="text-primary" />
+      </button>
+      {images.length > 1 && (
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1 items-center">
+          {images.map((_, i) => (
+            <div
+              key={i}
+              className={cn(
+                "h-1.5 rounded-[10px]",
+                i === activeIndex ? "w-4 bg-[#ff6900]" : "w-2 bg-[#ffd9c4]",
+              )}
+            />
+          ))}
+        </div>
       )}
     </div>
   );
