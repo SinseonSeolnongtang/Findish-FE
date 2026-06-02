@@ -6,10 +6,11 @@ import StepLayout from "./StepLayout";
 interface Props {
   selected: string[]; // friendIds (UUID)
   onSelect: (v: string[]) => void;
+  onPrev?: () => void;
   onNext: () => void;
 }
 
-export default function StepCompanion({ selected, onSelect, onNext }: Props) {
+export default function StepCompanion({ selected, onSelect, onPrev, onNext }: Props) {
   const { data, isLoading } = useFriendsQuery();
   const friends = data ?? [];
   const isNone = selected.length === 0;
@@ -31,7 +32,7 @@ export default function StepCompanion({ selected, onSelect, onNext }: Props) {
   }
 
   return (
-    <StepLayout title="누구와 함께 식사하시나요?" onNext={onNext}>
+    <StepLayout title="누구와 함께 식사하시나요?" onPrev={onPrev} onNext={onNext}>
       <div className="w-130">
         <ul>
           <li>

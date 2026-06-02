@@ -448,17 +448,18 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
                 </p>
               </div>
               <div className="flex flex-row gap-2 pl-12 pt-3">
-                {["천막집 대표 메뉴를 알려줘", "삼삼뼈국 리뷰 요약해줘"].map(
-                  (suggestion) => (
-                    <button
-                      key={suggestion}
-                      onClick={() => !isPending && sendText(suggestion)}
-                      className="self-start px-4 py-2 rounded-full border border-orange-300 bg-orange-50 typo-body-sm text-orange-500 hover:bg-orange-100 transition-colors cursor-pointer"
-                    >
-                      {suggestion}
-                    </button>
-                  ),
-                )}
+                {[
+                  "한성대 근처 회식하기 좋은 고깃집 알려줘",
+                  "삼삼뼈국 리뷰 요약해줘",
+                ].map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    onClick={() => !isPending && sendText(suggestion)}
+                    className="self-start px-4 py-2 rounded-full border border-orange-300 bg-orange-50 typo-body-sm text-orange-500 hover:bg-orange-100 transition-colors cursor-pointer"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
               </div>
             </div>
           )

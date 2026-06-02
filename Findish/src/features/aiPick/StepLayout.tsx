@@ -8,6 +8,7 @@ interface Props {
   onNext: () => void;
   nextLabel?: string;
   loading?: boolean;
+  nextDisabled?: boolean;
   children: ReactNode;
 }
 
@@ -18,6 +19,7 @@ export default function StepLayout({
   onNext,
   nextLabel = "다음으로",
   loading,
+  nextDisabled,
   children,
 }: Props) {
   return (
@@ -47,7 +49,7 @@ export default function StepLayout({
         )}
         <Button
           onClick={onNext}
-          disabled={loading}
+          disabled={loading || nextDisabled}
           className={onPrev ? "w-35" : "w-70"}
         >
           {loading ? (

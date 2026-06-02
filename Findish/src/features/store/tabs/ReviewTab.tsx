@@ -222,16 +222,6 @@ export default function ReviewTab({ restaurantId }: ReviewTabProps) {
                   )}
 
                   {/* 원문 보기 링크 */}
-                  {review.sourceUrl && (
-                    <a
-                      href={review.sourceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="typo-micro text-primary underline-offset-2 hover:underline self-start"
-                    >
-                      네이버 원문 보기
-                    </a>
-                  )}
                 </div>
               );
             })
