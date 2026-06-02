@@ -4,9 +4,10 @@ import { useNavigate } from "react-router-dom";
 interface ToastProps {
   message: string;
   visible: boolean;
+  showCartButton?: boolean;
 }
 
-export default function Toast({ message, visible }: ToastProps) {
+export default function Toast({ message, visible, showCartButton = true }: ToastProps) {
   const [mounted, setMounted] = useState(visible);
   const navigate = useNavigate();
 
@@ -22,12 +23,14 @@ export default function Toast({ message, visible }: ToastProps) {
       }`}
     >
       <span className="typo-caption whitespace-nowrap">{message}</span>
-      <button
-        onClick={() => navigate("/cart")}
-        className="typo-caption font-semibold text-orange-350 whitespace-nowrap underline underline-offset-2"
-      >
-        장바구니 보러가기
-      </button>
+      {showCartButton && (
+        <button
+          onClick={() => navigate("/cart")}
+          className="typo-caption font-semibold text-orange-350 whitespace-nowrap underline underline-offset-2"
+        >
+          장바구니 보러가기
+        </button>
+      )}
     </div>
   );
 }
