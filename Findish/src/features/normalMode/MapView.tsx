@@ -11,11 +11,10 @@ interface MapViewProps {
   pinnedStore?: StoreCardData | null;
 }
 
-function pinHtml(name: string, rating: number, imageUrl: string | undefined, isSelected: boolean): string {
+function pinHtml(name: string, imageUrl: string | undefined, isSelected: boolean): string {
   return renderToStaticMarkup(
     <PinNamed
       name={name}
-      rating={rating}
       imageUrl={imageUrl}
       isSelected={isSelected}
       style={{ position: "relative", transform: "none" }}
@@ -90,8 +89,8 @@ export default function MapView({
       map,
       title: pinnedStore.name,
       icon: {
-        content: pinHtml(pinnedStore.name, pinnedStore.rating ?? 0, pinnedStore.imageUrl, isSelected),
-        anchor: new naver.maps.Point(46, 120),
+        content: pinHtml(pinnedStore.name, pinnedStore.imageUrl, isSelected),
+        anchor: new naver.maps.Point(48, 111),
       },
     });
     marker.addListener("click", () => onPinClick(pinnedStore.id));
@@ -117,8 +116,8 @@ export default function MapView({
         map: mapRef.current!,
         title: r.name,
         icon: {
-          content: pinHtml(r.name, r.rating ?? 0, r.imageUrl, isSelected),
-          anchor: new naver.maps.Point(46, 120),
+          content: pinHtml(r.name, r.imageUrl, isSelected),
+          anchor: new naver.maps.Point(48, 111),
         },
       });
 
