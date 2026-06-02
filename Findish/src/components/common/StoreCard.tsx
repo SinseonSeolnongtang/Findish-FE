@@ -142,7 +142,7 @@ export default function StoreCard({
                 store.isOpen ? "text-success" : "text-neutral-400",
               )}
             >
-              {store.isOpen ? "영업중" : "영업종료"}
+              {store.isOpen ? "영업중" : "영업 종료"}
             </span>
           </div>
           <div className="flex items-center gap-1">

@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import MainPage from '@/pages/MainPage';
 import LoginPage from '@/pages/LoginPage';
 import SignupPage from '@/pages/SignupPage';
@@ -11,6 +10,7 @@ import AIPickPage from '@/pages/AIPickPage';
 import CartPage from '@/pages/CartPage';
 import MyPage from '@/pages/MyPage';
 import MapTestPage from '@/pages/MapTestPage';
+import StorePage from '@/pages/StorePage';
 import AuthLayout from '@/layout/AuthLayout';
 import PrivateRoute from '@/components/common/PrivateRoute';
 
@@ -37,6 +37,7 @@ export default function App() {
           <Route path="/pick" element={<PickModePage />} />
           <Route path="/compare" element={<ComparePage />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/store/:id" element={<StorePage />} />
           <Route element={<PrivateRoute />}>
             <Route path="/ai-pick" element={<AIPickPage />} />
             <Route path="/mypage" element={<MyPage />} />
@@ -45,7 +46,6 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
-      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }

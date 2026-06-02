@@ -46,6 +46,18 @@ export interface AgentMenuInfo {
   price?: number;
   quantity?: number;
   imageUrl?: string | null;
+  isSignature?: boolean;
+}
+
+export interface AgentRestaurantInfo {
+  restaurantId: string;
+  name: string;
+  category: string;
+  address: string;
+  thumbnailUrl?: string;
+  reviewCount?: number;
+  lat?: number;
+  lng?: number;
 }
 
 export interface ChatResponse {
@@ -53,8 +65,11 @@ export interface ChatResponse {
   intent?: AgentIntent;
   step?: AgentStep;
   targetId?: string;
+  restaurantId?: string;
+  thumbnailUrl?: string;
   reservation?: AgentReservationInfo;
   menus?: AgentMenuInfo[];
+  restaurants?: AgentRestaurantInfo[];
 }
 
 // ─── 2. 대화 내역 조회 ────────────────────────────────────────────────────────
@@ -67,6 +82,11 @@ export interface GetChatHistoryRequest {
 export interface HistoryMessage {
   role: "USER" | "AGENT";
   content: string;
+  intent?: AgentIntent;
+  step?: AgentStep;
+  restaurantId?: string;
+  menus?: AgentMenuInfo[];
+  restaurants?: AgentRestaurantInfo[];
 }
 
 export interface GetChatHistoryResponse {

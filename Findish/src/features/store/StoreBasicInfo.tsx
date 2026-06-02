@@ -2,6 +2,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { type StoreCardData } from "@/components/common/StoreCard";
 import { useRestaurantBasicQuery, useRestaurantInfoQuery } from "@/hooks/useRestaurant";
+import { isOpenNow } from "@/lib/businessHours";
 
 const DAYS = ["월", "화", "수", "목", "금", "토", "일"] as const;
 
@@ -40,7 +41,9 @@ export default function StoreBasicInfo({ store, restaurantId }: StoreBasicInfoPr
   const { data: basicData } = useRestaurantBasicQuery(restaurantId);
   const { data: infoData } = useRestaurantInfoQuery(restaurantId);
 
-  const isOpen = infoData?.data?.isOpen ?? basicData?.data?.isOpen ?? store.isOpen;
+  const isOpen = infoData?.data?.businessHours
+    ? isOpenNow(infoData.data.businessHours)
+    : (infoData?.data?.isOpen ?? basicData?.data?.isOpen ?? store.isOpen);
   const reviewCount = infoData?.data?.reviewCount ?? basicData?.data?.reviewCount ?? store.reviewCount;
   const priceRange = basicData?.data?.priceRange;
 
@@ -70,7 +73,7 @@ export default function StoreBasicInfo({ store, restaurantId }: StoreBasicInfoPr
               <path d="M8 5v3l2 1.5" stroke="#6A7282" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             <span className={cn("text-[12px] font-bold", isOpen ? "text-[#00A63E]" : "text-[#FF4500]")}>
-              {isOpen ? "영업중" : "영업전"}
+              {isOpen ? "영업중" : "영업 종료"}
             </span>
             {todayHoursStr && (
               <>

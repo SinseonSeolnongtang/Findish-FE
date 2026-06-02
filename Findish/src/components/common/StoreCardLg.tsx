@@ -96,7 +96,7 @@ export default function StoreCardLg({
               store.isOpen ? "text-success" : "text-neutral-400",
             )}
           >
-            {store.isOpen ? "영업중" : "영업종료"}
+            {store.isOpen ? "영업중" : "영업 종료"}
           </span>
           <span className="typo-caption text-neutral-500">
             리뷰 {store.reviewCount}

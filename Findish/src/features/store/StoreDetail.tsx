@@ -23,10 +23,11 @@ interface StoreDetailProps {
   store: StoreCardData;
   onClose: () => void;
   initialShowReservation?: boolean;
+  initialTab?: TabType;
 }
 
-export default function StoreDetail({ store, onClose, initialShowReservation = false }: StoreDetailProps) {
-  const [activeTab, setActiveTab] = useState<TabType>("ai");
+export default function StoreDetail({ store, onClose, initialShowReservation = false, initialTab }: StoreDetailProps) {
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab ?? "ai");
   const [showReservation, setShowReservation] = useState(initialShowReservation);
 
   const restaurantId = store.id;
