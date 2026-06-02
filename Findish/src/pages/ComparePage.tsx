@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/common/Header";
-import { useAnalysisQuery, useRemoveSelectionMutation } from "@/hooks/useExplore";
+import { useAnalysisQuery, useRemoveSelectionMutation, SELECTIONS_KEY } from "@/hooks/useExplore";
 import type { AnalysisKeyword, AnalysisRestaurant } from "@/types/explore";
 
 const CARD_COLORS = ["#FF6900", "#FACC15", "#22C55E"] as const;
@@ -9,12 +10,17 @@ const CARD_COLORS = ["#FF6900", "#FACC15", "#22C55E"] as const;
 function RestaurantCard({
   restaurant,
   color,
+  onClick,
 }: {
   restaurant: AnalysisRestaurant;
   color: string;
+  onClick?: () => void;
 }) {
   return (
-    <div className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden shadow-sm">
+    <div
+      className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden shadow-sm cursor-pointer hover:bg-orange-50 transition-colors"
+      onClick={onClick}
+    >
       <div className="w-full h-30 overflow-hidden">
         <img
           src={restaurant.thumbnailUrl}
@@ -86,6 +92,7 @@ function BarGroup({
 
 export default function ComparePage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data, isLoading } = useAnalysisQuery();
   const removeMutation = useRemoveSelectionMutation();
   const clearedRef = useRef(false);
@@ -93,6 +100,7 @@ export default function ComparePage() {
   useEffect(() => {
     if (data?.restaurants && !clearedRef.current) {
       clearedRef.current = true;
+      queryClient.removeQueries({ queryKey: SELECTIONS_KEY });
       data.restaurants.forEach((r) => {
         if (r.restaurantId) removeMutation.mutate(r.restaurantId);
       });
@@ -126,6 +134,22 @@ export default function ComparePage() {
                   key={r.restaurantId ?? i}
                   restaurant={r}
                   color={CARD_COLORS[i]}
+                  onClick={() => {
+                    if (!r.restaurantId) return;
+                    navigate("/normal", {
+                      state: {
+                        preSelectedStore: {
+                          id: r.restaurantId,
+                          name: r.name ?? "",
+                          category: r.category ?? "",
+                          isOpen: false,
+                          reviewCount: "0",
+                          keywords: [],
+                          imageUrl: r.thumbnailUrl,
+                        },
+                      },
+                    });
+                  }}
                 />
               ))}
             </div>

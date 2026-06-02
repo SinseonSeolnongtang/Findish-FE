@@ -144,15 +144,15 @@ export default function FriendList() {
         <ul className="flex flex-col">
           {friends.map((friend, idx) => (
             <li key={friend.memberId}>
-              <div className="flex items-center justify-between py-4">
+              <div className="flex items-center justify-between py-3">
                 <div>
-                  <span className="typo-t1 text-neutral-900">{friend.name}</span>
+                  <span className="typo-body-lg text-neutral-900">{friend.name}</span>
                   <span className="typo-body-sm text-neutral-400 ml-2">@{friend.loginId}</span>
                 </div>
                 <Button
                   variant="primary"
                   size="sm"
-                  className="typo-body-lg"
+                  className="typo-body-md"
                   disabled={deleteFriendMutation.isPending}
                   onClick={() => {
                     setTargetMemberId(friend.memberId);

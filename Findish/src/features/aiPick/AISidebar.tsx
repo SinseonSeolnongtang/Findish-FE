@@ -12,9 +12,10 @@ interface AISidebarProps {
   onFriendClick?: () => void;
   onNewChat?: () => void;
   onPresetSelect?: (presetId: string) => void;
+  onPresetDelete?: (presetId: string) => void;
 }
 
-export default function AISidebar({ open, onToggle, onFriendClick, onNewChat, onPresetSelect }: AISidebarProps) {
+export default function AISidebar({ open, onToggle, onFriendClick, onNewChat, onPresetSelect, onPresetDelete }: AISidebarProps) {
   const [hovered, setHovered] = useState(false);
   const [search, setSearch] = useState('');
   const effectiveOpen = open || hovered;
@@ -78,10 +79,25 @@ export default function AISidebar({ open, onToggle, onFriendClick, onNewChat, on
             {filtered.map((preset) => (
               <li
                 key={preset.presetId}
-                onClick={() => preset.presetId && onPresetSelect?.(preset.presetId)}
-                className="typo-caption text-neutral-900 cursor-pointer hover:text-primary transition-colors truncate"
+                className="flex items-center justify-between group/item"
               >
-                {preset.title}
+                <span
+                  onClick={() => preset.presetId && onPresetSelect?.(preset.presetId)}
+                  className="typo-caption text-neutral-900 cursor-pointer hover:text-primary transition-colors truncate flex-1 min-w-0"
+                >
+                  {preset.title}
+                </span>
+                {preset.presetId && onPresetDelete && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onPresetDelete(preset.presetId!);
+                    }}
+                    className="typo-caption text-neutral-400 hover:text-red-400 transition-colors ml-2 shrink-0 opacity-0 group-hover/item:opacity-100"
+                  >
+                    삭제
+                  </button>
+                )}
               </li>
             ))}
             {filtered.length === 0 && (

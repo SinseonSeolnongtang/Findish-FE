@@ -38,6 +38,7 @@ export default function SearchField({
           type="text"
           value={value ?? ""}
           onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && onSearch?.()}
           placeholder={placeholder}
           className="flex-1 typo-body-sm text-black placeholder-neutral-400 bg-transparent outline-none"
         />

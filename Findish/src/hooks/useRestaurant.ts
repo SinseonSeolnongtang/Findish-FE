@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import {
   searchRestaurants,
   getRestaurantBasic,
@@ -57,6 +57,24 @@ export const useRestaurantReviewsQuery = (restaurantId: string, params: GetRevie
     queryKey: ['restaurant', restaurantId, 'reviews', params],
     queryFn: () => getRestaurantReviews(restaurantId, params),
     enabled: !!restaurantId,
+  });
+};
+
+export const useRestaurantKeywordReviewsInfiniteQuery = (
+  restaurantId: string,
+  keyword: string | undefined,
+  size = 10,
+) => {
+  return useInfiniteQuery({
+    queryKey: ['restaurant', restaurantId, 'keyword-reviews', keyword],
+    queryFn: ({ pageParam }) =>
+      getRestaurantReviews(restaurantId, { keyword, page: pageParam as number, size }),
+    getNextPageParam: (lastPage, allPages) => {
+      const totalPages = lastPage.data?.totalPages ?? 0;
+      return allPages.length < totalPages ? allPages.length : undefined;
+    },
+    initialPageParam: 0,
+    enabled: !!restaurantId && !!keyword,
   });
 };
 

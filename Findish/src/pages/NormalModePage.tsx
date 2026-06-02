@@ -36,6 +36,7 @@ export default function NormalModePage() {
   const preSelectedStore = locationState?.preSelectedStore ?? null;
   const openReservation = locationState?.openReservation ?? false;
   const [selectedId, setSelectedId] = useState<string | null>(preSelectedStore?.id ?? null);
+  const [reserveOnOpen, setReserveOnOpen] = useState<boolean>(openReservation);
   const [keyword, setKeyword] = useState("");
   // id → true(좋아요) / false(취소) 낙관적 오버라이드
   const [toggledIds, setToggledIds] = useState<Record<string, boolean>>({});
@@ -93,8 +94,9 @@ export default function NormalModePage() {
     ?? (preSelectedStore?.id === selectedId ? preSelectedStore : null);
   const searched = !!keyword.trim();
 
-  const handlePinClick = (id: string) => setSelectedId(id === selectedId ? null : id);
-  const handleCardSelect = (id: string) => setSelectedId(id === selectedId ? null : id);
+  const handlePinClick = (id: string) => { setSelectedId(id === selectedId ? null : id); setReserveOnOpen(false); };
+  const handleCardSelect = (id: string) => { setSelectedId(id === selectedId ? null : id); setReserveOnOpen(false); };
+  const handleReserve = (id: string) => { setSelectedId(id); setReserveOnOpen(true); };
 
   return (
     <div className="h-screen overflow-hidden">
@@ -127,6 +129,7 @@ export default function NormalModePage() {
           totalCount={restaurants.length}
           selectedId={selectedId}
           onSelect={handleCardSelect}
+          onReserve={handleReserve}
           likedIds={likedIds}
           onToggleLike={handleToggleLike}
         />
@@ -134,7 +137,12 @@ export default function NormalModePage() {
 
       {selected && (
         <div className="absolute right-0 top-17 bottom-0 w-95 bg-white shadow-[-4px_0px_12px_rgba(0,0,0,0.08)] z-20 rounded-tl-2xl overflow-hidden">
-          <StoreDetail store={selected} onClose={() => setSelectedId(null)} initialShowReservation={openReservation} />
+          <StoreDetail
+            key={`${selectedId}-${reserveOnOpen}`}
+            store={selected}
+            onClose={() => setSelectedId(null)}
+            initialShowReservation={reserveOnOpen}
+          />
         </div>
       )}
 

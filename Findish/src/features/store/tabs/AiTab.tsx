@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { type StoreCardData } from "@/components/common/StoreCard";
 import MainMenuCard from "@/components/common/MainMenuCard";
-import { useRestaurantAiSummaryQuery, useRestaurantMenusQuery } from "@/hooks/useRestaurant";
+import { useRestaurantAiSummaryQuery, useRestaurantMenusQuery, useRestaurantKeywordReviewsInfiniteQuery } from "@/hooks/useRestaurant";
 import type { AiKeyword } from "@/types/restaurant";
 
 interface AiTabProps {
@@ -84,12 +84,60 @@ export default function AiTab({ store, restaurantId, onMoreClick }: AiTabProps) 
 
   const [selectedKeywordIdx, setSelectedKeywordIdx] = useState(0);
   const [sentimentTab, setSentimentTab] = useState<"positive" | "negative">("positive");
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const selectedKeyword = keywords[selectedKeywordIdx];
-  const sentences =
+
+  // 긍정 탭: /reviews API에서 keyword로 페이지네이션 (ai-summary는 ~3개 샘플만 내려줌)
+  const {
+    data: reviewPages,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useRestaurantKeywordReviewsInfiniteQuery(restaurantId, selectedKeyword?.key);
+
+  const positiveReviews = reviewPages?.pages.flatMap((p) => p.data?.content ?? []) ?? [];
+
+  // 부정 탭: ai-summary의 negativeSentences (개수가 적어 전체 표시)
+  const negativeItems = selectedKeyword?.negativeSentences ?? [];
+
+  const displayItems: string[] =
     sentimentTab === "positive"
-      ? (selectedKeyword?.positiveSentences ?? [])
-      : (selectedKeyword?.negativeSentences ?? []);
+      ? positiveReviews.map((r) => r.content ?? "").filter(Boolean)
+      : negativeItems;
+
+  const showSentinel = sentimentTab === "positive" && !!hasNextPage;
+
+  const fetchMore = useCallback(() => {
+    if (!isFetchingNextPage) fetchNextPage();
+  }, [fetchNextPage, isFetchingNextPage]);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !showSentinel) return;
+
+    // overflow-y: auto/scroll 인 가장 가까운 조상을 root로 지정해야
+    // 패널 내부 스크롤 컨테이너 기준으로 교차를 감지함
+    let scrollParent: Element | null = null;
+    let el: Element | null = sentinel.parentElement;
+    while (el) {
+      const { overflowY } = getComputedStyle(el);
+      if (overflowY === "auto" || overflowY === "scroll") {
+        scrollParent = el;
+        break;
+      }
+      el = el.parentElement;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) fetchMore();
+      },
+      { root: scrollParent, threshold: 0 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [fetchMore, showSentinel]);
 
   const aspectSummaries = ASPECT_LABELS.map(({ key, label }) => ({
     label,
@@ -121,7 +169,7 @@ export default function AiTab({ store, restaurantId, onMoreClick }: AiTabProps) 
               <MainMenuCard
                 key={item.name ?? i}
                 name={item.name ?? ""}
-                price={Number(item.price?.replace(/[^0-9]/g, "") || 0)}
+                price={Number(String(item.price ?? "").replace(/[^0-9]/g, "") || 0)}
                 imageUrl={item.imageUrl || store.imageUrl}
                 className="shrink-0 w-30 h-25"
               />
@@ -229,12 +277,39 @@ export default function AiTab({ store, restaurantId, onMoreClick }: AiTabProps) 
 
             {/* 리뷰 문장 */}
             <div className="flex flex-col divide-y divide-neutral-100">
-              {sentences.length > 0 ? (
-                sentences.map((sentence, i) => (
-                  <p key={i} className="typo-caption text-neutral-700 leading-relaxed py-3 first:pt-0">
-                    <HighlightedText text={sentence} keyword={selectedKeyword?.key ?? ""} />
-                  </p>
-                ))
+              {displayItems.length > 0 ? (
+                <>
+                  {displayItems.map((sentence, i) => (
+                    <p key={i} className="typo-caption text-neutral-700 leading-relaxed py-3 first:pt-0">
+                      <HighlightedText text={sentence} keyword={selectedKeyword?.key ?? ""} />
+                    </p>
+                  ))}
+                  {showSentinel && (
+                    <div ref={sentinelRef} className="py-4 flex justify-center">
+                      <div className="flex gap-1.5 items-center">
+                        {[0, 1, 2].map((i) => (
+                          <div
+                            key={i}
+                            className="w-1.5 h-1.5 rounded-full bg-neutral-400 animate-bounce"
+                            style={{ animationDelay: `${i * 120}ms` }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : isFetchingNextPage || (!reviewPages && sentimentTab === "positive") ? (
+                <div className="py-4 flex justify-center">
+                  <div className="flex gap-1.5 items-center">
+                    {[0, 1, 2].map((i) => (
+                      <div
+                        key={i}
+                        className="w-1.5 h-1.5 rounded-full bg-neutral-400 animate-bounce"
+                        style={{ animationDelay: `${i * 120}ms` }}
+                      />
+                    ))}
+                  </div>
+                </div>
               ) : (
                 <p className="typo-caption text-neutral-400 text-center py-4">
                   {sentimentTab === "positive" ? "긍정" : "부정"} 리뷰가 없습니다.

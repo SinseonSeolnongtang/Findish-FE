@@ -24,7 +24,7 @@ export default function ReviewTab({ restaurantId }: ReviewTabProps) {
   const [sortType, setSortType] = useState<SortOption>("최신순");
 
   const { data, isLoading, isError } = useRestaurantReviewsQuery(restaurantId, {
-    page: 1,
+    page: 0,
     size: 20,
     photoOnly,
     sort: SORT_MAP[sortType],
@@ -63,9 +63,11 @@ export default function ReviewTab({ restaurantId }: ReviewTabProps) {
       {/* 필터 행 */}
       <div className="flex items-center justify-between">
         <p className="typo-caption text-neutral-900">
-          전체 리뷰{" "}
+          {submittedKeyword ? "검색된 리뷰" : "전체 리뷰"}{" "}
           <span className="font-bold text-primary">
-            {data?.data?.totalElements ?? "…"}
+            {submittedKeyword
+              ? (data?.data?.numberOfElements ?? "…")
+              : (data?.data?.totalElements ?? "…")}
           </span>
           개
         </p>

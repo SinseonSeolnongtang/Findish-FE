@@ -9,7 +9,7 @@ import {
 } from '@/api/explore';
 import type { ExploreSearchRequest, AddSelectionRequest } from '@/types/explore';
 
-const SELECTIONS_KEY = ['explore', 'selections'] as const;
+export const SELECTIONS_KEY = ['explore', 'selections'] as const;
 
 export const useExploreSearchQuery = (params: ExploreSearchRequest) => {
   return useQuery({

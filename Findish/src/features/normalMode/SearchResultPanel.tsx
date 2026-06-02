@@ -5,6 +5,7 @@ interface SearchResultPanelProps {
   totalCount: number;
   selectedId: string | null;
   onSelect: (id: string) => void;
+  onReserve?: (id: string) => void;
   likedIds?: Set<string>;
   onToggleLike?: (id: string) => void;
 }
@@ -14,6 +15,7 @@ export default function SearchResultPanel({
   totalCount,
   selectedId,
   onSelect,
+  onReserve,
   likedIds,
   onToggleLike,
 }: SearchResultPanelProps) {
@@ -32,6 +34,7 @@ export default function SearchResultPanel({
             store={r}
             isActive={selectedId === r.id}
             onClick={() => onSelect(r.id)}
+            onReserve={() => onReserve?.(r.id)}
             isFavorited={likedIds?.has(r.id) ?? false}
             onFavorite={() => onToggleLike?.(r.id)}
           />

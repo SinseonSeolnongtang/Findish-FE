@@ -26,7 +26,11 @@ export const getPresetHistory = async (signal?: AbortSignal) => {
 // ─── 2. 프리셋 생성 ────────────────────────────────────────────────────────────
 // POST /api/v1/ai-pick/presets
 export const createPreset = async (body: CreateAiPickPresetRequest) => {
-  const { data } = await axiosInstance.post<ApiResponse<CreateAiPickPresetResponse>>('/api/v1/ai-pick/presets', body);
+  const { data } = await axiosInstance.post<ApiResponse<CreateAiPickPresetResponse>>(
+    '/api/v1/ai-pick/presets',
+    body,
+    { timeout: 60000 },
+  );
   return data.data;
 };
 
@@ -40,7 +44,11 @@ export const getPresetDetail = async (presetId: string, signal?: AbortSignal) =>
 // ─── 4. 프리셋 수정 ────────────────────────────────────────────────────────────
 // PATCH /api/v1/ai-pick/presets/{presetId}
 export const updatePreset = async (presetId: string, body: UpdateAiPickPresetRequest) => {
-  const { data } = await axiosInstance.patch<ApiResponse<UpdateAiPickPresetResponse>>(`/api/v1/ai-pick/presets/${presetId}`, body);
+  const { data } = await axiosInstance.patch<ApiResponse<UpdateAiPickPresetResponse>>(
+    `/api/v1/ai-pick/presets/${presetId}`,
+    body,
+    { timeout: 60000 },
+  );
   return data.data;
 };
 

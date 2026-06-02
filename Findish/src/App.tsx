@@ -41,7 +41,7 @@ export default function App() {
             <Route path="/ai-pick" element={<AIPickPage />} />
             <Route path="/mypage" element={<MyPage />} />
           </Route>
-          <Route path="/about" element={<MapTestPage />} />
+          <Route path="/about" element={<Navigate to="/" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
