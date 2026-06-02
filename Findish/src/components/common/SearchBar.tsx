@@ -39,21 +39,22 @@ export default function SearchBar({
       <div
         onClick={() => onModeChange?.(mode === "normal" ? "pick" : "normal")}
         className={cn(
-          "relative flex items-center rounded-full w-21.5 h-8 shrink-0 cursor-pointer",
+          "relative flex items-center rounded-full w-21.5 h-8 shrink-0 cursor-pointer transition-colors duration-300",
           mode === "normal" ? "bg-neutral-300" : "bg-primary",
         )}
       >
         {/* 슬라이딩 thumb */}
         <div
-          className={cn(
-            "absolute left-0.5 top-0.5 w-10 h-7 bg-white rounded-full shadow-sm",
-            mode === "pick" ? "translate-x-11" : "translate-x-0",
-          )}
+          className="absolute left-0.5 top-0.5 w-10 h-7 bg-white rounded-full shadow-sm"
+          style={{
+            transform: mode === "pick" ? "translateX(2.75rem)" : "translateX(0)",
+            transition: "transform 300ms ease-in-out",
+          }}
         />
         {/* 레이블 */}
         <span
           className={cn(
-            "relative z-10 flex-1 text-center text-[12px] font-medium select-none",
+            "relative z-10 flex-1 text-center text-[12px] font-medium select-none transition-colors duration-300",
             mode === "normal" ? "text-neutral-800" : "text-transparent",
           )}
         >
@@ -61,7 +62,7 @@ export default function SearchBar({
         </span>
         <span
           className={cn(
-            "relative z-10 flex-1 text-center text-[12px] font-medium select-none",
+            "relative z-10 flex-1 text-center text-[12px] font-medium select-none transition-colors duration-300",
             mode === "pick" ? "text-neutral-800" : "text-transparent",
           )}
         >

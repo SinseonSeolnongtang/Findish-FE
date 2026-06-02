@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { type StoreCardData } from "@/components/common/StoreCard";
-import { useRestaurantBasicQuery, useRestaurantInfoQuery } from "@/hooks/useRestaurant";
+import { useRestaurantBasicQuery, useRestaurantInfoQuery, useToggleLikeMutation } from "@/hooks/useRestaurant";
+import { isOpenNow } from "@/lib/businessHours";
+import FavoriteIcon from "@/assets/icons/common/favorite.svg?react";
 
 const DAYS = ["월", "화", "수", "목", "금", "토", "일"] as const;
 
@@ -39,8 +41,25 @@ export default function StoreBasicInfo({ store, restaurantId }: StoreBasicInfoPr
 
   const { data: basicData } = useRestaurantBasicQuery(restaurantId);
   const { data: infoData } = useRestaurantInfoQuery(restaurantId);
+  const { mutate: toggleLikeMutate } = useToggleLikeMutation();
+  const [liked, setLiked] = useState<boolean | null>(null);
 
-  const isOpen = infoData?.data?.isOpen ?? basicData?.data?.isOpen ?? store.isOpen;
+  useEffect(() => {
+    if (basicData?.data?.isLiked !== undefined && liked === null) {
+      setLiked(basicData.data.isLiked);
+    }
+  }, [basicData?.data?.isLiked]);
+
+  const isLiked = liked ?? basicData?.data?.isLiked ?? false;
+
+  const handleLike = () => {
+    setLiked((prev) => !(prev ?? basicData?.data?.isLiked ?? false));
+    toggleLikeMutate(restaurantId);
+  };
+
+  const isOpen = infoData?.data?.businessHours
+    ? isOpenNow(infoData.data.businessHours)
+    : (infoData?.data?.isOpen ?? basicData?.data?.isOpen ?? store.isOpen);
   const reviewCount = infoData?.data?.reviewCount ?? basicData?.data?.reviewCount ?? store.reviewCount;
   const priceRange = basicData?.data?.priceRange;
 
@@ -58,7 +77,21 @@ export default function StoreBasicInfo({ store, restaurantId }: StoreBasicInfoPr
 
   return (
     <div className="px-4 pt-4 pb-2">
-      <h2 className="text-[28px] font-bold text-black mb-1">{store.name}</h2>
+      <div className="flex items-center justify-between mb-1">
+        <h2 className="text-[28px] font-bold text-black">{store.name}</h2>
+        <button
+          onClick={handleLike}
+          className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-neutral-100 transition-colors shrink-0"
+          aria-label={isLiked ? "좋아요 취소" : "좋아요"}
+        >
+          <FavoriteIcon
+            width={24}
+            height={24}
+            stroke={isLiked ? "var(--color-primary)" : "#99A1AF"}
+            fill={isLiked ? "var(--color-primary)" : "none"}
+          />
+        </button>
+      </div>
       <p className="text-[16px] text-[#99A1AF] mb-3">{store.summary}</p>
 
       <div className="flex flex-col gap-1.5">
@@ -70,7 +103,7 @@ export default function StoreBasicInfo({ store, restaurantId }: StoreBasicInfoPr
               <path d="M8 5v3l2 1.5" stroke="#6A7282" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             <span className={cn("text-[12px] font-bold", isOpen ? "text-[#00A63E]" : "text-[#FF4500]")}>
-              {isOpen ? "영업중" : "영업전"}
+              {isOpen ? "영업중" : "영업 종료"}
             </span>
             {todayHoursStr && (
               <>

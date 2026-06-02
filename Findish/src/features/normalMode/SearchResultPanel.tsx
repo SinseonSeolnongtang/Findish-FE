@@ -27,7 +27,7 @@ export default function SearchResultPanel({
           <span className="font-bold text-primary">{totalCount}개</span>
         </p>
       </div>
-      <div className="flex-1 overflow-y-auto divide-y divide-[#F3F4F6]">
+      <div className="flex-1 overflow-y-auto no-scrollbar divide-y divide-[#F3F4F6]">
         {restaurants.map((r) => (
           <StoreCard
             key={r.id}

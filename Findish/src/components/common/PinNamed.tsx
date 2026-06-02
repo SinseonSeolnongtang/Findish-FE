@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 
 interface PinNamedProps {
   name: string;
-  rating?: number;
   imageUrl?: string;
   isSelected?: boolean;
   onClick?: () => void;
@@ -13,14 +12,14 @@ interface PinNamedProps {
 
 export default function PinNamed({
   name,
-  rating,
   imageUrl,
   isSelected = false,
   onClick,
   className,
   style,
 }: PinNamedProps) {
-  const pinBg = isSelected ? "#FF6900" : "white";
+  const nameBg = isSelected ? "#FF6900" : "white";
+  const textColor = isSelected ? "white" : "#1a1a1a";
 
   return (
     <button
@@ -31,56 +30,58 @@ export default function PinNamed({
         className,
       )}
       style={{
-        width: 108,
-        height: 130,
         transform: "translate(-50%, -100%)",
         ...style,
       }}
     >
-      {/* 핀 바디: 음식 사진 */}
+      {/* drop-shadow가 카드+삼각형 전체 외형에 적용되도록 래퍼에 filter 설정 */}
       <div
-        className="absolute"
-        style={{ top: 8, left: 0, right: 16, bottom: 22 }}
+        className="flex flex-col items-center"
+        style={{ filter: "drop-shadow(0 3px 8px rgba(0,0,0,0.28))" }}
       >
+        {/* 카드: 상단 이미지 + 하단 식당명 */}
         <div
-          className="absolute inset-0 rounded-[10px]"
-          style={{ background: pinBg, boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}
+          className="rounded-[10px] overflow-hidden"
+          style={{ width: 96, background: nameBg }}
+        >
+          {/* 상단: 식당 대표 이미지 썸네일 */}
+          <div className="w-full overflow-hidden bg-neutral-200" style={{ height: 82 }}>
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt={name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-neutral-200" />
+            )}
+          </div>
+
+          {/* 하단: 식당명 — 선택 시 주황 배경·흰 텍스트 */}
+          <div
+            className="px-2 py-0.5 text-center transition-colors duration-200"
+            style={{ background: nameBg }}
+          >
+            <span
+              className="typo-caption font-bold whitespace-nowrap transition-colors duration-200"
+              style={{ color: textColor }}
+            >
+              {name}
+            </span>
+          </div>
+        </div>
+
+        {/* 최하단 삼각형 포인터 — 식당명 영역 색상과 동일 */}
+        <div
+          style={{
+            width: 0,
+            height: 0,
+            borderLeft: "9px solid transparent",
+            borderRight: "9px solid transparent",
+            borderTop: `11px solid ${nameBg}`,
+            transition: "border-top-color 0.2s",
+          }}
         />
-        <div className="absolute inset-1.5 rounded-lg overflow-hidden bg-[#E5E7EB]">
-          {imageUrl && (
-            <img
-              src={imageUrl}
-              alt={name}
-              className="w-full h-full object-cover"
-            />
-          )}
-        </div>
-      </div>
-
-      <div
-        className="absolute"
-        style={{
-          top: 108,
-          left: 38,
-          width: 0,
-          height: 0,
-          borderLeft: "8px solid transparent",
-          borderRight: "8px solid transparent",
-          borderTop: `12px solid ${pinBg}`,
-        }}
-      />
-
-      {/* 별점 뱃지 — 우상단 */}
-      {rating != null && (
-        <div className="absolute top-0 right-0 bg-primary flex items-center gap-1 px-2.5 py-0.75 rounded-full">
-          <span className="text-white typo-micro">★</span>
-          <span className="text-white typo-caption font-medium">{rating}</span>
-        </div>
-      )}
-
-      {/* 식당명 라벨 — 하단 중앙 */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-white px-2 py-1 rounded-[10px] whitespace-nowrap shadow-[0px_2px_2px_rgba(0,0,0,0.2)]">
-        <span className="typo-caption font-bold text-black">{name}</span>
       </div>
     </button>
   );

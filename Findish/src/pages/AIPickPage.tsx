@@ -221,16 +221,16 @@ export default function AIPickPage() {
               />
 
               {presetStep === 1 && (
-                <StepCompanion
-                  selected={companions}
-                  onSelect={setCompanions}
+                <StepSituation
+                  selected={situation}
+                  onSelect={setSituation}
                   onNext={handleNextStep}
                 />
               )}
               {presetStep === 2 && (
-                <StepSituation
-                  selected={situation}
-                  onSelect={setSituation}
+                <StepCompanion
+                  selected={companions}
+                  onSelect={setCompanions}
                   onPrev={handlePrevStep}
                   onNext={handleNextStep}
                 />

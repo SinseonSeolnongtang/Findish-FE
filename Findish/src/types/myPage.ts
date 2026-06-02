@@ -12,6 +12,9 @@ export interface ReservationItem {
   time?: string;
   partySize?: number;
   status?: string;
+  storeName?: string;
+  category?: string;
+  thumbnailUrl?: string;
 }
 export interface ReservationsResponse {
   totalElements?: number;
@@ -33,10 +36,14 @@ export interface OrderItemInfo {
   menuName?: string;
   quantity?: number;
   price?: number;
+  imageUrl?: string | null;
 }
 export interface OrderItem {
   orderId?: string;
   naverPlaceId?: string;
+  storeName?: string;
+  category?: string;
+  thumbnailUrl?: string;
   items?: OrderItemInfo[];
   totalPrice?: number;
   status?: string;

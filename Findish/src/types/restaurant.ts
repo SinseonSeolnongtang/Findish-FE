@@ -14,6 +14,7 @@ export interface RestaurantBasicItem {
   groupSeating?: boolean;
   isLiked?: boolean;
   isOpen?: boolean;
+  businessHours?: string;
 }
 
 // ─── 0. 키워드 검색 (일반모드) ────────────────────────────────────────────────
@@ -57,11 +58,14 @@ export interface GetAiSummaryResponse {
 // GET /api/v1/restaurants/{naverPlaceId}/menus
 export interface MenuItem {
   name?: string;
-  price?: string;
+  price?: number;
   imageUrl?: string;
   isSignature?: boolean;
 }
-export type GetMenusResponse = MenuItem[];
+export interface GetMenusResponse {
+  thumbnailUrl?: string;
+  menus: MenuItem[];
+}
 
 // ─── 4. 리뷰 목록 조회 ───────────────────────────────────────────────────────
 // GET /api/v1/restaurants/{naverPlaceId}/reviews

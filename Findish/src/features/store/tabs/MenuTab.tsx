@@ -36,7 +36,7 @@ export default function MenuTab({ restaurantId }: MenuTabProps) {
       {
         naverPlaceId: restaurantId,
         menuName: m.name ?? "",
-        price: Number(String(m.price ?? "").replace(/[^0-9]/g, "") || 0),
+        price: m.price ?? 0,
         quantity: 1,
         imageUrl: m.imageUrl,
       },
@@ -73,11 +73,11 @@ export default function MenuTab({ restaurantId }: MenuTabProps) {
   return (
     <>
       <div className="flex flex-col gap-3 p-4">
-        {data?.data?.map((m, i) => (
+        {(data?.data?.menus ?? []).map((m, i) => (
           <MenuItem
             key={m.name ?? i}
             name={m.name ?? ""}
-            price={Number(String(m.price ?? "").replace(/[^0-9]/g, "") || 0)}
+            price={m.price ?? 0}
             imageUrl={m.imageUrl}
             isAdding={addingName === (m.name ?? "")}
             onAdd={() => handleAdd(m)}

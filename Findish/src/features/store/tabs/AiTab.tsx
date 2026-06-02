@@ -78,7 +78,8 @@ export default function AiTab({ store, restaurantId, onMoreClick }: AiTabProps) 
   const { data: menuData, isLoading: menuLoading } = useRestaurantMenusQuery(restaurantId);
 
   const ai = aiData?.data;
-  const menus = menuData?.data?.slice(0, 3) ?? [];
+  const rawMenus = menuData?.data;
+  const menus = (rawMenus?.menus ?? []).filter((item) => item.isSignature).slice(0, 3);
   const keywords = ai?.keywords ?? [];
   const photos = ai?.photos ?? [];
 
@@ -169,8 +170,9 @@ export default function AiTab({ store, restaurantId, onMoreClick }: AiTabProps) 
               <MainMenuCard
                 key={item.name ?? i}
                 name={item.name ?? ""}
-                price={Number(String(item.price ?? "").replace(/[^0-9]/g, "") || 0)}
+                price={item.price ?? 0}
                 imageUrl={item.imageUrl || store.imageUrl}
+                isSignature={item.isSignature}
                 className="shrink-0 w-30 h-25"
               />
             ))}

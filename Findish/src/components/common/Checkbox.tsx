@@ -4,12 +4,14 @@ import CheckFilled from "@/assets/icons/common/check_filled.svg?react";
 interface CheckboxProps {
   checked: boolean;
   onChange: () => void;
+  size?: number;
   className?: string;
 }
 
 export default function Checkbox({
   checked,
   onChange,
+  size = 39,
   className,
 }: CheckboxProps) {
   return (
@@ -18,7 +20,7 @@ export default function Checkbox({
       onClick={onChange}
       className={cn("shrink-0 transition-opacity", !checked && "opacity-40", className)}
     >
-      <CheckFilled />
+      <CheckFilled width={size} height={size} />
     </button>
   );
 }

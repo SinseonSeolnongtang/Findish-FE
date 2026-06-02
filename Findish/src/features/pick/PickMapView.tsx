@@ -12,7 +12,6 @@ function pinHtml(name: string, imageUrl: string): string {
   return renderToStaticMarkup(
     <PinNamed
       name={name}
-      rating={0}
       imageUrl={imageUrl}
       isSelected
       style={{ position: "relative", transform: "none" }}
@@ -82,7 +81,7 @@ export default function PickMapView({ restaurant, showPin }: Props) {
       icon: {
         content: pinHtml(restaurant.name, restaurant.imageUrl),
         // 핀 삼각형 끝(tip) 위치: x=46(핀 바디 중앙), y=120(삼각형 하단)
-        anchor: new naver.maps.Point(46, 120),
+        anchor: new naver.maps.Point(48, 111),
       },
     });
   }, [restaurant, showPin]);

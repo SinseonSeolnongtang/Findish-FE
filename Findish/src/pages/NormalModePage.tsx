@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Header from "@/components/common/Header";
 import SearchBar from "@/components/common/SearchBar";
@@ -14,13 +14,14 @@ import {
 } from "@/hooks/useRestaurant";
 import type { StoreCardData } from "@/components/common/StoreCard";
 import type { RestaurantBasicItem } from "@/types/restaurant";
+import { isOpenNow } from "@/lib/businessHours";
 
 function toStoreCard(item: RestaurantBasicItem): StoreCardData {
   return {
     id: String(item.restaurantId),
     name: item.name,
     category: item.category,
-    isOpen: item.isOpen,
+    isOpen: item.businessHours ? isOpenNow(item.businessHours) : (item.isOpen ?? false),
     reviewCount: String(item.reviewCount),
     keywords: item.tags ?? [],
     imageUrl: item.thumbnailUrl,
@@ -32,11 +33,21 @@ function toStoreCard(item: RestaurantBasicItem): StoreCardData {
 export default function NormalModePage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const locationState = location.state as { preSelectedStore?: StoreCardData; openReservation?: boolean } | null;
+  const locationState = location.state as { preSelectedStore?: StoreCardData; openReservation?: boolean; openMenuTab?: boolean } | null;
   const preSelectedStore = locationState?.preSelectedStore ?? null;
   const openReservation = locationState?.openReservation ?? false;
   const [selectedId, setSelectedId] = useState<string | null>(preSelectedStore?.id ?? null);
   const [reserveOnOpen, setReserveOnOpen] = useState<boolean>(openReservation);
+  const [menuTabOnOpen, setMenuTabOnOpen] = useState<boolean>(locationState?.openMenuTab ?? false);
+
+  useEffect(() => {
+    const newId = preSelectedStore?.id ?? null;
+    if (newId) {
+      setSelectedId(newId);
+      setReserveOnOpen(locationState?.openReservation ?? false);
+      setMenuTabOnOpen(locationState?.openMenuTab ?? false);
+    }
+  }, [location.key]);
   const [keyword, setKeyword] = useState("");
   // id → true(좋아요) / false(취소) 낙관적 오버라이드
   const [toggledIds, setToggledIds] = useState<Record<string, boolean>>({});
@@ -91,7 +102,7 @@ export default function NormalModePage() {
   );
 
   const selected = restaurants.find((r) => r.id === selectedId)
-    ?? (preSelectedStore?.id === selectedId ? preSelectedStore : null);
+    ?? (preSelectedStore?.id === selectedId ? (pinnedStore ?? preSelectedStore) : null);
   const searched = !!keyword.trim();
 
   const handlePinClick = (id: string) => { setSelectedId(id === selectedId ? null : id); setReserveOnOpen(false); };
@@ -138,10 +149,11 @@ export default function NormalModePage() {
       {selected && (
         <div className="absolute right-0 top-17 bottom-0 w-95 bg-white shadow-[-4px_0px_12px_rgba(0,0,0,0.08)] z-20 rounded-tl-2xl overflow-hidden">
           <StoreDetail
-            key={`${selectedId}-${reserveOnOpen}`}
+            key={`${selectedId}-${reserveOnOpen}-${menuTabOnOpen}`}
             store={selected}
-            onClose={() => setSelectedId(null)}
+            onClose={() => { setSelectedId(null); setMenuTabOnOpen(false); }}
             initialShowReservation={reserveOnOpen}
+            initialTab={menuTabOnOpen ? "menu" : undefined}
           />
         </div>
       )}
