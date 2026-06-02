@@ -5,13 +5,46 @@ export type AiPickSituation =
   | "ALONE"
   | "MEETING"
   | "FAMILY";
-export type AiPickPriority =
-  | "TASTE"
-  | "ATMOSPHERE"
-  | "PRICE"
-  | "CLEANLINESS"
-  | "SERVICE"
-  | "PARKING";
+
+// ─── Evidence 관련 타입 ───────────────────────────────────────────────────────
+export interface AiPickEvidenceKeywordEvidence {
+  text: string;
+  sentiment: string;
+  highlight: number[];
+}
+
+export interface AiPickEvidenceKeyword {
+  keyword: string;
+  positive_count: number;
+  negative_count: number;
+  total_mentions: number;
+  evidence?: AiPickEvidenceKeywordEvidence[];
+}
+
+export interface AiPickEvidence {
+  matchScore?: number;
+  aiReason?: string;
+  reasons?: string[];
+  keywords?: AiPickEvidenceKeyword[];
+  matchedKeywords?: string[];
+  aspectMatch?: Record<string, unknown>;
+  breakdown?: Record<string, number>;
+}
+
+// ─── Personalization 타입 ────────────────────────────────────────────────────
+export interface AiPickPersonalization {
+  mode?: string;
+  userLabel?: string;
+  personaCode?: string;
+  personaLabel?: string;
+  topAspects?: string[];
+  groupSize?: number;
+  groupStrategy?: string | null;
+  members?: unknown[];
+  vectorActive?: boolean;
+  aspectScores?: Record<string, unknown>;
+  sharedKeywords?: string[];
+}
 
 // ─── 공통 추천 식당 아이템 ────────────────────────────────────────────────────
 export interface AiPickRestaurantItem {
@@ -20,14 +53,14 @@ export interface AiPickRestaurantItem {
   category?: string;
   address?: string;
   thumbnailUrl?: string;
-  tags?: string[];
   lat?: number;
   lng?: number;
-  reviewCount?: number;
-  priceRange?: string;
+  reviewCount?: number | null;
+  priceRange?: string | null;
   parking?: boolean;
   groupSeating?: boolean;
   isLiked?: boolean;
+  evidence?: AiPickEvidence;
 }
 
 // ─── 1. 프리셋 생성 (POST /api/v1/ai-pick/presets) ───────────────────────────
@@ -36,7 +69,6 @@ export interface CreateAiPickPresetRequest {
   situation: AiPickSituation;
   budgetMin: number;
   budgetMax: number;
-  priorities: AiPickPriority[];
   extraCondition?: string;
   lat?: number;
   lng?: number;
@@ -46,6 +78,7 @@ export interface CreateAiPickPresetResponse {
   title?: string;
   aiMessage?: string;
   restaurants?: AiPickRestaurantItem[];
+  personalization?: AiPickPersonalization;
   createdAt?: string;
 }
 
@@ -55,7 +88,6 @@ export interface UpdateAiPickPresetRequest {
   situation?: AiPickSituation;
   budgetMin?: number;
   budgetMax?: number;
-  priorities?: AiPickPriority[];
   extraCondition?: string;
 }
 export type UpdateAiPickPresetResponse = CreateAiPickPresetResponse;
@@ -80,10 +112,10 @@ export interface GetAiPickPresetDetailResponse {
   situation?: AiPickSituation;
   budgetMin?: number;
   budgetMax?: number;
-  priorities?: AiPickPriority[];
   extraCondition?: string;
   aiMessage?: string;
   restaurants?: AiPickRestaurantItem[];
+  personalization?: AiPickPersonalization;
   createdAt?: string;
 }
 

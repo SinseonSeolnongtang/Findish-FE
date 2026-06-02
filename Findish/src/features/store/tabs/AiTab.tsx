@@ -169,7 +169,7 @@ export default function AiTab({ store, restaurantId, onMoreClick }: AiTabProps) 
               <MainMenuCard
                 key={item.name ?? i}
                 name={item.name ?? ""}
-                price={Number(item.price?.replace(/[^0-9]/g, "") || 0)}
+                price={Number(String(item.price ?? "").replace(/[^0-9]/g, "") || 0)}
                 imageUrl={item.imageUrl || store.imageUrl}
                 className="shrink-0 w-30 h-25"
               />

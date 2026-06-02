@@ -10,13 +10,14 @@ import StepResult, { type SelectedConditions } from '@/features/aiPick/StepResul
 import StepProgressBar from '@/features/aiPick/StepProgressBar';
 import FriendList from '@/features/aiPick/FriendList';
 import { useCreatePresetMutation, useUpdatePresetMutation, usePresetDetailQuery, useDeletePresetMutation } from '@/hooks/useAiPick';
-import type { AiPickSituation, AiPickPriority, AiPickRestaurantItem } from '@/types/aiPick';
+import type { AiPickSituation, AiPickRestaurantItem } from '@/types/aiPick';
 
 type View = 'home' | 'preset' | 'result' | 'friends';
 
 interface ResultData {
   presetId?: string;
   title: string;
+  aiMessage?: string;
   restaurants: AiPickRestaurantItem[];
 }
 
@@ -27,12 +28,11 @@ export default function AIPickPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
 
-  // 폼 상태 — API enum 타입으로 관리
+  // 폼 상태
   const [companions, setCompanions] = useState<string[]>([]);
   const [situation, setSituation] = useState<AiPickSituation | ''>('');
   const [budgetMin, setBudgetMin] = useState(10000);
   const [budgetMax, setBudgetMax] = useState(38000);
-  const [priorities, setPriorities] = useState<AiPickPriority[]>([]);
   const [additionalNote, setAdditionalNote] = useState('');
 
   const [result, setResult] = useState<ResultData | null>(null);
@@ -62,7 +62,6 @@ export default function AIPickPage() {
       situation,
       budgetMin,
       budgetMax,
-      priorities,
       extraCondition: additionalNote.trim() || undefined,
     };
 
@@ -71,7 +70,12 @@ export default function AIPickPage() {
         { presetId: selectedPresetId, body },
         {
           onSuccess: (data) => {
-            setResult({ presetId: data.presetId, title: data.title ?? '', restaurants: data.restaurants ?? [] });
+            setResult({
+              presetId: data.presetId,
+              title: data.title ?? '',
+              aiMessage: data.aiMessage,
+              restaurants: data.restaurants ?? [],
+            });
             setView('result');
           },
         },
@@ -79,7 +83,12 @@ export default function AIPickPage() {
     } else {
       createPresetMutation.mutate(body, {
         onSuccess: (data) => {
-          setResult({ presetId: data.presetId, title: data.title ?? '', restaurants: data.restaurants ?? [] });
+          setResult({
+            presetId: data.presetId,
+            title: data.title ?? '',
+            aiMessage: data.aiMessage,
+            restaurants: data.restaurants ?? [],
+          });
           setView('result');
         },
       });
@@ -130,7 +139,6 @@ export default function AIPickPage() {
     setSituation('');
     setBudgetMin(10000);
     setBudgetMax(38000);
-    setPriorities([]);
     setAdditionalNote('');
     setView('home');
   };
@@ -138,7 +146,11 @@ export default function AIPickPage() {
   // 사이드바 히스토리 선택 시 presetDetail이 로드되면 표시
   const displayResult: ResultData | null =
     selectedPresetId !== null && presetDetail
-      ? { title: presetDetail.title ?? '', restaurants: presetDetail.restaurants ?? [] }
+      ? {
+          title: presetDetail.title ?? '',
+          aiMessage: presetDetail.aiMessage,
+          restaurants: presetDetail.restaurants ?? [],
+        }
       : result;
 
   const displayConditions: SelectedConditions | undefined =
@@ -147,7 +159,6 @@ export default function AIPickPage() {
           situation: presetDetail.situation ?? '',
           budgetMin: presetDetail.budgetMin ?? 0,
           budgetMax: presetDetail.budgetMax ?? 0,
-          priorities: presetDetail.priorities ?? [],
           extraCondition: presetDetail.extraCondition || undefined,
           companionCount: (presetDetail.friends?.length ?? 0) > 0 ? presetDetail.friends!.length : undefined,
         }
@@ -156,7 +167,6 @@ export default function AIPickPage() {
             situation,
             budgetMin,
             budgetMax,
-            priorities,
             extraCondition: additionalNote.trim() || undefined,
             companionCount: companions.length > 0 ? companions.length : undefined,
           }
@@ -237,8 +247,6 @@ export default function AIPickPage() {
               )}
               {presetStep === 4 && (
                 <StepFactors
-                  selected={priorities}
-                  onSelect={setPriorities}
                   additionalNote={additionalNote}
                   onNoteChange={setAdditionalNote}
                   onPrev={handlePrevStep}
@@ -256,6 +264,7 @@ export default function AIPickPage() {
           {view === 'result' && displayResult && (
             <StepResult
               title={displayResult.title}
+              aiMessage={displayResult.aiMessage}
               restaurants={displayResult.restaurants}
               conditions={displayConditions}
               onReset={handleReset}

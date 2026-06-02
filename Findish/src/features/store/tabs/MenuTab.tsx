@@ -36,7 +36,7 @@ export default function MenuTab({ restaurantId }: MenuTabProps) {
       {
         naverPlaceId: restaurantId,
         menuName: m.name ?? "",
-        price: Number(m.price?.replace(/[^0-9]/g, "") || 0),
+        price: Number(String(m.price ?? "").replace(/[^0-9]/g, "") || 0),
         quantity: 1,
         imageUrl: m.imageUrl,
       },
@@ -77,7 +77,7 @@ export default function MenuTab({ restaurantId }: MenuTabProps) {
           <MenuItem
             key={m.name ?? i}
             name={m.name ?? ""}
-            price={Number(m.price?.replace(/[^0-9]/g, "") || 0)}
+            price={Number(String(m.price ?? "").replace(/[^0-9]/g, "") || 0)}
             imageUrl={m.imageUrl}
             isAdding={addingName === (m.name ?? "")}
             onAdd={() => handleAdd(m)}
