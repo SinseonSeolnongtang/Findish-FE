@@ -31,12 +31,29 @@ function ReservationCard({
   onCancelClick: (id: string) => void;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-neutral-300 flex gap-3 p-4">
-      <div className="flex-1 flex flex-col gap-1.5 min-w-0">
+    <div className="bg-white rounded-xl border border-neutral-300 flex items-center gap-4 p-4">
+      {item.thumbnailUrl ? (
+        <img
+          src={item.thumbnailUrl}
+          alt={item.storeName ?? ""}
+          className="w-16 h-16 rounded-lg object-cover shrink-0"
+        />
+      ) : (
+        <div className="w-16 h-16 rounded-lg bg-neutral-100 shrink-0" />
+      )}
+
+      <div className="flex-1 flex flex-col gap-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <p className="typo-body-lg font-bold text-neutral-900">
-            {item.naverPlaceId ?? ""}
-          </p>
+          <div className="flex items-center gap-2 min-w-0">
+            <p className="typo-body-lg font-bold text-neutral-900 truncate">
+              {item.storeName ?? item.naverPlaceId ?? ""}
+            </p>
+            {item.category && (
+              <span className="shrink-0 typo-micro text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full">
+                {item.category}
+              </span>
+            )}
+          </div>
           {item.status === "PENDING" && item.reservationId && (
             <Button
               variant="outline"

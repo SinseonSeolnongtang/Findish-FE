@@ -29,6 +29,16 @@ interface StoreCardProps {
   onFavorite?: () => void;
   isFavorited?: boolean;
   className?: string;
+  hideStatus?: boolean;
+  likedAt?: string;
+}
+
+function formatLikedAt(likedAt: string): string {
+  const date = new Date(likedAt);
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}.${m}.${d}`;
 }
 
 export default function StoreCard({
@@ -39,6 +49,8 @@ export default function StoreCard({
   onFavorite,
   isFavorited = false,
   className,
+  hideStatus = false,
+  likedAt,
 }: StoreCardProps) {
   const isControlled = onFavorite !== undefined;
   const [localFavorited, setLocalFavorited] = useState(isFavorited);
@@ -125,33 +137,50 @@ export default function StoreCard({
         )}
 
         {/* 영업상태 + 리뷰 수 */}
-        <div className="flex items-center gap-3 mt-1.5">
-          <div className="flex items-center gap-1">
-            <ClockIcon
-              width={16}
-              height={16}
-              stroke={
-                store.isOpen
-                  ? "var(--color-success)"
-                  : "var(--color-neutral-400)"
-              }
+        {!hideStatus && (
+          <div className="flex items-center gap-3 mt-1.5">
+            <div className="flex items-center gap-1">
+              <ClockIcon
+                width={16}
+                height={16}
+                stroke={
+                  store.isOpen
+                    ? "var(--color-success)"
+                    : "var(--color-neutral-400)"
+                }
+              />
+              <span
+                className={cn(
+                  "text-[12px] font-bold",
+                  store.isOpen ? "text-success" : "text-neutral-400",
+                )}
+              >
+                {store.isOpen ? "영업중" : "영업 종료"}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <ReviewIcon width={17} height={17} />
+              <span className="typo-caption text-neutral-500">
+                리뷰 {store.reviewCount}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* 좋아요 날짜 */}
+        {likedAt && (
+          <div className="flex items-center gap-1 mt-1.5">
+            <FavoriteIcon
+              width={13}
+              height={13}
+              stroke="var(--color-primary)"
+              fill="var(--color-primary)"
             />
-            <span
-              className={cn(
-                "text-[12px] font-bold",
-                store.isOpen ? "text-success" : "text-neutral-400",
-              )}
-            >
-              {store.isOpen ? "영업중" : "영업 종료"}
+            <span className="typo-caption text-neutral-400">
+              {formatLikedAt(likedAt)}
             </span>
           </div>
-          <div className="flex items-center gap-1">
-            <ReviewIcon width={17} height={17} />
-            <span className="typo-caption text-neutral-500">
-              리뷰 {store.reviewCount}
-            </span>
-          </div>
-        </div>
+        )}
 
         {/* 키워드 */}
         <div className="flex items-center gap-1.25 mt-1.5 overflow-hidden flex-nowrap">

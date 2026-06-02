@@ -40,7 +40,7 @@ export default function LikedTab() {
   });
 
   const items = data?.data?.content ?? [];
-  const stores = items.map(toStoreCardData);
+  const stores = items.map((item) => ({ card: toStoreCardData(item), likedAt: item.likedAt }));
   const totalPages = Math.max(
     1,
     Math.ceil((data?.data?.totalElements ?? 0) / PAGE_SIZE),
@@ -59,14 +59,16 @@ export default function LikedTab() {
       ) : (
         <>
           <div className="grid grid-cols-2 gap-4">
-            {stores.map((store) => (
+            {stores.map(({ card, likedAt }) => (
               <StoreCard
-                key={store.id}
-                store={store}
+                key={card.id}
+                store={card}
                 isFavorited={true}
-                onClick={() => navigate("/normal", { state: { preSelectedStore: store } })}
-                onReserve={() => navigate("/normal", { state: { preSelectedStore: store, openReservation: true } })}
-                onFavorite={() => handleToggleLike(store.id)}
+                hideStatus={true}
+                likedAt={likedAt}
+                onClick={() => navigate("/normal", { state: { preSelectedStore: card } })}
+                onReserve={() => navigate("/normal", { state: { preSelectedStore: card, openReservation: true } })}
+                onFavorite={() => handleToggleLike(card.id)}
                 className="border border-neutral-300 rounded-xl overflow-hidden"
               />
             ))}
