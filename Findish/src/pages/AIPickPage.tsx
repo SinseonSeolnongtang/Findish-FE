@@ -112,6 +112,16 @@ export default function AIPickPage() {
     });
   };
 
+  const handlePresetDelete = (presetId: string) => {
+    deletePresetMutation.mutate(presetId, {
+      onSuccess: () => {
+        if (selectedPresetId === presetId || result?.presetId === presetId) {
+          handleNewChat();
+        }
+      },
+    });
+  };
+
   const handleNewChat = () => {
     setSelectedPresetId(null);
     setResult(null);
@@ -163,6 +173,7 @@ export default function AIPickPage() {
           onFriendClick={() => setView('friends')}
           onNewChat={handleNewChat}
           onPresetSelect={handlePresetSelect}
+          onPresetDelete={handlePresetDelete}
         />
 
         <main className="flex-1 overflow-y-auto">
