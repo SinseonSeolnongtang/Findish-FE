@@ -21,7 +21,10 @@ export default function SearchBar({
 }: SearchBarProps) {
   const [query, setQuery] = useState("");
 
-  const defaultPlaceholder = "검색어를 입력해주세요 (가게명, 음식명 등)";
+  const defaultPlaceholder =
+    mode === "pick"
+      ? "혜화에 가성비 좋은 일식집 찾아줘."
+      : "검색어를 입력해주세요 (가게명, 음식명 등)";
 
   return (
     <div className="flex flex-row items-center w-167.5 h-12.5 bg-white rounded-[30px] shadow-sm px-2 pl-4 gap-3">
