@@ -12,7 +12,7 @@ interface AISidebarProps {
   onFriendClick?: () => void;
   onNewChat?: () => void;
   onPresetSelect?: (presetId: string) => void;
-  onPresetDelete?: (presetId: string) => void;
+  onPresetDelete?: (presetId: string, title: string) => void;
 }
 
 export default function AISidebar({ open, onToggle, onFriendClick, onNewChat, onPresetSelect, onPresetDelete }: AISidebarProps) {
@@ -91,7 +91,7 @@ export default function AISidebar({ open, onToggle, onFriendClick, onNewChat, on
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onPresetDelete(preset.presetId!);
+                      onPresetDelete(preset.presetId!, preset.title ?? "");
                     }}
                     className="typo-caption text-neutral-400 hover:text-red-400 transition-colors ml-2 shrink-0 opacity-0 group-hover/item:opacity-100"
                   >

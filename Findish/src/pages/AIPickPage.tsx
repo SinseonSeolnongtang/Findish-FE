@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Header from "@/components/common/Header";
+import Toast from "@/components/common/Toast";
 import Button from "@/components/common/Button";
 import AISidebar from "@/features/aiPick/AISidebar";
 import findyAiPickUrl from "@/assets/icons/Findy/findy_ai_pick.svg?url";
@@ -35,6 +36,9 @@ export default function AIPickPage() {
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastVisible, setToastVisible] = useState(false);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 폼 상태
   const [companions, setCompanions] = useState<string[]>([]);
@@ -44,6 +48,13 @@ export default function AIPickPage() {
   const [additionalNote, setAdditionalNote] = useState("");
 
   const [result, setResult] = useState<ResultData | null>(null);
+
+  const showToast = (message: string) => {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    setToastMessage(message);
+    setToastVisible(true);
+    toastTimerRef.current = setTimeout(() => setToastVisible(false), 3000);
+  };
 
   const createPresetMutation = useCreatePresetMutation();
   const updatePresetMutation = useUpdatePresetMutation();
@@ -123,15 +134,20 @@ export default function AIPickPage() {
 
   const handleDelete = () => {
     const presetId = selectedPresetId ?? result?.presetId;
+    const title = displayResult?.title ?? "";
     if (!presetId) return;
     deletePresetMutation.mutate(presetId, {
-      onSuccess: () => handleNewChat(),
+      onSuccess: () => {
+        showToast(`${title}을 삭제하였습니다.`);
+        handleNewChat();
+      },
     });
   };
 
-  const handlePresetDelete = (presetId: string) => {
+  const handlePresetDelete = (presetId: string, title: string) => {
     deletePresetMutation.mutate(presetId, {
       onSuccess: () => {
+        showToast(`${title}을 삭제하였습니다.`);
         if (selectedPresetId === presetId || result?.presetId === presetId) {
           handleNewChat();
         }
@@ -356,6 +372,8 @@ export default function AIPickPage() {
           )}
         </main>
       </div>
+
+      <Toast message={toastMessage} visible={toastVisible} showCartButton={false} />
     </div>
   );
 }
