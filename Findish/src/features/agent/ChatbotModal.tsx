@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect, useId } from "react";
+import { useState, useRef, useEffect, useId, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import chatbotUrl from "@/assets/chatbot.svg?url";
+import chatbotUrl from "@/assets/icons/Findy/findy_ai2.svg?url";
 import CloseIcon from "@/assets/icons/common/close_lg.svg?react";
 import ReviewIcon from "@/assets/icons/common/review.svg?react";
 import MainMenuCard from "@/components/common/MainMenuCard";
@@ -263,7 +263,7 @@ function buildMessageType(
 }
 
 export default function ChatbotModal({ onClose }: ChatbotModalProps) {
-  const [messages, setMessages] = useState<LocalMessage[]>([]);
+  const [liveMessages, setMessages] = useState<LocalMessage[]>([]);
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const idPrefix = useId();
@@ -278,29 +278,28 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
   const { data: historyData, isLoading: historyLoading } =
     useChatHistoryQuery();
 
-  const initialized = useRef(false);
-
-  useEffect(() => {
-    if (!historyLoading && !initialized.current) {
-      initialized.current = true;
-      const msgs = historyData?.data?.messages;
-      if (msgs?.length) {
-        setMessages(
-          msgs.map((msg, idx) => ({
-            id: `history-${idx}`,
-            role: (msg.role === "USER" ? "user" : "agent") as "user" | "agent",
-            text: msg.content,
-            intent: msg.intent,
-            step: msg.step,
-            targetId: msg.restaurantId,
-            menus: msg.menus,
-            restaurants: msg.restaurants,
-            messageType: buildMessageType(msg.intent, msg.step),
-          })),
-        );
-      }
-    }
+  const historyMessages = useMemo((): LocalMessage[] => {
+    if (historyLoading) return [];
+    const msgs = historyData?.data?.messages;
+    if (!msgs?.length) return [];
+    return msgs.map((msg, idx) => ({
+      id: `history-${idx}`,
+      role: (msg.role === "USER" ? "user" : "agent") as "user" | "agent",
+      text: msg.content,
+      intent: msg.intent,
+      step: msg.step,
+      targetId: msg.restaurantId,
+      menus: msg.menus,
+      restaurants: msg.restaurants,
+      messageType: buildMessageType(msg.intent, msg.step),
+      confirmed: true,
+    }));
   }, [historyLoading, historyData]);
+
+  const messages = useMemo(
+    () => [...historyMessages, ...liveMessages],
+    [historyMessages, liveMessages],
+  );
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -403,7 +402,9 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
       {/* 헤더 */}
       <div className="flex items-center justify-between px-8 pt-8 pb-5 shrink-0">
         <h2 className="typo-t1 font-bold text-neutral-900">
-          Findish 다이닝 에이전트
+          <span className="font-logo text-primary mr-1">
+            Findy <span className="text-neutral-500">AI Agent</span>
+          </span>{" "}
         </h2>
         <button
           onClick={onClose}
@@ -428,26 +429,36 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
           </div>
         ) : (
           isEmpty && (
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <img src={chatbotUrl} alt="" className="w-8 h-8 shrink-0" />
-                <p className="typo-body-lg font-bold text-neutral-900">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-1">
+                <div className="w-11 h-11 bg-primary rounded-full flex items-center justify-center shrink-0">
+                  <img src={chatbotUrl} alt="" className="w-9 h-9" />
+                </div>
+                <p className="typo-body-md font-bold text-neutral-800">
                   무엇을 도와드릴까요?
                 </p>
               </div>
-              <div className="flex flex-col gap-2 pl-10">
-                {[
-                  "쿄코코의 대표 메뉴를 알려줘",
-                  "삼삼뼈국 리뷰 요약해서 알려줘",
-                ].map((suggestion) => (
-                  <button
-                    key={suggestion}
-                    onClick={() => !isPending && sendText(suggestion)}
-                    className="self-start px-4 py-2 rounded-full border border-orange-300 bg-orange-50 typo-body-sm text-orange-500 hover:bg-orange-100 transition-colors cursor-pointer"
-                  >
-                    {suggestion}
-                  </button>
-                ))}
+              <div className="pl-12 flex flex-col gap-1">
+                <p className="typo-body-sm text-neutral-600">
+                  Findy는 AI Agent에요.
+                </p>
+                <p className="typo-body-sm text-neutral-600">
+                  대표메뉴 조회부터 리뷰 요약, 주문, 예약 모두 Findy가
+                  도와드릴게요.
+                </p>
+              </div>
+              <div className="flex flex-row gap-2 pl-12 pt-3">
+                {["천막집 대표 메뉴를 알려줘", "삼삼뼈국 리뷰 요약해줘"].map(
+                  (suggestion) => (
+                    <button
+                      key={suggestion}
+                      onClick={() => !isPending && sendText(suggestion)}
+                      className="self-start px-4 py-2 rounded-full border border-orange-300 bg-orange-50 typo-body-sm text-orange-500 hover:bg-orange-100 transition-colors cursor-pointer"
+                    >
+                      {suggestion}
+                    </button>
+                  ),
+                )}
               </div>
             </div>
           )
@@ -456,10 +467,12 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start items-center gap-2"}`}
+            className={`flex ${msg.role === "user" ? "justify-end" : "justify-start items-start gap-2"}`}
           >
             {msg.role === "agent" && (
-              <img src={chatbotUrl} alt="" className="w-8 h-8 shrink-0" />
+              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center shrink-0">
+                <img src={chatbotUrl} alt="" className="w-7 h-7" />
+              </div>
             )}
 
             {msg.role === "user" ? (
@@ -467,7 +480,7 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
                 {msg.text}
               </div>
             ) : (
-              <div className="max-w-[80%]">
+              <div className="max-w-[80%] mt-3">
                 {msg.messageType === "login_required" ? (
                   <div className="typo-body-sm text-neutral-900">
                     <p>주문/예약을 원하신다면 로그인을 먼저 진행해주세요!</p>
@@ -543,7 +556,9 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
         {/* 전송 중 타이핑 인디케이터 */}
         {isPending && (
           <div className="flex items-center gap-2">
-            <img src={chatbotUrl} alt="" className="w-8 h-8 shrink-0" />
+            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center shrink-0">
+              <img src={chatbotUrl} alt="" className="w-7 h-7" />
+            </div>
             <TypingIndicator />
           </div>
         )}
