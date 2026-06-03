@@ -24,7 +24,7 @@ export default function ConfirmModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-[0px_4px_8px_0px_rgba(0,0,0,0.25)] w-142 h-75 flex flex-col px-10 pt-8 pb-8"
+        className="bg-white rounded-2xl shadow-[0px_4px_8px_0px_rgba(0,0,0,0.25)] w-142 flex flex-col px-10 pt-8 pb-8"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative flex items-center justify-center mb-6">
@@ -38,7 +38,7 @@ export default function ConfirmModal({
           </button>
         </div>
 
-        <p className="text-sm text-black flex-1 flex items-center justify-center">{message}</p>
+        <p className="text-sm text-black text-center py-6">{message}</p>
 
         <div className="flex gap-3 justify-center">
           <Button
