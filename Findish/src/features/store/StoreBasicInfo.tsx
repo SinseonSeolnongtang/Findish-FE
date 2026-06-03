@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { type StoreCardData } from "@/components/common/StoreCard";
 import { useRestaurantBasicQuery, useRestaurantInfoQuery, useToggleLikeMutation } from "@/hooks/useRestaurant";
-import { isOpenNow } from "@/lib/businessHours";
+import { getBusinessStatus } from "@/lib/businessHours";
 import FavoriteIcon from "@/assets/icons/common/favorite.svg?react";
 
 const DAYS = ["월", "화", "수", "목", "금", "토", "일"] as const;
@@ -57,9 +57,10 @@ export default function StoreBasicInfo({ store, restaurantId }: StoreBasicInfoPr
     toggleLikeMutate(restaurantId);
   };
 
-  const isOpen = infoData?.data?.businessHours
-    ? isOpenNow(infoData.data.businessHours)
-    : (infoData?.data?.isOpen ?? basicData?.data?.isOpen ?? store.isOpen);
+  const businessStatus = infoData?.data?.businessHours
+    ? getBusinessStatus(infoData.data.businessHours)
+    : ((infoData?.data?.isOpen ?? basicData?.data?.isOpen ?? store.isOpen) ? "영업중" : "영업 종료");
+  const isOpen = businessStatus === "영업중";
   const reviewCount = infoData?.data?.reviewCount ?? basicData?.data?.reviewCount ?? store.reviewCount;
   const priceRange = basicData?.data?.priceRange;
 
@@ -98,12 +99,15 @@ export default function StoreBasicInfo({ store, restaurantId }: StoreBasicInfoPr
         {/* 영업 시간 */}
         <div>
           <div className="flex items-center gap-1.5">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
-              <circle cx="8" cy="8" r="6.5" stroke="#6A7282" strokeWidth="1.2" />
-              <path d="M8 5v3l2 1.5" stroke="#6A7282" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+            <svg
+              width="16" height="16" viewBox="0 0 16 16" fill="none"
+              className={cn("shrink-0", isOpen ? "text-[#00A63E]" : "text-[#FF4500]")}
+            >
+              <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.2" />
+              <path d="M8 5v3l2 1.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             <span className={cn("text-[12px] font-bold", isOpen ? "text-[#00A63E]" : "text-[#FF4500]")}>
-              {isOpen ? "영업중" : "영업 종료"}
+              {businessStatus}
             </span>
             {todayHoursStr && (
               <>
