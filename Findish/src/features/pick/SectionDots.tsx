@@ -12,8 +12,8 @@ export default function SectionDots({ active }: Props) {
         <div
           key={i}
           className={cn(
-            'h-2 rounded-[10px] transition-all',
-            i === active ? 'w-[42px] bg-primary' : 'w-4 bg-orange-300',
+            'h-1.5 rounded-[10px] transition-all',
+            i === active ? 'w-[42px] bg-[#ff6900]' : 'w-4 bg-[#ffd9c4]',
           )}
         />
       ))}

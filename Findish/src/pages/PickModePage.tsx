@@ -217,17 +217,17 @@ export default function PickModePage() {
                     <button
                       onClick={() => handleSwipe("prev")}
                       disabled={section === 0}
-                      className="w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center disabled:opacity-30 transition-opacity cursor-pointer"
+                      className="w-8 h-8 rounded-full bg-orange-200 shadow-md flex items-center justify-center disabled:opacity-30 transition-opacity cursor-pointer hover:bg-orange-300"
                     >
-                      <RightIcon width={10} height={10} className="text-neutral-700 rotate-180" />
+                      <RightIcon width={10} height={10} className="text-primary rotate-180" />
                     </button>
                     <SectionDots active={section} />
                     <button
                       onClick={() => handleSwipe("next")}
                       disabled={section === SECTIONS.length - 1}
-                      className="w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center disabled:opacity-30 transition-opacity cursor-pointer"
+                      className="w-8 h-8 rounded-full bg-orange-200 shadow-md flex items-center justify-center disabled:opacity-30 transition-opacity cursor-pointer hover:bg-orange-300"
                     >
-                      <RightIcon width={10} height={10} className="text-neutral-700" />
+                      <RightIcon width={10} height={10} className="text-primary" />
                     </button>
                   </div>
                 </div>
