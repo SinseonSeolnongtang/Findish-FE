@@ -33,7 +33,7 @@ export default function StepProgressBar({
 
         return (
           <React.Fragment key={i}>
-            <div className="flex flex-col items-center gap-2 shrink-0">
+            <div className="flex flex-col items-center gap-2 w-9">
               <div
                 className={cn(
                   "w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-colors duration-500",

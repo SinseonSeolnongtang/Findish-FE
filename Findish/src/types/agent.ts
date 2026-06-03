@@ -49,6 +49,22 @@ export interface AgentMenuInfo {
   isSignature?: boolean;
 }
 
+export interface AgentCartItem {
+  cartItemId: string;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+export interface AgentCartInfo {
+  restaurantId: string;
+  restaurantName: string;
+  category?: string;
+  thumbnailUrl?: string;
+  items: AgentCartItem[];
+  totalPrice: number;
+}
+
 export interface AgentRestaurantInfo {
   restaurantId: string;
   name: string;
@@ -70,6 +86,7 @@ export interface ChatResponse {
   reservation?: AgentReservationInfo;
   menus?: AgentMenuInfo[];
   restaurants?: AgentRestaurantInfo[];
+  cart?: AgentCartInfo;
 }
 
 // ─── 2. 대화 내역 조회 ────────────────────────────────────────────────────────
@@ -87,6 +104,7 @@ export interface HistoryMessage {
   restaurantId?: string;
   menus?: AgentMenuInfo[];
   restaurants?: AgentRestaurantInfo[];
+  cart?: AgentCartInfo;
 }
 
 export interface GetChatHistoryResponse {

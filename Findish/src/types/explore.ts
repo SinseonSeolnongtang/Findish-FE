@@ -60,12 +60,26 @@ export interface TopKeywordItem {
   positiveRatio?: number;
   negativeRatio?: number;
 }
+
+export interface AspectRadarItem {
+  score?: number;
+  positiveRatio?: number;
+  positiveCount?: number;
+  negativeCount?: number;
+  reviewCount?: number;
+  scoreRelative?: number;
+}
+
+export type AspectRadarKey = "taste" | "mood" | "service" | "value" | "facility" | "waiting";
+
 export interface RestaurantCardItem {
   restaurantId?: string;
   name?: string;
   category?: string;
   thumbnailUrl?: string;
   topKeywords?: TopKeywordItem[];
+  aspectRadar?: Partial<Record<AspectRadarKey, AspectRadarItem>>;
+  aiReason?: string;
 }
 export interface AnalysisSummary {
   commonText?: string;
@@ -81,11 +95,28 @@ export interface KeywordScoreItem {
     sentimentLabel?: string;
   }>;
 }
+
+export interface AspectTradeoffScore {
+  naverPlaceId?: string;
+  ratio?: number;
+  positiveRatio?: number;
+  negativeRatio?: number;
+  sentimentLabel?: string;
+}
+
+export interface AspectTradeoff {
+  aspect?: string;
+  label?: string;
+  scores?: AspectTradeoffScore[];
+  gap?: number;
+}
+
 export interface GetAnalysisResponse {
   restaurants?: RestaurantCardItem[];
   summary?: AnalysisSummary;
   commonKeywords?: KeywordScoreItem[];
   tradeOffKeywords?: KeywordScoreItem[];
+  aspectTradeoff?: AspectTradeoff[];
 }
 
 export type AnalysisRestaurant = RestaurantCardItem;

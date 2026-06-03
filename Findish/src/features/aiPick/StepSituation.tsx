@@ -65,16 +65,6 @@ function FamilyIcon() {
   );
 }
 
-function OtherIcon() {
-  return (
-    <svg viewBox="0 0 28 28" fill="#FF6900" className="w-7 h-7">
-      <circle cx="7" cy="14" r="2.5" />
-      <circle cx="14" cy="14" r="2.5" />
-      <circle cx="21" cy="14" r="2.5" />
-    </svg>
-  );
-}
-
 const SITUATION_OPTIONS: {
   value: AiPickSituation;
   label: string;
@@ -111,12 +101,6 @@ const SITUATION_OPTIONS: {
     description: "온 가족이 함께\n맛있는 식사를 해요",
     Icon: FamilyIcon,
   },
-  {
-    value: "OTHER",
-    label: "기타 상황",
-    description: "여행, 기념일 등\n특별한 상황이에요",
-    Icon: OtherIcon,
-  },
 ];
 
 export default function StepSituation({ selected, onSelect, onPrev, onNext }: Props) {
@@ -138,9 +122,6 @@ export default function StepSituation({ selected, onSelect, onPrev, onNext }: Pr
         {/* Header */}
         <div className="flex justify-between items-start mb-7">
           <div>
-            <div className="inline-flex items-center gap-1.5 bg-orange-100 text-primary text-xs font-semibold px-3 py-1 rounded-full mb-3">
-              🏠 STEP 1
-            </div>
             <h1 className="text-[28px] font-bold text-neutral-900 leading-tight mb-1.5">
               어떤 <span className="text-primary">상황</span>인가요?
             </h1>
@@ -190,11 +171,6 @@ export default function StepSituation({ selected, onSelect, onPrev, onNext }: Pr
           })}
         </div>
 
-        {/* Hint */}
-        <div className="bg-orange-100 rounded-xl px-4 py-3 flex items-center justify-center gap-2 text-sm text-neutral-600">
-          <span>💡</span>
-          선택한 상황을 바탕으로 더 정확한 맛집을 추천해드려요!
-        </div>
       </div>
 
       {/* Next Button */}

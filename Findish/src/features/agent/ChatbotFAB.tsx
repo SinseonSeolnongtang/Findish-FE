@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AnimatePresence } from "motion/react";
 import chatbotUrl from "@/assets/icons/Findy/findy_ai2.svg?url";
 import ChatbotModal from "./ChatbotModal";
 
@@ -7,7 +8,9 @@ export default function ChatbotFAB() {
 
   return (
     <>
-      {open && <ChatbotModal onClose={() => setOpen(false)} />}
+      <AnimatePresence>
+        {open && <ChatbotModal onClose={() => setOpen(false)} />}
+      </AnimatePresence>
       <div
         onClick={() => setOpen((prev) => !prev)}
         className="fixed bottom-8 right-8 w-24 h-24 bg-primary rounded-full flex items-center justify-center cursor-pointer active:scale-95 transition-all z-40 shadow-[0px_4px_8px_0px_rgba(0,0,0,0.25)]"

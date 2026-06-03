@@ -13,6 +13,7 @@ export interface StoreCardData {
   category: string;
   summary?: string;
   isOpen: boolean;
+  businessStatus?: "영업중" | "영업 전" | "영업 종료";
   reviewCount: string;
   rating?: number;
   keywords: string[];
@@ -140,23 +141,27 @@ export default function StoreCard({
         {!hideStatus && (
           <div className="flex items-center gap-3 mt-1.5">
             <div className="flex items-center gap-1">
-              <ClockIcon
-                width={16}
-                height={16}
-                stroke={
-                  store.isOpen
-                    ? "var(--color-success)"
-                    : "var(--color-neutral-400)"
-                }
-              />
-              <span
-                className={cn(
-                  "text-[12px] font-bold",
-                  store.isOpen ? "text-success" : "text-neutral-400",
-                )}
-              >
-                {store.isOpen ? "영업중" : "영업 종료"}
-              </span>
+              {(() => {
+                const status = store.businessStatus ?? (store.isOpen ? "영업중" : "영업 종료");
+                const isOpen = status === "영업중";
+                return (
+                  <>
+                    <ClockIcon
+                      width={16}
+                      height={16}
+                      className={isOpen ? "text-success" : "text-neutral-400"}
+                    />
+                    <span
+                      className={cn(
+                        "text-[12px] font-bold",
+                        isOpen ? "text-success" : "text-neutral-400",
+                      )}
+                    >
+                      {status}
+                    </span>
+                  </>
+                );
+              })()}
             </div>
             <div className="flex items-center gap-1">
               <ReviewIcon width={17} height={17} />

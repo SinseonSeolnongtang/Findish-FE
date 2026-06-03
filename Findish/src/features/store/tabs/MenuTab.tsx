@@ -14,6 +14,7 @@ export default function MenuTab({ restaurantId }: MenuTabProps) {
   const { data, isLoading, isError } = useRestaurantMenusQuery(restaurantId);
   const { mutate: addToCart } = useAddToCartMutation();
   const [addingName, setAddingName] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; showCartButton: boolean } | null>(null);
   const [toastVisible, setToastVisible] = useState(false);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -23,7 +24,8 @@ export default function MenuTab({ restaurantId }: MenuTabProps) {
     };
   }, []);
 
-  const showToast = () => {
+  const showToast = (message: string, showCartButton = true) => {
+    setToast({ message, showCartButton });
     setToastVisible(true);
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     toastTimerRef.current = setTimeout(() => setToastVisible(false), 3000);
@@ -41,11 +43,14 @@ export default function MenuTab({ restaurantId }: MenuTabProps) {
         imageUrl: m.imageUrl,
       },
       {
+        onSuccess: () => {
+          showToast(`${m.name ?? "메뉴"}을(를) 담았어요.`);
+        },
         onSettled: () => setAddingName(null),
         onError: (error: Error) => {
           const axiosError = error as AxiosError;
           if (axiosError.response?.status === 409) {
-            showToast();
+            showToast("이미 다른 가게의 메뉴가 담겨있어요.");
           }
         },
       },
@@ -84,7 +89,7 @@ export default function MenuTab({ restaurantId }: MenuTabProps) {
           />
         ))}
       </div>
-      <Toast message="이미 다른 가게의 메뉴가 담겨있어요." visible={toastVisible} />
+      {toast && <Toast message={toast.message} visible={toastVisible} showCartButton={toast.showCartButton} />}
     </>
   );
 }

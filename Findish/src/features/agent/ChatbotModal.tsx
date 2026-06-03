@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useId, useMemo } from "react";
+import { motion } from "motion/react";
 import { Link, useNavigate } from "react-router-dom";
 import chatbotUrl from "@/assets/icons/Findy/findy_ai2.svg?url";
 import CloseIcon from "@/assets/icons/common/close_lg.svg?react";
@@ -12,6 +13,7 @@ import type {
   AgentReservationInfo,
   AgentMenuInfo,
   AgentRestaurantInfo,
+  AgentCartInfo,
   ChatResponse,
 } from "@/types/agent";
 
@@ -26,6 +28,7 @@ interface LocalMessage {
   thumbnailUrl?: string | null;
   menus?: AgentMenuInfo[] | null;
   restaurants?: AgentRestaurantInfo[] | null;
+  cart?: AgentCartInfo | null;
   confirmed?: boolean;
   messageType?:
     | "login_required"
@@ -251,6 +254,37 @@ function MenuSlider({
   );
 }
 
+function CartItemList({ cart }: { cart: AgentCartInfo }) {
+  return (
+    <div className="mt-3 border border-neutral-100 rounded-xl overflow-hidden">
+      {cart.items.map((item) => (
+        <div
+          key={item.cartItemId}
+          className="flex items-center gap-3 px-3 py-2.5 border-b border-neutral-100 last:border-b-0"
+        >
+          <div className="w-10 h-10 rounded-lg overflow-hidden bg-neutral-100 shrink-0">
+            {cart.thumbnailUrl ? (
+              <img
+                src={cart.thumbnailUrl}
+                alt={item.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-neutral-200" />
+            )}
+          </div>
+          <span className="typo-body-sm text-neutral-900 flex-1 truncate">
+            {item.name}
+          </span>
+          <span className="typo-body-sm text-neutral-500 shrink-0">
+            {item.quantity}개
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function buildMessageType(
   intent?: AgentIntent,
   step?: AgentStep,
@@ -266,6 +300,7 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
   const [liveMessages, setMessages] = useState<LocalMessage[]>([]);
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
   const idPrefix = useId();
   const nextId = useRef(0);
   const makeId = () => `${idPrefix}-${nextId.current++}`;
@@ -291,6 +326,7 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
       targetId: msg.restaurantId,
       menus: msg.menus,
       restaurants: msg.restaurants,
+      cart: msg.cart,
       messageType: buildMessageType(msg.intent, msg.step),
       confirmed: true,
     }));
@@ -300,6 +336,16 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
     () => [...historyMessages, ...liveMessages],
     [historyMessages, liveMessages],
   );
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [onClose]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -323,6 +369,7 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
         reservation: res.reservation,
         menus: res.menus,
         restaurants: res.restaurants,
+        cart: res.cart,
         messageType: buildMessageType(res.intent, res.step),
       },
     ]);
@@ -398,7 +445,15 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="fixed bottom-8 right-8 z-50 w-140 h-150 bg-white-50 rounded-3xl shadow-[0px_4px_8px_0px_rgba(0,0,0,0.25)] flex flex-col">
+    <motion.div
+      ref={modalRef}
+      initial={{ opacity: 0, scale: 0.05 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.05 }}
+      transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+      style={{ transformOrigin: "bottom right" }}
+      className="fixed bottom-8 right-8 z-50 w-140 h-150 bg-white-50 rounded-3xl shadow-[0px_4px_8px_0px_rgba(0,0,0,0.25)] flex flex-col"
+    >
       {/* 헤더 */}
       <div className="flex items-center justify-between px-8 pt-8 pb-5 shrink-0">
         <h2 className="typo-t1 font-bold text-neutral-900">
@@ -519,6 +574,13 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
                       <RestaurantSlider restaurants={msg.restaurants} />
                     )}
 
+                    {/* 장바구니 목록: ADD_TO_CART 완료 */}
+                    {msg.intent === "ADD_TO_CART" &&
+                      msg.cart &&
+                      msg.cart.items.length > 0 && (
+                        <CartItemList cart={msg.cart} />
+                      )}
+
                     {/* 메뉴 슬라이더: 추천 또는 주문 요청 */}
                     {(msg.intent === "MENU_RECOMMEND" ||
                       msg.intent === "ORDER") &&
@@ -569,6 +631,26 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
 
       {/* 입력창 */}
       <div className="px-8 py-5 shrink-0">
+        {/* 시연용 예시 문구 버튼 */}
+        <div className="flex gap-2 overflow-x-auto pb-2.5 scrollbar-hide">
+          {[
+            { text: "장바구니에 담겨있는거 주문해줘.", tag: "주문" },
+            { text: "6/8 삼삼뼈국 저녁 7시에 5명 예약해줘.", tag: "예약" },
+            { text: "쿄코코 리뷰 요약해서 알려줘.", tag: "리뷰 요약" },
+            { text: "삼삼뼈국 리뷰중에서 맛에 관한 리뷰만 요약해줘", tag: "측면별 리뷰 요약" },
+          ].map(({ text, tag }) => (
+            <button
+              key={text}
+              onClick={() => !isPending && sendText(text)}
+              className="relative shrink-0 px-3.5 pt-5 pb-2 rounded-xl border border-neutral-200 bg-neutral-50 typo-caption text-neutral-500 hover:bg-neutral-100 transition-colors cursor-pointer whitespace-nowrap"
+            >
+              <span className="absolute top-1.5 left-3.5 text-[10px] font-semibold text-primary leading-none">
+                {tag}
+              </span>
+              {text}
+            </button>
+          ))}
+        </div>
         <div className="relative flex items-center h-11 rounded-[20px] border border-primary bg-white-50 shadow-[0px_2px_4px_0px_rgba(0,0,0,0.15)]">
           <input
             type="text"
@@ -576,7 +658,7 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={isPending}
-            placeholder='"6/5 20시에 방목 2호점으로 5명 예약해줘."라고 말해보세요.'
+            placeholder="삼삼뼈국 리뷰중에서 맛에 관한 리뷰만 요약해줘."
             className="flex-1 h-full px-5 bg-transparent outline-none typo-body-sm text-neutral-800 placeholder:text-neutral-400 disabled:opacity-50"
           />
           <button
@@ -588,6 +670,6 @@ export default function ChatbotModal({ onClose }: ChatbotModalProps) {
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

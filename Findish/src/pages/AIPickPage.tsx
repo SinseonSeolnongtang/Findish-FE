@@ -13,13 +13,17 @@ import StepResult, {
 } from "@/features/aiPick/StepResult";
 import StepProgressBar from "@/features/aiPick/StepProgressBar";
 import FriendList from "@/features/aiPick/FriendList";
+import TrashIcon from "@/assets/icons/common/trash.svg?react";
+import ConfirmModal from "@/components/common/ConfirmModal";
 import {
   useCreatePresetMutation,
   useUpdatePresetMutation,
   usePresetDetailQuery,
   useDeletePresetMutation,
+  useFriendsQuery,
 } from "@/hooks/useAiPick";
-import type { AiPickSituation, AiPickRestaurantItem } from "@/types/aiPick";
+import type { AiPickSituation, AiPickRestaurantItem, AiPickPersonalization } from "@/types/aiPick";
+import { SITUATION_LABEL } from "@/constants/aiPick";
 
 type View = "home" | "preset" | "result" | "friends";
 
@@ -28,13 +32,14 @@ interface ResultData {
   title: string;
   aiMessage?: string;
   restaurants: AiPickRestaurantItem[];
+  personalization?: AiPickPersonalization;
 }
 
 export default function AIPickPage() {
   const [view, setView] = useState<View>("home");
   const [presetStep, setPresetStep] = useState<1 | 2 | 3 | 4>(1);
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedPresetId, setSelectedPresetId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState("");
   const [toastVisible, setToastVisible] = useState(false);
@@ -48,6 +53,8 @@ export default function AIPickPage() {
   const [additionalNote, setAdditionalNote] = useState("");
 
   const [result, setResult] = useState<ResultData | null>(null);
+  const [friendTooltipVisible, setFriendTooltipVisible] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<{ presetId: string; title: string } | null>(null);
 
   const showToast = (message: string) => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
@@ -60,6 +67,7 @@ export default function AIPickPage() {
   const updatePresetMutation = useUpdatePresetMutation();
   const deletePresetMutation = useDeletePresetMutation();
   const { data: presetDetail } = usePresetDetailQuery(selectedPresetId ?? "");
+  const { data: friendsData } = useFriendsQuery();
 
   // 사이드바에서 히스토리 클릭 → 프리셋 상세 조회 후 결과 뷰 진입
   const handlePresetSelect = (presetId: string) => {
@@ -93,7 +101,8 @@ export default function AIPickPage() {
               presetId: data.presetId,
               title: data.title ?? "",
               aiMessage: data.aiMessage,
-              restaurants: data.restaurants ?? [],
+              restaurants: data.aiRestaurants ?? data.restaurants ?? [],
+              personalization: data.personalization,
             });
             setView("result");
           },
@@ -106,7 +115,8 @@ export default function AIPickPage() {
             presetId: data.presetId,
             title: data.title ?? "",
             aiMessage: data.aiMessage,
-            restaurants: data.restaurants ?? [],
+            restaurants: data.aiRestaurants ?? data.restaurants ?? [],
+            personalization: data.personalization,
           });
           setView("result");
         },
@@ -136,15 +146,17 @@ export default function AIPickPage() {
     const presetId = selectedPresetId ?? result?.presetId;
     const title = displayResult?.title ?? "";
     if (!presetId) return;
-    deletePresetMutation.mutate(presetId, {
-      onSuccess: () => {
-        showToast(`${title}을 삭제하였습니다.`);
-        handleNewChat();
-      },
-    });
+    setPendingDelete({ presetId, title });
   };
 
   const handlePresetDelete = (presetId: string, title: string) => {
+    setPendingDelete({ presetId, title });
+  };
+
+  const handleConfirmDelete = () => {
+    if (!pendingDelete) return;
+    const { presetId, title } = pendingDelete;
+    setPendingDelete(null);
     deletePresetMutation.mutate(presetId, {
       onSuccess: () => {
         showToast(`${title}을 삭제하였습니다.`);
@@ -168,12 +180,14 @@ export default function AIPickPage() {
   };
 
   // 사이드바 히스토리 선택 시 presetDetail이 로드되면 표시
+  // aiRestaurants는 evidence 포함 데이터, restaurants는 businessHours 포함 데이터
   const displayResult: ResultData | null =
     selectedPresetId !== null && presetDetail
       ? {
           title: presetDetail.title ?? "",
           aiMessage: presetDetail.aiMessage,
-          restaurants: presetDetail.restaurants ?? [],
+          restaurants: presetDetail.aiRestaurants ?? presetDetail.restaurants ?? [],
+          personalization: presetDetail.personalization,
         }
       : result;
 
@@ -188,6 +202,10 @@ export default function AIPickPage() {
             (presetDetail.friends?.length ?? 0) > 0
               ? presetDetail.friends!.length
               : undefined,
+          friendNames:
+            presetDetail.friends && presetDetail.friends.length > 0
+              ? presetDetail.friends.map((f) => f.name ?? "").filter(Boolean)
+              : undefined,
         }
       : result
         ? {
@@ -197,11 +215,18 @@ export default function AIPickPage() {
             extraCondition: additionalNote.trim() || undefined,
             companionCount:
               companions.length > 0 ? companions.length : undefined,
+            friendNames:
+              companions.length > 0 && friendsData
+                ? friendsData
+                    .filter((f) => companions.includes(f.memberId ?? ""))
+                    .map((f) => f.name ?? "")
+                    .filter(Boolean)
+                : undefined,
           }
         : undefined;
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className="relative h-screen flex flex-col overflow-hidden">
       <Header />
 
       <div className="flex flex-1 overflow-hidden pt-17">
@@ -354,14 +379,61 @@ export default function AIPickPage() {
 
           {/* 추천 결과 — 새 프리셋 또는 히스토리 상세 */}
           {view === "result" && displayResult && (
-            <StepResult
-              title={displayResult.title}
-              aiMessage={displayResult.aiMessage}
-              restaurants={displayResult.restaurants}
-              conditions={displayConditions}
-              onReset={handleReset}
-              onDelete={handleDelete}
-            />
+            <>
+              <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-sm border-b border-neutral-100 px-8 py-3">
+                {displayConditions && (
+                  <div className="w-full flex items-center gap-3">
+                    <div className="flex-1 flex items-center border border-neutral-200 rounded-full shadow-sm bg-white overflow-hidden divide-x divide-neutral-200">
+                      {displayConditions.companionCount ? (
+                        <div
+                          className="relative flex-1 flex items-center justify-center px-5 py-3 cursor-default"
+                          onMouseEnter={() => setFriendTooltipVisible(true)}
+                          onMouseLeave={() => setFriendTooltipVisible(false)}
+                        >
+                          <span className="text-[13px] font-semibold text-neutral-800 whitespace-nowrap">
+                            친구 {displayConditions.companionCount}명
+                          </span>
+                          {friendTooltipVisible && displayConditions.friendNames && displayConditions.friendNames.length > 0 && (
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 bg-neutral-800 text-white text-[12px] rounded-lg px-3 py-2 whitespace-nowrap shadow-lg pointer-events-none">
+                              {displayConditions.friendNames.join(", ")}
+                              <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-neutral-800" />
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex-1 flex items-center justify-center px-5 py-3">
+                          <span className="text-[13px] text-neutral-400 whitespace-nowrap">동행 없음</span>
+                        </div>
+                      )}
+                      <div className="flex-1 flex items-center justify-center px-5 py-3">
+                        <span className="text-[13px] font-semibold text-neutral-800 whitespace-nowrap">
+                          {displayConditions.situation ? SITUATION_LABEL[displayConditions.situation] : "—"}
+                        </span>
+                      </div>
+                      <div className="flex-1 flex items-center justify-center px-5 py-3">
+                        <span className="text-[13px] font-semibold text-neutral-800 whitespace-nowrap">
+                          {displayConditions.budgetMin.toLocaleString("ko-KR")}원 ~ {displayConditions.budgetMax.toLocaleString("ko-KR")}원
+                        </span>
+                      </div>
+                    </div>
+                    <Button variant="primary" size="sm" onClick={handleReset} className="h-11 px-5 rounded-full text-[13px] font-semibold shrink-0 whitespace-nowrap">
+                      조건 재설정
+                    </Button>
+                    <button
+                      onClick={handleDelete}
+                      className="flex items-center justify-center w-11 h-11 rounded-full border border-neutral-200 text-neutral-400 hover:border-red-300 hover:text-red-400 transition-colors shrink-0"
+                      aria-label="프리셋 삭제"
+                    >
+                      <TrashIcon width={14} height={14} />
+                    </button>
+                  </div>
+                )}
+              </div>
+              <StepResult
+                restaurants={displayResult.restaurants}
+                personalization={displayResult.personalization}
+              />
+            </>
           )}
 
           {/* 히스토리 상세 로딩 중 */}
@@ -372,6 +444,17 @@ export default function AIPickPage() {
           )}
         </main>
       </div>
+
+      {pendingDelete && (
+        <ConfirmModal
+          title={`${pendingDelete.title}을 삭제하시겠어요?`}
+          message="삭제한 프리셋은 복구할 수 없어요."
+          confirmLabel="삭제하기"
+          cancelLabel="취소하기"
+          onConfirm={handleConfirmDelete}
+          onClose={() => setPendingDelete(null)}
+        />
+      )}
 
       <Toast message={toastMessage} visible={toastVisible} showCartButton={false} />
     </div>
