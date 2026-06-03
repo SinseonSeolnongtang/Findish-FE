@@ -61,12 +61,13 @@ export default function NormalModePage() {
     preSelectedStore?: StoreCardData;
     openReservation?: boolean;
     openMenuTab?: boolean;
+    initialMode?: Mode;
   } | null;
   const preSelectedStore = locationState?.preSelectedStore ?? null;
   const openReservation = locationState?.openReservation ?? false;
 
   // ── 모드 ──────────────────────────────────────────
-  const [mode, setMode] = useState<Mode>("normal");
+  const [mode, setMode] = useState<Mode>(locationState?.initialMode ?? "normal");
 
   // ── 일반 모드 state ───────────────────────────────
   const [keyword, setKeyword] = useState("");
@@ -83,7 +84,7 @@ export default function NormalModePage() {
   const [localSelections, setLocalSelections] = useState<SlotItem[]>([]);
   const serverSyncedRef = useRef(false);
 
-  // 딥링크 재진입 시 (location.key 변경) normal 모드로 복귀 및 state 갱신
+  // 딥링크 재진입 시 (location.key 변경) 모드 복귀 및 state 갱신
   useEffect(() => {
     const newId = preSelectedStore?.id ?? null;
     if (newId) {
@@ -91,6 +92,8 @@ export default function NormalModePage() {
       setSelectedId(newId);
       setReserveOnOpen(locationState?.openReservation ?? false);
       setMenuTabOnOpen(locationState?.openMenuTab ?? false);
+    } else if (locationState?.initialMode) {
+      handleModeChange(locationState.initialMode);
     }
   }, [location.key]);
 

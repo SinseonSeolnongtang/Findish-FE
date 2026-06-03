@@ -1,6 +1,7 @@
 import { useState } from "react";
 import SearchIcon from "@/assets/icons/common/search.svg?react";
 import { cn } from "@/lib/utils";
+import Button from "./Button";
 
 type Mode = "normal" | "pick";
 
@@ -11,7 +12,12 @@ interface SearchBarProps {
   placeholder?: string;
 }
 
-import Button from "./Button";
+const NORMAL_EXAMPLES = ["삼겹살", "파스타", "삼삼뼈국", "쿄코코"];
+
+const PICK_EXAMPLES = [
+  "혜화에 가성비 좋은 양식집 찾아줘",
+  "조용하고 분위기 좋은 일식집 추천해줘",
+];
 
 export default function SearchBar({
   mode,
@@ -26,7 +32,13 @@ export default function SearchBar({
       ? "혜화에 가성비 좋은 일식집 찾아줘."
       : "검색어를 입력해주세요 (가게명, 음식명 등)";
 
+  const handleExampleClick = (example: string) => {
+    setQuery(example);
+    onSearch?.(example);
+  };
+
   return (
+    <div className="flex flex-col items-center gap-2">
     <div className="flex flex-row items-center w-167.5 h-12.5 bg-white rounded-[30px] shadow-sm px-2 pl-4 gap-3">
       <SearchIcon className="w-5 h-5 text-neutral-400 shrink-0" />
 
@@ -81,6 +93,21 @@ export default function SearchBar({
       >
         검색
       </Button>
+    </div>
+
+    {(mode === "normal" || mode === "pick") && (
+      <div className="flex gap-2">
+        {(mode === "normal" ? NORMAL_EXAMPLES : PICK_EXAMPLES).map((example) => (
+          <button
+            key={example}
+            onClick={() => handleExampleClick(example)}
+            className="px-3.5 py-1.5 rounded-full bg-[#fff3e8] border border-[#ffd9b3] text-[12px] text-neutral-600 hover:bg-[#ffe8cc] transition-colors duration-200 cursor-pointer"
+          >
+            {example}
+          </button>
+        ))}
+      </div>
+    )}
     </div>
   );
 }

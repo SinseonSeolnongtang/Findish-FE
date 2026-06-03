@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Header from "@/components/common/Header";
 import Toast from "@/components/common/Toast";
 import Button from "@/components/common/Button";
@@ -54,7 +54,19 @@ export default function AIPickPage() {
 
   const [result, setResult] = useState<ResultData | null>(null);
   const [friendTooltipVisible, setFriendTooltipVisible] = useState(false);
+  const friendTooltipRef = useRef<HTMLDivElement>(null);
   const [pendingDelete, setPendingDelete] = useState<{ presetId: string; title: string } | null>(null);
+
+  useEffect(() => {
+    if (!friendTooltipVisible) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (friendTooltipRef.current && !friendTooltipRef.current.contains(e.target as Node)) {
+        setFriendTooltipVisible(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [friendTooltipVisible]);
 
   const showToast = (message: string) => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
@@ -383,38 +395,39 @@ export default function AIPickPage() {
               <div className="sticky top-0 z-10 bg-white/90 backdrop-blur-sm border-b border-neutral-100 px-8 py-3">
                 {displayConditions && (
                   <div className="w-full flex items-center gap-3">
-                    <div className="flex-1 flex items-center border border-neutral-200 rounded-full shadow-sm bg-white overflow-hidden divide-x divide-neutral-200">
-                      {displayConditions.companionCount ? (
-                        <div
-                          className="relative flex-1 flex items-center justify-center px-5 py-3 cursor-default"
-                          onMouseEnter={() => setFriendTooltipVisible(true)}
-                          onMouseLeave={() => setFriendTooltipVisible(false)}
-                        >
-                          <span className="text-[13px] font-semibold text-neutral-800 whitespace-nowrap">
-                            친구 {displayConditions.companionCount}명
-                          </span>
-                          {friendTooltipVisible && displayConditions.friendNames && displayConditions.friendNames.length > 0 && (
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 z-50 bg-neutral-800 text-white text-[12px] rounded-lg px-3 py-2 whitespace-nowrap shadow-lg pointer-events-none">
-                              {displayConditions.friendNames.join(", ")}
-                              <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-neutral-800" />
-                            </div>
-                          )}
-                        </div>
-                      ) : (
+                    <div ref={friendTooltipRef} className="relative flex-1">
+                      <div className="flex items-center border border-neutral-200 rounded-full shadow-sm bg-white overflow-hidden divide-x divide-neutral-200 w-full">
+                        {displayConditions.companionCount ? (
+                          <div
+                            className="flex-1 flex items-center justify-center px-5 py-3 cursor-pointer select-none"
+                            onClick={() => setFriendTooltipVisible((v) => !v)}
+                          >
+                            <span className="text-[13px] font-semibold text-neutral-800 whitespace-nowrap">
+                              친구 {displayConditions.companionCount}명
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex-1 flex items-center justify-center px-5 py-3">
+                            <span className="text-[13px] text-neutral-400 whitespace-nowrap">동행 없음</span>
+                          </div>
+                        )}
                         <div className="flex-1 flex items-center justify-center px-5 py-3">
-                          <span className="text-[13px] text-neutral-400 whitespace-nowrap">동행 없음</span>
+                          <span className="text-[13px] font-semibold text-neutral-800 whitespace-nowrap">
+                            {displayConditions.situation ? SITUATION_LABEL[displayConditions.situation] : "—"}
+                          </span>
+                        </div>
+                        <div className="flex-1 flex items-center justify-center px-5 py-3">
+                          <span className="text-[13px] font-semibold text-neutral-800 whitespace-nowrap">
+                            {displayConditions.budgetMin.toLocaleString("ko-KR")}원 ~ {displayConditions.budgetMax.toLocaleString("ko-KR")}원
+                          </span>
+                        </div>
+                      </div>
+                      {friendTooltipVisible && displayConditions.friendNames && displayConditions.friendNames.length > 0 && (
+                        <div className="absolute top-full left-[16.67%] -translate-x-1/2 mt-2 z-50 bg-neutral-800 text-white text-[12px] rounded-lg px-3 py-2 whitespace-nowrap shadow-lg">
+                          {displayConditions.friendNames.join(", ")}
+                          <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-b-4 border-l-transparent border-r-transparent border-b-neutral-800" />
                         </div>
                       )}
-                      <div className="flex-1 flex items-center justify-center px-5 py-3">
-                        <span className="text-[13px] font-semibold text-neutral-800 whitespace-nowrap">
-                          {displayConditions.situation ? SITUATION_LABEL[displayConditions.situation] : "—"}
-                        </span>
-                      </div>
-                      <div className="flex-1 flex items-center justify-center px-5 py-3">
-                        <span className="text-[13px] font-semibold text-neutral-800 whitespace-nowrap">
-                          {displayConditions.budgetMin.toLocaleString("ko-KR")}원 ~ {displayConditions.budgetMax.toLocaleString("ko-KR")}원
-                        </span>
-                      </div>
                     </div>
                     <Button variant="primary" size="sm" onClick={handleReset} className="h-11 px-5 rounded-full text-[13px] font-semibold shrink-0 whitespace-nowrap">
                       조건 재설정

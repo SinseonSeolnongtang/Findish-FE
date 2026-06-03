@@ -1,5 +1,5 @@
 import axios, { type AxiosError, type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios';
-import { useAuthStore } from '@/stores/authStore';
+import { refreshAccessToken, forceLogout } from '@/lib/tokenRefresh';
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -26,32 +26,23 @@ axiosInstance.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-    const isAuthEndpoint = originalRequest.url?.includes('/auth/');
-    const refreshToken = localStorage.getItem('refreshToken');
+    const isReissueEndpoint = originalRequest.url?.includes('/auth/reissue');
+    const hasRefreshToken = !!localStorage.getItem('refreshToken');
 
     if (
       (error.response?.status === 401 || error.response?.status === 403) &&
       !originalRequest._retry &&
-      !isAuthEndpoint &&
-      refreshToken
+      !isReissueEndpoint &&
+      hasRefreshToken
     ) {
       originalRequest._retry = true;
 
       try {
-        const { data } = await axios.post(
-          `${import.meta.env.VITE_API_BASE_URL}/api/v1/auth/reissue`,
-          { refreshToken },
-        );
-
-        useAuthStore.getState().login(data.data.accessToken, data.data.refreshToken);
-        originalRequest.headers.Authorization = `Bearer ${data.data.accessToken}`;
-
+        const accessToken = await refreshAccessToken();
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return axiosInstance(originalRequest);
       } catch {
-        useAuthStore.getState().logout();
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login';
-        }
+        forceLogout();
       }
     }
 

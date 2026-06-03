@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Keyword from "@/components/common/Keyword";
 import StarFilled from "@/assets/icons/common/star_filled.svg?react";
 import type {
@@ -20,20 +20,6 @@ export interface SelectedConditions {
 interface Props {
   restaurants: AiPickRestaurantItem[];
   personalization?: AiPickPersonalization;
-}
-
-// ─── aiReason 파싱 헬퍼 ────────────────────────────────────────────────────────
-
-function parseRestaurantPersona(aiReason?: string): string | null {
-  if (!aiReason) return null;
-  const match = aiReason.match(/\[이 식당\][^\S\n]+([^\n(]+)/);
-  return match ? match[1].trim() : null;
-}
-
-function parseUserTasteMsg(aiReason?: string): string | null {
-  if (!aiReason) return null;
-  const match = aiReason.match(/\[당신의 취향\][^\S\n]+([^\n]+)/);
-  return match ? match[1].trim() : null;
 }
 
 // ─── 상수 ─────────────────────────────────────────────────────────────────────
@@ -63,37 +49,84 @@ const RADAR_AXES: { label: string; key: AspectKey }[] = [
 
 // ─── 육각형 레이더 차트 ────────────────────────────────────────────────────────
 
-function RadarChart({ restaurants }: { restaurants: AiPickRestaurantItem[] }) {
+function RadarChart({
+  restaurants,
+  avgRadar,
+  userRadar,
+}: {
+  restaurants: AiPickRestaurantItem[];
+  avgRadar?: Record<string, number>;
+  userRadar?: Record<string, number>;
+}) {
   const SIZE = 420;
   const CENTER = SIZE / 2;
   const RADIUS = 132;
   const LEVELS = 4;
   const N = RADAR_AXES.length;
 
-  const [hoveredPoint, setHoveredPoint] = useState<{
-    ri: number;
-    axisIdx: number;
-  } | null>(null);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    let rafId: number;
+    let startTime: number | null = null;
+    const duration = 975;
+    const easeOutExpo = (t: number) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t));
+    const animate = (ts: number) => {
+      if (!startTime) startTime = ts;
+      const t = Math.min((ts - startTime) / duration, 1);
+      setProgress(easeOutExpo(t));
+      if (t < 1) rafId = requestAnimationFrame(animate);
+    };
+    rafId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafId);
+  }, []);
+
+  const [hoveredAxis, setHoveredAxis] = useState<number | null>(null);
   const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [hoveredPoint, setHoveredPoint] = useState<{ ri: number; ai: number } | null>(null);
+  const [pointTooltipVisible, setPointTooltipVisible] = useState(false);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const showRafRef = useRef<number | null>(null);
+  const pointHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pointShowRafRef = useRef<number | null>(null);
 
-  const handlePointEnter = (ri: number, axisIdx: number) => {
+  const handleAxisEnter = (axisIdx: number) => {
+    if (hoveredPoint !== null) return;
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     if (showRafRef.current != null) cancelAnimationFrame(showRafRef.current);
-    // opacity=0 상태로 먼저 DOM에 추가한 뒤, 다음 페인트 프레임에서 opacity=1로 전환
     setTooltipVisible(false);
-    setHoveredPoint({ ri, axisIdx });
+    setHoveredAxis(axisIdx);
     showRafRef.current = requestAnimationFrame(() => {
       showRafRef.current = requestAnimationFrame(() => setTooltipVisible(true));
     });
   };
 
-  const handlePointLeave = () => {
+  const handleAxisLeave = () => {
     if (showRafRef.current != null) cancelAnimationFrame(showRafRef.current);
     setTooltipVisible(false);
-    hideTimerRef.current = setTimeout(() => setHoveredPoint(null), 200);
+    hideTimerRef.current = setTimeout(() => setHoveredAxis(null), 200);
   };
+
+  const handlePointEnter = (ri: number, ai: number) => {
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    if (showRafRef.current != null) cancelAnimationFrame(showRafRef.current);
+    setTooltipVisible(false);
+    setHoveredAxis(null);
+    if (pointHideTimerRef.current) clearTimeout(pointHideTimerRef.current);
+    if (pointShowRafRef.current != null) cancelAnimationFrame(pointShowRafRef.current);
+    setPointTooltipVisible(false);
+    setHoveredPoint({ ri, ai });
+    pointShowRafRef.current = requestAnimationFrame(() => {
+      pointShowRafRef.current = requestAnimationFrame(() => setPointTooltipVisible(true));
+    });
+  };
+
+  const handlePointLeave = () => {
+    if (pointShowRafRef.current != null) cancelAnimationFrame(pointShowRafRef.current);
+    setPointTooltipVisible(false);
+    pointHideTimerRef.current = setTimeout(() => setHoveredPoint(null), 200);
+  };
+
 
   const getAngle = (i: number) => (Math.PI * 2 * i) / N - Math.PI / 2;
   const getXY = (value: number, i: number) => ({
@@ -119,15 +152,53 @@ function RadarChart({ restaurants }: { restaurants: AiPickRestaurantItem[] }) {
   const getScore = (r: AiPickRestaurantItem, key: AspectKey) =>
     r.evidence?.aspectRadar?.[key]?.score ?? 0;
 
-  const tooltipContent = (() => {
+  const radarPoints = (map?: Record<string, number>) => {
+    if (!map) return null;
+    return RADAR_AXES.map((axis, i) => {
+      const { x, y } = getXY((map[axis.key] ?? 0) * progress, i);
+      return `${x},${y}`;
+    }).join(" ");
+  };
+
+  const avgPoints = radarPoints(avgRadar);
+  const userPoints = radarPoints(userRadar);
+
+  const axisTooltip = (() => {
+    if (hoveredAxis === null) return null;
+    const axis = RADAR_AXES[hoveredAxis];
+    const labelPos = getXY(1.3, hoveredAxis);
+    const tw = 236;
+    const pad = 12;
+    const titleH = 28;
+    const rowH = 27;
+    const barAreaX = 90;
+    const barW = 92;
+    const th = pad + titleH + 6 + active.length * rowH + pad;
+    let tx = labelPos.x + 12;
+    let ty = labelPos.y - th / 2;
+    if (tx + tw > SIZE - 6) tx = labelPos.x - tw - 12;
+    if (ty < 6) ty = 6;
+    if (ty + th > SIZE - 6) ty = SIZE - th - 6;
+    return { axis, tw, pad, titleH, rowH, barAreaX, barW, th, tx, ty };
+  })();
+
+  const clickTooltip = (() => {
     if (!hoveredPoint) return null;
-    const { ri, axisIdx } = hoveredPoint;
+    const { ri, ai } = hoveredPoint;
+    if (ri >= active.length) return null;
     const r = active[ri];
-    const axis = RADAR_AXES[axisIdx];
+    const axis = RADAR_AXES[ai];
     const item = r.evidence?.aspectRadar?.[axis.key];
-    if (!item) return null;
-    const { x, y } = getXY(getScore(r, axis.key), axisIdx);
-    return { x, y, item, ri, axisLabel: axis.label };
+    const score = getScore(r, axis.key);
+    const color = RESTAURANT_COLORS[ri].stroke;
+    const { x: px, y: py } = getXY(score, ai);
+    const tw = 210, th = 126;
+    let tx = px + 14;
+    let ty = py - th / 2;
+    if (tx + tw > SIZE - 6) tx = px - tw - 14;
+    if (ty < 6) ty = 6;
+    if (ty + th > SIZE - 6) ty = SIZE - th - 6;
+    return { r, ri, axis, item, score, color, tx, ty, tw, th };
   })();
 
   return (
@@ -141,6 +212,8 @@ function RadarChart({ restaurants }: { restaurants: AiPickRestaurantItem[] }) {
           <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.12" />
         </filter>
       </defs>
+
+      <g>
 
       {/* 바깥 배경 */}
       <polygon points={outerPoints} fill="#FFF7ED" stroke="none" />
@@ -173,10 +246,36 @@ function RadarChart({ restaurants }: { restaurants: AiPickRestaurantItem[] }) {
         );
       })}
 
-      {/* 데이터 폴리곤 */}
+      {/* 전체 평균 레이어 */}
+      {avgPoints && (
+        <polygon
+          points={avgPoints}
+          fill="#9CA3AF"
+          fillOpacity={0.1}
+          stroke="#9CA3AF"
+          strokeWidth={1.5}
+          strokeDasharray="4,3"
+          strokeLinejoin="round"
+        />
+      )}
+
+      {/* 내 취향 레이어 */}
+      {userPoints && (
+        <polygon
+          points={userPoints}
+          fill="#FF6900"
+          fillOpacity={0.08}
+          stroke="#FF6900"
+          strokeWidth={1.5}
+          strokeDasharray="5,3"
+          strokeLinejoin="round"
+        />
+      )}
+
+      {/* 식당별 데이터 폴리곤 */}
       {active.map((r, ri) => {
         const points = RADAR_AXES.map((axis, i) => {
-          const { x, y } = getXY(getScore(r, axis.key), i);
+          const { x, y } = getXY(getScore(r, axis.key) * progress, i);
           return `${x},${y}`;
         }).join(" ");
         const c = RESTAURANT_COLORS[ri];
@@ -193,21 +292,38 @@ function RadarChart({ restaurants }: { restaurants: AiPickRestaurantItem[] }) {
         );
       })}
 
-      {/* 데이터 점 (호버 이벤트 포함) */}
+      {/* 축 호버 히트 영역 (레이블 근처 바깥쪽만) */}
+      {RADAR_AXES.map((_, i) => {
+        const start = getXY(0.88, i);
+        const end = getXY(1.2, i);
+        return (
+          <line
+            key={i}
+            x1={start.x} y1={start.y}
+            x2={end.x} y2={end.y}
+            stroke="transparent"
+            strokeWidth={14}
+            style={{ pointerEvents: "all", cursor: "pointer" }}
+            onMouseEnter={() => handleAxisEnter(i)}
+            onMouseLeave={handleAxisLeave}
+          />
+        );
+      })}
+
+      {/* 데이터 점 */}
       {active.map((r, ri) =>
         RADAR_AXES.map((axis, i) => {
-          const { x, y } = getXY(getScore(r, axis.key), i);
-          const isHovered =
-            hoveredPoint?.ri === ri && hoveredPoint?.axisIdx === i;
+          const { x, y } = getXY(getScore(r, axis.key) * progress, i);
+          const isHoveredPt = hoveredPoint?.ri === ri && hoveredPoint?.ai === i;
           return (
             <circle
               key={`${ri}-${i}`}
               cx={x}
               cy={y}
-              r={isHovered ? 5.5 : 4}
+              r={isHoveredPt ? 5.5 : 4}
               fill={RESTAURANT_COLORS[ri].stroke}
               stroke="white"
-              strokeWidth={1.5}
+              strokeWidth={isHoveredPt ? 2 : 1.5}
               style={{ cursor: "pointer" }}
               onMouseEnter={() => handlePointEnter(ri, i)}
               onMouseLeave={handlePointLeave}
@@ -227,6 +343,7 @@ function RadarChart({ restaurants }: { restaurants: AiPickRestaurantItem[] }) {
           Math.abs(cosA) < 0.2 ? "middle" : cosA > 0 ? "start" : "end";
         const dominantBaseline =
           Math.abs(sinA) < 0.2 ? "middle" : sinA > 0 ? "hanging" : "auto";
+        const isHovered = hoveredAxis === i;
 
         return (
           <text
@@ -236,8 +353,11 @@ function RadarChart({ restaurants }: { restaurants: AiPickRestaurantItem[] }) {
             textAnchor={textAnchor}
             dominantBaseline={dominantBaseline}
             fontSize={15}
-            fontWeight="600"
-            fill="#374151"
+            fontWeight={isHovered ? "700" : "600"}
+            fill={isHovered ? "#FF6900" : "#374151"}
+            style={{ cursor: "pointer" }}
+            onMouseEnter={() => handleAxisEnter(i)}
+            onMouseLeave={handleAxisLeave}
           >
             {axis.label}
           </text>
@@ -262,224 +382,110 @@ function RadarChart({ restaurants }: { restaurants: AiPickRestaurantItem[] }) {
         );
       })}
 
-      {/* 호버 툴팁 */}
-      {tooltipContent &&
-        (() => {
-          const { x, y, item, ri, axisLabel } = tooltipContent;
-          const color = RESTAURANT_COLORS[ri].stroke;
-          const restaurantName = active[ri].name ?? `${ri + 1}위`;
-          const scoreText = `${(item.score * 100).toFixed(1)}점`;
-          const pad = 14;
-          const dotR = 5;
-          const nameLineH = 26;
-          const axisLineH = 22;
-          const dataLineH = 19;
-          const tw = 175;
-          const noReview = (item.reviewCount ?? 0) === 0;
-          // 리뷰 없음: 안내 문구 2줄(38px) / 정상: 긍정비율 + bar(27) + 리뷰
-          const th = noReview
-            ? pad + nameLineH + 7 + axisLineH + 38 + pad
-            : pad + nameLineH + 7 + axisLineH + dataLineH + 27 + dataLineH + pad;
-          let tx = x + 14;
-          let ty = y - th / 2;
-          if (tx + tw > SIZE - 6) tx = x - tw - 14;
-          if (ty < 6) ty = 6;
-          if (ty + th > SIZE - 6) ty = SIZE - th - 6;
-
-          const nameY = ty + pad + nameLineH * 0.72;
-          const dividerY = ty + pad + nameLineH + 3;
-          const axisY = dividerY + 5 + axisLineH * 0.72;
-          const dataStartY = axisY + axisLineH * 0.4;
-
-          return (
-            <g
-              style={{
-                pointerEvents: "none",
-                opacity: tooltipVisible ? 1 : 0,
-                transition: "opacity 0.18s ease",
-              }}
-            >
-              <rect
-                x={tx}
-                y={ty}
-                width={tw}
-                height={th}
-                rx={7}
-                ry={7}
-                fill="white"
-                stroke={color}
-                strokeWidth={1.5}
-                filter="url(#tt-shadow)"
-              />
-              {/* 가게명 + 컬러 도트 */}
-              <circle
-                cx={tx + pad + dotR}
-                cy={nameY - 2}
-                r={dotR}
-                fill={color}
-              />
-              <text
-                x={tx + pad + dotR * 2 + 6}
-                y={nameY}
-                fontSize={14}
-                fontWeight="700"
-                fill={color}
-              >
-                {restaurantName}
-              </text>
-              {/* 구분선 */}
-              <line
-                x1={tx + 1}
-                y1={dividerY}
-                x2={tx + tw - 1}
-                y2={dividerY}
-                stroke="#F3F4F6"
-                strokeWidth={1}
-              />
-              {/* 축 이름 + 점수 태그 */}
-              <text
-                x={tx + pad}
-                y={axisY}
-                fontSize={13}
-                fontWeight="700"
-                fill="#374151"
-              >
-                {axisLabel}
-              </text>
-              {(() => {
-                const tagPad = 5;
-                const tagH = 18;
-                const tagW = scoreText.length * 8 + tagPad * 2;
-                const tagX = tx + pad + 50;
-                const tagY = axisY - tagH * 0.8;
-                return (
-                  <>
-                    <rect
-                      x={tagX}
-                      y={tagY}
-                      width={tagW}
-                      height={tagH}
-                      rx={4}
-                      ry={4}
-                      fill={color}
-                      fillOpacity={0.12}
-                    />
-                    <text
-                      x={tagX + tagPad}
-                      y={tagY + tagH * 0.72}
-                      fontSize={12}
-                      fontWeight="600"
-                      fill={color}
-                    >
-                      {scoreText}
-                    </text>
-                  </>
-                );
-              })()}
-              {noReview ? (
-                <>
-                  <text
-                    x={tx + pad}
-                    y={dataStartY + 16}
-                    fontSize={11}
-                    fill="#9CA3AF"
-                  >
-                    등록된 리뷰가 없어
+      {/* 축별 비교 툴팁 */}
+      {axisTooltip && (() => {
+        const { axis, tw, pad, titleH, rowH, barAreaX, barW, th, tx, ty } = axisTooltip;
+        const titleY = ty + pad + titleH * 0.72;
+        const dividerY = ty + pad + titleH + 2;
+        return (
+          <g style={{ pointerEvents: "none", opacity: tooltipVisible ? 1 : 0, transition: "opacity 0.18s ease" }}>
+            <rect
+              x={tx} y={ty} width={tw} height={th}
+              rx={8} ry={8}
+              fill="white" stroke="#E5E7EB" strokeWidth={1.5}
+              filter="url(#tt-shadow)"
+            />
+            <text x={tx + pad} y={titleY} fontSize={14} fontWeight="700" fill="#111827">
+              {axis.label}
+            </text>
+            <line x1={tx + 1} y1={dividerY} x2={tx + tw - 1} y2={dividerY} stroke="#F3F4F6" strokeWidth={1} />
+            {active.map((r, ri) => {
+              const item = r.evidence?.aspectRadar?.[axis.key];
+              const ratio = item?.positiveRatio ?? null;
+              const color = RESTAURANT_COLORS[ri].stroke;
+              const dotY = dividerY + 6 + ri * rowH + rowH * 0.5;
+              const rowY = dividerY + 6 + ri * rowH + rowH * 0.72;
+              const filledW = ratio != null ? Math.round((ratio / 100) * barW) : 0;
+              return (
+                <g key={ri}>
+                  <circle cx={tx + pad + 4} cy={dotY} r={4} fill={color} />
+                  <text x={tx + pad + 14} y={rowY} fontSize={11} fontWeight="500" fill="#374151">
+                    {(r.name ?? `${ri + 1}위`).slice(0, 8)}
                   </text>
-                  <text
-                    x={tx + pad}
-                    y={dataStartY + 16 + 18}
-                    fontSize={11}
-                    fill="#9CA3AF"
-                  >
-                    수치를 나타낼 수 없어요.
+                  <rect x={tx + barAreaX} y={dotY - 5} width={barW} height={9} rx={4} fill="#F3F4F6" />
+                  {ratio != null && filledW > 0 && (
+                    <rect x={tx + barAreaX} y={dotY - 5} width={filledW} height={9} rx={4} fill={color} fillOpacity={0.85} />
+                  )}
+                  <text x={tx + tw - pad} y={rowY} fontSize={12} fontWeight="700" fill={color} textAnchor="end">
+                    {ratio != null ? `${ratio}%` : "—"}
                   </text>
-                </>
-              ) : (
-                <>
-                  {/* 긍정비율 */}
-                  <text
-                    x={tx + pad}
-                    y={dataStartY + dataLineH}
-                    fontSize={12}
-                    fontWeight="400"
-                    fill="#374151"
-                  >
-                    {`긍정비율: ${item.positiveRatio}%`}
-                  </text>
+                </g>
+              );
+            })}
+          </g>
+        );
+      })()}
+      {/* 점 툴팁 */}
+      {clickTooltip && (() => {
+        const { r, ri, axis, item, score, color, tx, ty, tw, th } = clickTooltip;
+        const positiveRatio = item?.positiveRatio ?? 0;
+        const positiveCount = item?.positiveCount ?? 0;
+        const negativeCount = item?.negativeCount ?? 0;
+        const reviewCount = item?.reviewCount ?? 0;
+        const barTotalW = tw - 28;
+        const barFilledW = Math.round((positiveRatio / 100) * barTotalW);
+        const badgeW = 58;
+        const badgeX = tx + tw - 14 - badgeW;
+        const badgeY = ty + 37;
+        const badgeH = 22;
+        return (
+          <g style={{ pointerEvents: "none", opacity: pointTooltipVisible ? 1 : 0, transition: "opacity 0.18s ease" }}>
+            <rect x={tx} y={ty} width={tw} height={th} rx={10} ry={10}
+              fill="white" stroke="#E5E7EB" strokeWidth={1.5} filter="url(#tt-shadow)" />
+            {/* 식당명 */}
+            <circle cx={tx + 14} cy={ty + 18} r={4} fill={color} />
+            <text x={tx + 24} y={ty + 22} fontSize={12} fontWeight="600" fill="#111827">
+              {(r.name ?? `${ri + 1}위`).slice(0, 13)}
+            </text>
+            <line x1={tx + 1} y1={ty + 32} x2={tx + tw - 1} y2={ty + 32} stroke="#F3F4F6" strokeWidth={1} />
+            {/* 측면 레이블 + 점수 배지 */}
+            <text x={tx + 14} y={ty + 53} fontSize={14} fontWeight="700" fill="#111827">
+              {axis.label}
+            </text>
+            <rect x={badgeX} y={badgeY} width={badgeW} height={badgeH} rx={11} ry={11}
+              fill={color} fillOpacity={0.12} />
+            <text x={badgeX + badgeW / 2} y={badgeY + badgeH * 0.72} fontSize={12}
+              fontWeight="700" fill={color} textAnchor="middle">
+              {`${(score * 100).toFixed(1)}점`}
+            </text>
+            {/* 긍정 비율 */}
+            <text x={tx + 14} y={ty + 72} fontSize={11} fill="#6B7280">
+              {'긍정 비율: '}
+              <tspan fontWeight="700" fill={color}>{positiveRatio}%</tspan>
+            </text>
+            {/* 리뷰 */}
+            <text x={tx + 14} y={ty + 88} fontSize={11} fill="#6B7280">
+              {'리뷰: '}
+              <tspan fontWeight="600" fill="#374151">{reviewCount}건</tspan>
+            </text>
+            {/* 바 */}
+            <rect x={tx + 14} y={ty + 98} width={barTotalW} height={8} rx={4} fill="#F3F4F6" />
+            {barFilledW > 0 && (
+              <rect x={tx + 14} y={ty + 98} width={barFilledW} height={8} rx={4}
+                fill={color} fillOpacity={0.9} />
+            )}
+            {/* 긍정/부정 건수 */}
+            <text x={tx + 14} y={ty + 116} fontSize={10} fill="#9CA3AF">
+              {`${positiveCount}건`}
+            </text>
+            <text x={tx + tw - 14} y={ty + 116} fontSize={10} fill="#9CA3AF" textAnchor="end">
+              {`${negativeCount}건`}
+            </text>
+          </g>
+        );
+      })()}
 
-                  {/* 리뷰 */}
-                  <text
-                    x={tx + pad}
-                    y={dataStartY + dataLineH + dataLineH}
-                    fontSize={12}
-                    fontWeight="400"
-                    fill="#374151"
-                  >
-                    {`리뷰: ${item.reviewCount}건`}
-                  </text>
-
-                  {/* 긍정/부정 막대 그래프 */}
-                  {(() => {
-                    const barW = tw - 2 * pad;
-                    const total = item.positiveCount + item.negativeCount;
-                    const posW =
-                      total > 0
-                        ? Math.round((item.positiveCount / total) * barW)
-                        : Math.round((item.positiveRatio / 100) * barW);
-                    const negW = barW - posW;
-                    const barTop = dataStartY + 2 * dataLineH + 5;
-                    const barH = 8;
-                    const labelY = barTop + barH + 14;
-                    return (
-                      <>
-                        <rect
-                          x={tx + pad}
-                          y={barTop}
-                          width={posW}
-                          height={barH}
-                          rx={3}
-                          ry={3}
-                          fill="#10B981"
-                        />
-                        {negW > 0 && (
-                          <rect
-                            x={tx + pad + posW}
-                            y={barTop}
-                            width={negW}
-                            height={barH}
-                            rx={3}
-                            ry={3}
-                            fill="#EF4444"
-                          />
-                        )}
-                        <text
-                          x={tx + pad}
-                          y={labelY}
-                          fontSize={11}
-                          fontWeight="500"
-                          fill="#10B981"
-                        >
-                          {`${item.positiveCount}건`}
-                        </text>
-                        <text
-                          x={tx + tw - pad}
-                          y={labelY}
-                          fontSize={11}
-                          fontWeight="500"
-                          fill="#EF4444"
-                          textAnchor="end"
-                        >
-                          {`${item.negativeCount}건`}
-                        </text>
-                      </>
-                    );
-                  })()}
-                </>
-              )}
-            </g>
-          );
-        })()}
+      </g>
     </svg>
   );
 }
@@ -494,9 +500,8 @@ function PersonalizationPanel({
   restaurants: AiPickRestaurantItem[];
 }) {
   const personalizationMessage =
-    parseUserTasteMsg(
-      restaurants.find((r) => r.evidence?.aiReason)?.evidence?.aiReason,
-    ) ?? (personalization?.vectorActive === false
+    personalization?.personalizationMessage ??
+    (personalization?.vectorActive === false
       ? "좋아요를 더 누를수록 취향 분석이 정확해져요!"
       : null);
 
@@ -602,214 +607,6 @@ function OverallScorePanel({
           </span>
         </div>
       ))}
-    </div>
-  );
-}
-
-// ─── 측면별 점수 비교 ──────────────────────────────────────────────────────────
-
-function AspectComparison({
-  restaurants,
-}: {
-  restaurants: AiPickRestaurantItem[];
-}) {
-  const [viewMode, setViewMode] = useState<"percent" | "rank">("percent");
-  const [sortByIdx, setSortByIdx] = useState<number | null>(null);
-  const active = restaurants.slice(0, 3);
-
-  const getRank = (key: AspectKey, ri: number): number | null => {
-    const scores = active.map(
-      (r) => r.evidence?.aspectRadar?.[key]?.positiveRatio ?? -1,
-    );
-    const myScore = scores[ri];
-    if (myScore < 0) return null;
-    return scores.filter((s) => s > myScore).length + 1;
-  };
-
-  const getWinners = (key: AspectKey) => {
-    const entries = active
-      .map((r, i) => ({
-        i,
-        ratio: r.evidence?.aspectRadar?.[key]?.positiveRatio,
-      }))
-      .filter((e): e is { i: number; ratio: number } => e.ratio != null);
-    if (entries.length === 0) return [];
-    const max = Math.max(...entries.map((e) => e.ratio));
-    return entries.filter((e) => e.ratio === max);
-  };
-
-  const sortedAxes =
-    sortByIdx == null
-      ? RADAR_AXES
-      : [...RADAR_AXES].sort((a, b) => {
-          const aVal =
-            active[sortByIdx]?.evidence?.aspectRadar?.[a.key]?.positiveRatio ??
-            -1;
-          const bVal =
-            active[sortByIdx]?.evidence?.aspectRadar?.[b.key]?.positiveRatio ??
-            -1;
-          return bVal - aVal;
-        });
-
-  return (
-    <div className="w-full bg-white rounded-2xl border border-neutral-100 shadow-sm p-5">
-      <div className="flex items-center justify-between mb-4">
-        <p className="typo-body-sm font-semibold text-neutral-700">
-          측면별 점수 비교
-        </p>
-        <div className="flex rounded-lg overflow-hidden border border-neutral-200 text-xs">
-          <button
-            onClick={() => setViewMode("percent")}
-            className={`px-3 py-1.5 font-medium transition-colors ${
-              viewMode === "percent"
-                ? "bg-primary text-white"
-                : "text-neutral-500 hover:bg-neutral-50"
-            }`}
-          >
-            % 점수
-          </button>
-          <button
-            onClick={() => setViewMode("rank")}
-            className={`px-3 py-1.5 font-medium border-l border-neutral-200 transition-colors ${
-              viewMode === "rank"
-                ? "bg-primary text-white"
-                : "text-neutral-500 hover:bg-neutral-50"
-            }`}
-          >
-            순위
-          </button>
-        </div>
-      </div>
-
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-neutral-100">
-              <th className="text-left py-2 pr-3 typo-caption text-neutral-400 font-normal whitespace-nowrap">
-                측면
-              </th>
-              {active.map((r, i) => (
-                <th
-                  key={r.restaurantId ?? i}
-                  className="py-2 px-2 text-left typo-caption font-medium cursor-pointer select-none"
-                  style={{ color: RESTAURANT_COLORS[i].stroke }}
-                  onClick={() => setSortByIdx(sortByIdx === i ? null : i)}
-                >
-                  <div className="flex items-center gap-1">
-                    <span
-                      className="w-2 h-2 rounded-full shrink-0"
-                      style={{ backgroundColor: RESTAURANT_COLORS[i].stroke }}
-                    />
-                    <span className="truncate max-w-30">{r.name}</span>
-                    {sortByIdx === i && (
-                      <span className="opacity-60" style={{ fontSize: 9 }}>
-                        ↓
-                      </span>
-                    )}
-                  </div>
-                </th>
-              ))}
-              {viewMode === "percent" && (
-                <th className="py-2 pl-2 typo-caption text-neutral-400 font-medium text-right whitespace-nowrap">
-                  1위 가게
-                </th>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {sortedAxes.map((axis) => {
-              const winners = getWinners(axis.key);
-              return (
-                <tr
-                  key={axis.key}
-                  className="border-b border-neutral-50 last:border-0"
-                >
-                  <td className="py-2.5 pr-3 whitespace-nowrap">
-                    <span className="typo-caption text-neutral-600">
-                      {axis.label}
-                    </span>
-                  </td>
-                  {active.map((r, i) => {
-                    const item = r.evidence?.aspectRadar?.[axis.key];
-                    if (viewMode === "percent") {
-                      return (
-                        <td key={i} className="py-2.5 px-2">
-                          <div className="flex items-center gap-1.5 min-w-[90px]">
-                            <div className="flex-1 bg-neutral-100 rounded-full h-1.5 overflow-hidden">
-                              <div
-                                className="h-full rounded-full transition-all duration-300"
-                                style={{
-                                  width: item ? `${item.positiveRatio}%` : "0%",
-                                  backgroundColor: RESTAURANT_COLORS[i].stroke,
-                                }}
-                              />
-                            </div>
-                            <span
-                              className="typo-caption font-semibold whitespace-nowrap w-9 text-right"
-                              style={{
-                                color: item
-                                  ? RESTAURANT_COLORS[i].stroke
-                                  : "#D1D5DB",
-                              }}
-                            >
-                              {item ? `${item.positiveRatio}%` : "—"}
-                            </span>
-                          </div>
-                        </td>
-                      );
-                    } else {
-                      const rank = getRank(axis.key, i);
-                      return (
-                        <td key={i} className="py-2.5 px-2 text-center">
-                          <span
-                            className="typo-caption font-semibold"
-                            style={{
-                              color:
-                                rank === 1
-                                  ? RESTAURANT_COLORS[i].stroke
-                                  : "#9CA3AF",
-                            }}
-                          >
-                            {rank != null ? `${rank}위` : "—"}
-                          </span>
-                        </td>
-                      );
-                    }
-                  })}
-                  {viewMode === "percent" && (
-                    <td className="py-2.5 pl-2 text-right">
-                      {winners.length > 0 &&
-                        (winners.length > 1 ? (
-                          <span className="typo-caption font-semibold flex flex-col items-end gap-0.5">
-                            {winners.map((w) => (
-                              <span
-                                key={w.i}
-                                style={{ color: RESTAURANT_COLORS[w.i].stroke }}
-                              >
-                                {active[w.i].name ?? `${w.i + 1}위`}
-                              </span>
-                            ))}
-                            <span className="text-neutral-400">(공동 1위)</span>
-                          </span>
-                        ) : (
-                          <span
-                            className="typo-caption font-semibold"
-                            style={{
-                              color: RESTAURANT_COLORS[winners[0].i].stroke,
-                            }}
-                          >
-                            {active[winners[0].i].name ??
-                              `${winners[0].i + 1}위`}
-                          </span>
-                        ))}
-                    </td>
-                  )}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 }
@@ -1001,17 +798,14 @@ function RestaurantCard({
       </div>
 
       {/* 식당 페르소나 */}
-      {(() => {
-        const persona = parseRestaurantPersona(r.evidence?.aiReason);
-        return persona ? (
-          <div className="px-4 pt-3 pb-1">
-            <span className="inline-flex items-center gap-1 typo-caption font-semibold text-primary bg-orange-50 border border-orange-100 px-2.5 py-1 rounded-full">
-              <span className="text-[10px]">✦</span>
-              {persona}
-            </span>
-          </div>
-        ) : null;
-      })()}
+      {r.evidence?.restaurantPersona?.label && (
+        <div className="px-4 pt-3 pb-1">
+          <span className="inline-flex items-center gap-1 typo-caption font-semibold text-primary bg-orange-50 border border-orange-100 px-2.5 py-1 rounded-full">
+            <span className="text-[10px]">✦</span>
+            {r.evidence.restaurantPersona.label}
+          </span>
+        </div>
+      )}
 
       {/* 매칭 키워드 칩 */}
       {r.evidence?.matchedKeywords && r.evidence.matchedKeywords.length > 0 && (
@@ -1053,13 +847,6 @@ export default function StepResult({
             personalization={personalization}
             restaurants={activeRestaurants}
           />
-        </div>
-      )}
-
-      {/* 측면별 점수 비교 */}
-      {activeRestaurants.length > 1 && (
-        <div className="w-full max-w-2xl">
-          <AspectComparison restaurants={activeRestaurants} />
         </div>
       )}
 

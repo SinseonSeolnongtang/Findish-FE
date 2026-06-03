@@ -38,13 +38,22 @@ export interface AiPickAspectRadarItem {
   reviewCount: number;
 }
 
+export interface AiPickRestaurantPersona {
+  code?: string;
+  label?: string;
+  topAspects?: Array<{ aspect: string; label: string }>;
+}
+
 export interface AiPickEvidence {
   matchScore?: number;
+  reasonSummary?: string;
   aiReason?: string;
+  rerankReason?: string;
+  restaurantPersona?: AiPickRestaurantPersona;
   reasons?: string[];
   keywords?: AiPickEvidenceKeyword[];
   matchedKeywords?: string[];
-  aspectMatch?: Record<string, unknown>;
+  aspectMatch?: Record<string, number>;
   aspectRadar?: {
     taste?: AiPickAspectRadarItem;
     mood?: AiPickAspectRadarItem;
@@ -57,18 +66,30 @@ export interface AiPickEvidence {
 }
 
 // ─── Personalization 타입 ────────────────────────────────────────────────────
+export interface AiPickTopAspect {
+  aspect: string;
+  label: string;
+  score: number;
+}
+
 export interface AiPickPersonalization {
   mode?: string;
   userLabel?: string;
   personaCode?: string;
   personaLabel?: string;
-  topAspects?: string[];
+  topAspects?: AiPickTopAspect[];
   groupSize?: number;
   groupStrategy?: string | null;
-  members?: unknown[];
+  members?: string[];
   vectorActive?: boolean;
-  aspectScores?: Record<string, unknown>;
-  sharedKeywords?: string[];
+  aspectScores?: Record<string, number>;
+  sharedKeywords?: Array<{ keyword: string; shared_by: number; group_weight: number }>;
+  interactionCount?: number;
+  personalizationStrength?: number;
+  personalizationMessage?: string;
+  avgRadar?: Record<string, number>;
+  userRadar?: Record<string, number>;
+  groupAgreement?: number | null;
 }
 
 // ─── 공통 추천 식당 아이템 ────────────────────────────────────────────────────
