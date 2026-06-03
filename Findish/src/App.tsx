@@ -4,7 +4,6 @@ import MainPage from '@/pages/MainPage';
 import LoginPage from '@/pages/LoginPage';
 import SignupPage from '@/pages/SignupPage';
 import NormalModePage from '@/pages/NormalModePage';
-import PickModePage from '@/pages/PickModePage';
 import ComparePage from '@/pages/ComparePage';
 import AIPickPage from '@/pages/AIPickPage';
 import CartPage from '@/pages/CartPage';
@@ -34,7 +33,7 @@ export default function App() {
             <Route path="/signup" element={<SignupPage />} />
           </Route>
           <Route path="/normal" element={<NormalModePage />} />
-          <Route path="/pick" element={<PickModePage />} />
+          <Route path="/pick" element={<Navigate to="/normal" replace />} />
           <Route path="/compare" element={<ComparePage />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/store/:id" element={<StorePage />} />
