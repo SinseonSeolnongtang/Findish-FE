@@ -102,10 +102,10 @@ export default function FriendList() {
           <h2 className="typo-t1 font-bold text-neutral-900 mb-3">받은 친구 요청</h2>
           <ul className="flex flex-col">
             {receivedRequests.map((req, idx) => (
-              <li key={req.requestId}>
+              <li key={req.requestId ?? idx}>
                 <div className="flex items-center justify-between py-4">
                   <span className="typo-body-sm text-neutral-700">
-                    {req.senderName}님이 친구 요청을 보냈습니다.
+                    {req.senderName ?? ''}님이 친구 요청을 보냈습니다.
                   </span>
                   <div className="flex gap-2">
                     <Button
@@ -113,7 +113,7 @@ export default function FriendList() {
                       size="sm"
                       className="typo-body-sm"
                       disabled={respondFriendRequestMutation.isPending}
-                      onClick={() => handleRespond(req.requestId, 'ACCEPT')}
+                      onClick={() => handleRespond(req.requestId ?? '', 'ACCEPT')}
                     >
                       수락
                     </Button>
@@ -122,7 +122,7 @@ export default function FriendList() {
                       size="sm"
                       className="typo-body-sm"
                       disabled={respondFriendRequestMutation.isPending}
-                      onClick={() => handleRespond(req.requestId, 'REJECT')}
+                      onClick={() => handleRespond(req.requestId ?? '', 'REJECT')}
                     >
                       거절
                     </Button>
@@ -143,11 +143,11 @@ export default function FriendList() {
       ) : (
         <ul className="flex flex-col">
           {friends.map((friend, idx) => (
-            <li key={friend.memberId}>
+            <li key={friend.memberId ?? idx}>
               <div className="flex items-center justify-between py-3">
                 <div>
-                  <span className="typo-body-lg text-neutral-900">{friend.name}</span>
-                  <span className="typo-body-sm text-neutral-400 ml-2">@{friend.loginId}</span>
+                  <span className="typo-body-lg text-neutral-900">{friend.name ?? ''}</span>
+                  <span className="typo-body-sm text-neutral-400 ml-2">@{friend.loginId ?? ''}</span>
                 </div>
                 <Button
                   variant="primary"
@@ -155,8 +155,8 @@ export default function FriendList() {
                   className="typo-body-md"
                   disabled={deleteFriendMutation.isPending}
                   onClick={() => {
-                    setTargetMemberId(friend.memberId);
-                    setTargetName(friend.name);
+                    setTargetMemberId(friend.memberId ?? null);
+                    setTargetName(friend.name ?? '');
                   }}
                 >
                   삭제

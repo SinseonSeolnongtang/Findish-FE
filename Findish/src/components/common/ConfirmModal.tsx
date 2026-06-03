@@ -28,7 +28,7 @@ export default function ConfirmModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="relative flex items-center justify-center mb-6">
-          <h2 className="text-[34px] font-bold text-black">{title}</h2>
+          <h2 className="text-xl font-bold text-black">{title}</h2>
           <button
             onClick={onClose}
             className="absolute right-0 text-black hover:text-gray-500 transition-colors cursor-pointer"
@@ -38,13 +38,13 @@ export default function ConfirmModal({
           </button>
         </div>
 
-        <p className="text-[22px] text-black mb-auto">{message}</p>
+        <p className="text-sm text-black flex-1 flex items-center justify-center">{message}</p>
 
         <div className="flex gap-3 justify-center">
           <Button
             variant="primary"
             size="sm"
-            className="text-[18px]"
+            className="text-sm"
             onClick={onConfirm}
           >
             {confirmLabel}
@@ -52,7 +52,7 @@ export default function ConfirmModal({
           <Button
             variant="outline"
             size="sm"
-            className="text-[18px] bg-[#fff7ed] text-primary border-primary hover:bg-orange-100"
+            className="text-sm bg-[#fff7ed] text-primary border-primary hover:bg-orange-100"
             onClick={onClose}
           >
             {cancelLabel}

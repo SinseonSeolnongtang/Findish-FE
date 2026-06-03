@@ -1,13 +1,11 @@
 import { useRef, useState } from "react";
-import Button from "@/components/common/Button";
 import Keyword from "@/components/common/Keyword";
-import { SITUATION_LABEL } from "@/constants/aiPick";
 import StarFilled from "@/assets/icons/common/star_filled.svg?react";
-import TrashIcon from "@/assets/icons/common/trash.svg?react";
 import type {
   AiPickRestaurantItem,
   AiPickEvidenceKeyword,
   AiPickSituation,
+  AiPickPersonalization,
 } from "@/types/aiPick";
 
 export interface SelectedConditions {
@@ -16,15 +14,26 @@ export interface SelectedConditions {
   budgetMax: number;
   extraCondition?: string;
   companionCount?: number;
+  friendNames?: string[];
 }
 
 interface Props {
-  title: string;
-  aiMessage?: string;
   restaurants: AiPickRestaurantItem[];
-  conditions?: SelectedConditions;
-  onReset: () => void;
-  onDelete?: () => void;
+  personalization?: AiPickPersonalization;
+}
+
+// ─── aiReason 파싱 헬퍼 ────────────────────────────────────────────────────────
+
+function parseRestaurantPersona(aiReason?: string): string | null {
+  if (!aiReason) return null;
+  const match = aiReason.match(/\[이 식당\][^\S\n]+([^\n(]+)/);
+  return match ? match[1].trim() : null;
+}
+
+function parseUserTasteMsg(aiReason?: string): string | null {
+  if (!aiReason) return null;
+  const match = aiReason.match(/\[당신의 취향\][^\S\n]+([^\n]+)/);
+  return match ? match[1].trim() : null;
 }
 
 // ─── 상수 ─────────────────────────────────────────────────────────────────────
@@ -475,6 +484,73 @@ function RadarChart({ restaurants }: { restaurants: AiPickRestaurantItem[] }) {
   );
 }
 
+// ─── 개인화 패널 ───────────────────────────────────────────────────────────────
+
+function PersonalizationPanel({
+  personalization,
+  restaurants,
+}: {
+  personalization?: AiPickPersonalization;
+  restaurants: AiPickRestaurantItem[];
+}) {
+  const personalizationMessage =
+    parseUserTasteMsg(
+      restaurants.find((r) => r.evidence?.aiReason)?.evidence?.aiReason,
+    ) ?? (personalization?.vectorActive === false
+      ? "좋아요를 더 누를수록 취향 분석이 정확해져요!"
+      : null);
+
+  const personaLabel = personalization?.personaLabel;
+  const isDataInsufficient = !personalization?.vectorActive;
+  const activeRestaurants = restaurants.slice(0, 3);
+
+  return (
+    <div className="w-full bg-white rounded-2xl border border-neutral-100 shadow-sm p-5">
+      <div className="flex items-center justify-between mb-3">
+        <p className="typo-body-sm font-semibold text-neutral-700">나의 취향 매칭</p>
+        {personaLabel && (
+          <span
+            className={`typo-caption font-semibold px-2.5 py-1 rounded-full ${
+              isDataInsufficient
+                ? "bg-neutral-100 text-neutral-500"
+                : "bg-orange-100 text-primary"
+            }`}
+          >
+            {personaLabel}
+          </span>
+        )}
+      </div>
+
+      {personalizationMessage && (
+        <p className="typo-caption text-neutral-400 mb-4">{personalizationMessage}</p>
+      )}
+
+      <div className="flex items-center gap-4">
+        <div className="flex-1 min-w-0">
+          <RadarChart restaurants={activeRestaurants} />
+        </div>
+        <div className="w-44 shrink-0">
+          <OverallScorePanel restaurants={activeRestaurants} />
+        </div>
+      </div>
+
+      <div className="flex justify-center gap-5 mt-4 flex-wrap">
+        {activeRestaurants.map((r, i) => (
+          <div key={r.restaurantId ?? i} className="flex items-center gap-1.5">
+            <span
+              className="w-2.5 h-2.5 rounded-full shrink-0"
+              style={{ backgroundColor: RESTAURANT_COLORS[i].stroke }}
+            />
+            <span className="typo-caption text-neutral-600 font-medium">
+              {r.name}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── 종합 점수 패널 ────────────────────────────────────────────────────────────
 
 function OverallScorePanel({
@@ -756,7 +832,7 @@ function KeywordBars({
     <div className="space-y-2">
       {top.map((kw) => (
         <div key={kw.keyword} className="flex items-center gap-2">
-          <span className="typo-caption text-neutral-500 w-18 shrink-0 truncate text-right">
+          <span className="typo-caption text-neutral-500 w-14 shrink-0 truncate text-right">
             {kw.keyword}
           </span>
           <div className="flex-1 bg-neutral-100 rounded-full h-1.5 overflow-hidden">
@@ -791,7 +867,7 @@ function RestaurantCard({
   return (
     <div className="w-full bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
       {/* 썸네일 */}
-      <div className="relative h-44">
+      <div className="relative h-36">
         {r.thumbnailUrl ? (
           <img
             src={r.thumbnailUrl}
@@ -855,7 +931,7 @@ function RestaurantCard({
       </div>
 
       {/* 정보 배지 */}
-      <div className="px-4 pt-3 pb-1 flex flex-wrap gap-2">
+      <div className="px-4 pt-3 pb-1 flex flex-nowrap gap-2">
         {/* 주차 */}
         {r.parking === true && (
           <span className="flex items-center gap-1 typo-caption bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full border border-blue-100">
@@ -924,12 +1000,28 @@ function RestaurantCard({
         )}
       </div>
 
-      {/* AI 추천 이유 */}
-      {r.evidence?.reasons && r.evidence.reasons.length > 0 && (
-        <div className="px-4 pt-2 pb-1 flex flex-wrap gap-1.5">
-          {r.evidence.reasons.map((reason) => (
-            <Keyword key={reason} label={reason} />
-          ))}
+      {/* 식당 페르소나 */}
+      {(() => {
+        const persona = parseRestaurantPersona(r.evidence?.aiReason);
+        return persona ? (
+          <div className="px-4 pt-3 pb-1">
+            <span className="inline-flex items-center gap-1 typo-caption font-semibold text-primary bg-orange-50 border border-orange-100 px-2.5 py-1 rounded-full">
+              <span className="text-[10px]">✦</span>
+              {persona}
+            </span>
+          </div>
+        ) : null;
+      })()}
+
+      {/* 매칭 키워드 칩 */}
+      {r.evidence?.matchedKeywords && r.evidence.matchedKeywords.length > 0 && (
+        <div className="px-4 pt-2 pb-1">
+          <p className="typo-caption text-neutral-400 mb-1.5">매칭 키워드</p>
+          <div className="flex flex-wrap gap-1.5">
+            {r.evidence.matchedKeywords.map((kw) => (
+              <Keyword key={kw} label={kw} />
+            ))}
+          </div>
         </div>
       )}
 
@@ -947,103 +1039,32 @@ function RestaurantCard({
 // ─── 메인 컴포넌트 ─────────────────────────────────────────────────────────────
 
 export default function StepResult({
-  title,
-  aiMessage,
   restaurants,
-  conditions,
-  onReset,
-  onDelete,
+  personalization,
 }: Props) {
-  const chips: string[] = [];
-  if (conditions) {
-    if (conditions.companionCount)
-      chips.push(`친구 ${conditions.companionCount}명`);
-    if (conditions.situation) chips.push(SITUATION_LABEL[conditions.situation]);
-    chips.push(
-      `${conditions.budgetMin.toLocaleString("ko-KR")}원 ~ ${conditions.budgetMax.toLocaleString("ko-KR")}원`,
-    );
-  }
-
   const activeRestaurants = restaurants.slice(0, 3);
 
   return (
-    <div className="flex flex-col items-center gap-5 px-6 py-10 max-w-2xl mx-auto">
-      <p className="typo-body-md text-neutral-500">AI가 선택한 가게는</p>
-
-      {/* AI 메시지 */}
-      <div className="w-full flex items-start gap-2.5 bg-orange-50 border border-orange-200 rounded-2xl px-5 py-4">
-        <StarFilled
-          width={15}
-          height={15}
-          fill="#ff6900"
-          className="shrink-0 mt-0.5"
-        />
-        <p className="typo-body-sm text-neutral-700 leading-relaxed">
-          {aiMessage ?? `Findish AI가 ${title}에 딱 맞는 가게를 골라봤어요!`}
-        </p>
-      </div>
-
-      {/* 선택한 조건 요약 */}
-      {conditions && (
-        <div className="w-full flex flex-col gap-2">
-          <p className="typo-caption text-neutral-400">내가 고른 조건</p>
-          <div className="flex flex-wrap gap-1.5">
-            {chips.map((chip) => (
-              <Keyword key={chip} label={chip} />
-            ))}
-          </div>
-          {conditions.extraCondition && (
-            <p className="typo-caption text-neutral-400 italic">
-              "{conditions.extraCondition}"
-            </p>
-          )}
+    <div className="flex flex-col items-center gap-5 px-6 py-10 w-full max-w-6xl mx-auto">
+      {/* 개인화 패널 — 레이더 포함 */}
+      {activeRestaurants.length > 1 && (
+        <div className="w-full">
+          <PersonalizationPanel
+            personalization={personalization}
+            restaurants={activeRestaurants}
+          />
         </div>
       )}
 
-      {/* 리뷰 측면 비교 — 차트 + 종합 점수 */}
+      {/* 측면별 점수 비교 */}
       {activeRestaurants.length > 1 && (
-        <>
-          <div className="w-full bg-white rounded-2xl border border-neutral-100 shadow-sm p-5">
-            <p className="typo-body-sm font-semibold text-neutral-700 mb-1 text-center">
-              리뷰 측면 비교
-            </p>
-            <p className="typo-caption text-neutral-400 mb-4 text-center">
-              맛·분위기·서비스 등 6개 측면의 긍정 점수를 비교해요
-            </p>
-            <div className="flex items-center gap-4">
-              <div className="flex-1 min-w-0">
-                <RadarChart restaurants={activeRestaurants} />
-              </div>
-              <div className="w-44 shrink-0">
-                <OverallScorePanel restaurants={activeRestaurants} />
-              </div>
-            </div>
-            {/* 범례 */}
-            <div className="flex justify-center gap-5 mt-4 flex-wrap">
-              {activeRestaurants.map((r, i) => (
-                <div
-                  key={r.restaurantId ?? i}
-                  className="flex items-center gap-1.5"
-                >
-                  <span
-                    className="w-2.5 h-2.5 rounded-full shrink-0"
-                    style={{ backgroundColor: RESTAURANT_COLORS[i].stroke }}
-                  />
-                  <span className="typo-caption text-neutral-600 font-medium">
-                    {r.name}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* 측면별 점수 비교 */}
+        <div className="w-full max-w-2xl">
           <AspectComparison restaurants={activeRestaurants} />
-        </>
+        </div>
       )}
 
-      {/* 식당 카드 목록 */}
-      <div className="w-full flex flex-col gap-4">
+      {/* 식당 카드 — 3열 가로 배치 */}
+      <div className="w-full grid grid-cols-3 gap-4">
         {activeRestaurants.map((r, i) => (
           <RestaurantCard
             key={r.restaurantId ?? i}
@@ -1052,25 +1073,6 @@ export default function StepResult({
             color={RESTAURANT_COLORS[i]}
           />
         ))}
-      </div>
-
-      {/* 액션 버튼 */}
-      <div className="flex items-center gap-3 mt-2">
-        <Button variant="outline" size="sm" onClick={onReset}>
-          다시 설정
-        </Button>
-        <Button variant="primary" size="sm">
-          가게 보러가기
-        </Button>
-        {onDelete && (
-          <button
-            onClick={onDelete}
-            className="flex items-center justify-center w-9 h-9 rounded-full border border-neutral-200 text-neutral-400 hover:border-red-300 hover:text-red-400 transition-colors"
-            aria-label="프리셋 삭제"
-          >
-            <TrashIcon width={16} height={16} />
-          </button>
-        )}
       </div>
     </div>
   );
