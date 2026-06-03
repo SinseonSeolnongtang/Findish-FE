@@ -17,12 +17,29 @@ export default function Header() {
       </Link>
 
       <nav className="flex items-center gap-10 flex-1">
-        <Link
-          to="/normal"
-          className="typo-body-lg text-neutral-800 hover:text-primary transition-colors"
-        >
-          맛집 검색
-        </Link>
+        <div className="relative group">
+          <span className="typo-body-lg text-neutral-800 group-hover:text-primary transition-colors cursor-pointer">
+            맛집 검색
+          </span>
+          <div className="absolute top-full -left-4 hidden group-hover:block pt-2 z-10">
+            <div className="bg-white shadow-md rounded-md overflow-hidden min-w-26">
+              <Link
+                to="/normal"
+                state={{ initialMode: "normal" }}
+                className="block px-5 py-2 typo-body-sm text-neutral-800 hover:bg-neutral-50 hover:text-primary transition-colors"
+              >
+                일반 모드
+              </Link>
+              <Link
+                to="/normal"
+                state={{ initialMode: "pick" }}
+                className="block px-5 py-2 typo-body-sm text-neutral-800 hover:bg-neutral-50 hover:text-primary transition-colors"
+              >
+                선택 모드
+              </Link>
+            </div>
+          </div>
+        </div>
         <Link
           to="/ai-pick"
           className="typo-body-lg text-neutral-800 hover:text-primary transition-colors"
@@ -49,7 +66,9 @@ export default function Header() {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => logout(undefined, { onSuccess: () => navigate("/") })}
+              onClick={() =>
+                logout(undefined, { onSuccess: () => navigate("/") })
+              }
             >
               로그아웃
             </Button>
