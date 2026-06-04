@@ -1,4 +1,7 @@
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 import Keyword from "@/components/common/Keyword";
+import Skeleton from "@/components/common/Skeleton";
 import type { Restaurant } from "./types";
 
 interface Props {
@@ -6,21 +9,37 @@ interface Props {
 }
 
 export default function HomeSection({ restaurant }: Props) {
+  const [imgLoaded, setImgLoaded] = useState(false);
+
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <div className="px-3 pt-3 shrink-0 flex justify-center">
         <div className="relative w-90 h-80 overflow-hidden rounded-[10px]">
+          {!imgLoaded && <Skeleton className="absolute inset-0 rounded-none" />}
           <img
             src={restaurant.imageUrl}
             alt={restaurant.name}
-            className="w-full h-full object-cover"
+            className={cn("w-full h-full object-cover", !imgLoaded && "invisible")}
+            onLoad={() => setImgLoaded(true)}
           />
-          <div className="absolute inset-0 shadow-[inset_0px_-100px_12px_0px_rgba(0,0,0,0.4)]" />
+          {imgLoaded && (
+            <div className="absolute inset-0 shadow-[inset_0px_-100px_12px_0px_rgba(0,0,0,0.4)]" />
+          )}
           <div className="absolute bottom-4 left-4 right-4">
-            <span className="typo-body-sm text-white leading-tight">
+            <span
+              className={cn(
+                "typo-body-sm leading-tight",
+                imgLoaded ? "text-white" : "text-neutral-500",
+              )}
+            >
               {restaurant.category}
             </span>
-            <h2 className="typo-h1 font-bold text-white leading-tight">
+            <h2
+              className={cn(
+                "typo-h1 font-bold leading-tight",
+                imgLoaded ? "text-white" : "text-neutral-900",
+              )}
+            >
               {restaurant.name}
             </h2>
           </div>

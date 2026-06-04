@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import Button from "@/components/common/Button";
+import Skeleton from "@/components/common/Skeleton";
 
 interface MenuItemProps {
   name: string;
@@ -18,16 +20,22 @@ export default function MenuItem({
   isAdding = false,
   className,
 }: MenuItemProps) {
+  const [imgLoaded, setImgLoaded] = useState(false);
+
   return (
     <div className={cn("flex items-center gap-3", className)}>
       {/* 음식 이미지 */}
-      <div className="w-24 h-24 rounded-[10px] overflow-hidden shrink-0 bg-[#E5E7EB]">
+      <div className="relative w-24 h-24 rounded-[10px] overflow-hidden shrink-0 bg-[#E5E7EB]">
         {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={name}
-            className="w-full h-full object-cover"
-          />
+          <>
+            {!imgLoaded && <Skeleton className="absolute inset-0 rounded-none" />}
+            <img
+              src={imageUrl}
+              alt={name}
+              className={cn("w-full h-full object-cover", !imgLoaded && "invisible")}
+              onLoad={() => setImgLoaded(true)}
+            />
+          </>
         ) : (
           <div className="w-full h-full bg-linear-to-br from-[#FFE4CC] to-[#FFD0A8]" />
         )}

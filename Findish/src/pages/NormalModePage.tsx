@@ -2,6 +2,7 @@ import { useRef, useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import RightIcon from "@/assets/icons/common/right.svg?react";
 import Header from "@/components/common/Header";
+import Skeleton from "@/components/common/Skeleton";
 import Button from "@/components/common/Button";
 import SearchBar from "@/components/common/SearchBar";
 import LikeButton from "@/components/common/LikeButton";
@@ -335,7 +336,7 @@ export default function NormalModePage() {
       />
 
       {/* ── 일반 모드 UI ───────────────────────────── */}
-      {mode === "normal" && normalSearched && !normalLoading && (
+      {mode === "normal" && normalSearched && (
         <SearchResultPanel
           restaurants={restaurants}
           totalCount={restaurants.length}
@@ -344,6 +345,7 @@ export default function NormalModePage() {
           onReserve={handleReserve}
           likedIds={likedIds}
           onToggleLike={handleToggleLike}
+          isLoading={normalLoading}
         />
       )}
 
@@ -365,7 +367,7 @@ export default function NormalModePage() {
           {pickLoading ? (
             <div className="flex flex-col gap-3 flex-1 pt-4">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="h-6 rounded bg-neutral-100 animate-pulse" />
+                <Skeleton key={i} className="h-6" />
               ))}
             </div>
           ) : pickRestaurants.length === 0 ? (
@@ -388,9 +390,9 @@ export default function NormalModePage() {
                     <HomeSection restaurant={pickRestaurant} />
                   ) : summaryLoading ? (
                     <div className="flex-1 flex flex-col gap-3 p-4">
-                      <div className="h-90 rounded-[10px] bg-neutral-200 animate-pulse" />
-                      <div className="h-4 rounded bg-neutral-200 animate-pulse w-3/4" />
-                      <div className="h-4 rounded bg-neutral-200 animate-pulse w-1/2" />
+                      <Skeleton className="h-90 rounded-[10px]" />
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
                     </div>
                   ) : (
                     <>
