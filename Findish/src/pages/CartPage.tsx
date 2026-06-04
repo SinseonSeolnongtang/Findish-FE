@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import TrashIcon from "@/assets/icons/common/trash.svg?react";
@@ -7,6 +7,7 @@ import Header from "@/components/common/Header";
 import Checkbox from "@/components/common/Checkbox";
 import Button from "@/components/common/Button";
 import ConfirmModal from "@/components/common/ConfirmModal";
+import Toast from "@/components/common/Toast";
 import {
   useCartQuery,
   useUpdateCartQuantityMutation,
@@ -51,6 +52,17 @@ export default function CartPage() {
   const [orderDone, setOrderDone] = useState<{ totalPrice: number } | null>(null);
   const [deselectedIds, setDeselectedIds] = useState<Set<string>>(new Set());
 
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastVisible, setToastVisible] = useState(false);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    setToastVisible(true);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setToastVisible(false), 3000);
+  };
+
   const selectedIds = new Set(
     items.map((i) => i.cartItemId).filter((id) => !deselectedIds.has(id)),
   );
@@ -85,7 +97,10 @@ export default function CartPage() {
       deleteItem(cartItemId);
       return;
     }
-    updateQuantity({ cartItemId, body: { quantity: next } });
+    updateQuantity(
+      { cartItemId, body: { quantity: next } },
+      { onError: () => showToast("수량 변경에 실패했습니다. 다시 시도해 주세요.") },
+    );
   };
 
   const handleOrder = () => {
@@ -260,6 +275,8 @@ export default function CartPage() {
           onClose={() => { queryClient.invalidateQueries({ queryKey: ['cart'] }); setOrderDone(null); }}
         />
       )}
+
+      <Toast message={toastMessage} visible={toastVisible} showCartButton={false} />
 
       {/* 주문하기 버튼 (하단 고정) */}
       <div className="fixed bottom-0 left-0 right-0 px-6 pb-6 bg-white">
