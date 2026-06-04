@@ -11,23 +11,6 @@ interface AiTabProps {
   onMoreClick?: () => void;
 }
 
-type SummaryKey =
-  | "tasteSummary"
-  | "ambianceSummary"
-  | "serviceSummary"
-  | "priceSummary"
-  | "facilitySummary"
-  | "waitingSummary";
-
-const ASPECT_LABELS: { key: SummaryKey; label: string }[] = [
-  { key: "tasteSummary", label: "맛" },
-  { key: "ambianceSummary", label: "공간" },
-  { key: "serviceSummary", label: "서비스" },
-  { key: "priceSummary", label: "가격" },
-  { key: "facilitySummary", label: "시설" },
-  { key: "waitingSummary", label: "대기" },
-];
-
 function isNegativeDominant(kw: AiKeyword): boolean {
   const neg = kw.negativeCount ?? 0;
   const total = kw.sentenceCount ?? 1;
@@ -139,11 +122,6 @@ export default function AiTab({ store, restaurantId, onMoreClick }: AiTabProps) 
     observer.observe(sentinel);
     return () => observer.disconnect();
   }, [fetchMore, showSentinel]);
-
-  const aspectSummaries = ASPECT_LABELS.map(({ key, label }) => ({
-    label,
-    value: ai?.[key],
-  })).filter((s): s is { label: string; value: string } => !!s.value);
 
   return (
     <div className="p-4 flex flex-col gap-5">

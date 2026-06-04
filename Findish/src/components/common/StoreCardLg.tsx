@@ -54,9 +54,11 @@ export default function StoreCardLg({
         )}
 
         {/* 별점 배지 */}
-        <div className="absolute bottom-3 left-3">
-          <Rating value={store.rating} />
-        </div>
+        {store.rating != null && (
+          <div className="absolute bottom-3 left-3">
+            <Rating value={store.rating} />
+          </div>
+        )}
 
         {/* 이미지 인디케이터 */}
         {imgList.length > 1 && (

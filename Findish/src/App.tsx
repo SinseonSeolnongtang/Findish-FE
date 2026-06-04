@@ -9,7 +9,6 @@ import AIPickPage from '@/pages/AIPickPage';
 import FindyCodePage from '@/pages/FindyCodePage';
 import CartPage from '@/pages/CartPage';
 import MyPage from '@/pages/MyPage';
-import MapTestPage from '@/pages/MapTestPage';
 import StorePage from '@/pages/StorePage';
 import OnboardingPage from '@/pages/OnboardingPage';
 import AuthLayout from '@/layout/AuthLayout';

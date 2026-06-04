@@ -163,7 +163,7 @@ export default function ReviewTab({ restaurantId }: ReviewTabProps) {
           {submittedKeyword ? "검색된 리뷰" : "전체 리뷰"}{" "}
           <span className="font-bold text-primary">
             {submittedKeyword
-              ? (data?.data?.numberOfElements ?? "…")
+              ? (data?.data?.content?.length ?? "…")
               : (data?.data?.totalElements ?? "…")}
           </span>
           개

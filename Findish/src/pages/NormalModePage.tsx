@@ -42,8 +42,8 @@ function toStoreCard(item: RestaurantBasicItem): StoreCardData {
     : (item.isOpen ? "영업중" : "영업 종료");
   return {
     id: String(item.restaurantId),
-    name: item.name,
-    category: item.category,
+    name: item.name ?? "",
+    category: item.category ?? "",
     isOpen: businessStatus === "영업중",
     businessStatus,
     reviewCount: String(item.reviewCount),
@@ -153,14 +153,14 @@ export default function NormalModePage() {
     [normalData],
   );
 
-  const pinnedStore: StoreCardData | null = preSelectedStore && pinnedBasic
+  const pinnedStore: StoreCardData | null = preSelectedStore && pinnedBasic?.data
     ? {
         ...preSelectedStore,
-        lat: pinnedBasic.lat,
-        lng: pinnedBasic.lng,
-        isOpen: pinnedBasic.isOpen,
-        reviewCount: String(pinnedBasic.reviewCount),
-        keywords: pinnedBasic.tags,
+        lat: pinnedBasic.data.lat,
+        lng: pinnedBasic.data.lng,
+        isOpen: pinnedBasic.data.isOpen ?? preSelectedStore.isOpen,
+        reviewCount: String(pinnedBasic.data.reviewCount ?? preSelectedStore.reviewCount),
+        keywords: pinnedBasic.data.tags ?? preSelectedStore.keywords,
       }
     : null;
 

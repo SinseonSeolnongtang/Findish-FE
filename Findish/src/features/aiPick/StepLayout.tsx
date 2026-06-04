@@ -17,13 +17,13 @@ interface Props {
 }
 
 export default function StepLayout({
-  stepNumber,
-  stepEmoji,
+  stepNumber: _stepNumber,
+  stepEmoji: _stepEmoji,
   title,
   subtitle,
   characterSrc,
   characterAlt = "핀디 캐릭터",
-  hint,
+  hint: _hint,
   onPrev,
   onNext,
   nextLabel = "다음으로",

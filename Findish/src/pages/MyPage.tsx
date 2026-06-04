@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type JSX } from "react";
 import { useSearchParams } from "react-router-dom";
 import Header from "@/components/common/Header";
 import Button from "@/components/common/Button";

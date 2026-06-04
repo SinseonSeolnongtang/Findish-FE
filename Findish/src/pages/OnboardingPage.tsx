@@ -33,7 +33,7 @@ export default function OnboardingPage() {
 
   const advance = useCallback(
     async (liked: boolean, item: RandomRestaurantItem) => {
-      const newActionMap = { ...actionMap, [item.restaurantId]: liked ? "liked" : "skipped" };
+      const newActionMap: Record<string, "liked" | "skipped"> = { ...actionMap, [item.restaurantId]: liked ? "liked" : "skipped" };
       setActionMap(newActionMap);
 
       const newLikeCount = liked ? likeCount + 1 : likeCount;

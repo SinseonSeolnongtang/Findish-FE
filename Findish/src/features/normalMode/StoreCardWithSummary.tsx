@@ -10,6 +10,6 @@ interface Props extends Omit<StoreCardProps, 'store'> {
 
 export default function StoreCardWithSummary({ store, ...rest }: Props) {
   const { data } = useCardSummaryQuery(store.id);
-  const summary = data?.data?.atmosphere?.summary;
+  const summary = data?.data?.overallSummary;
   return <StoreCard store={{ ...store, summary }} {...rest} />;
 }
