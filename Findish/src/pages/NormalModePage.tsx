@@ -156,11 +156,11 @@ export default function NormalModePage() {
   const pinnedStore: StoreCardData | null = preSelectedStore && pinnedBasic?.data
     ? {
         ...preSelectedStore,
-        lat: pinnedBasic.data.lat,
-        lng: pinnedBasic.data.lng,
-        isOpen: pinnedBasic.data.isOpen ?? preSelectedStore.isOpen,
-        reviewCount: String(pinnedBasic.data.reviewCount ?? preSelectedStore.reviewCount),
-        keywords: pinnedBasic.data.tags ?? preSelectedStore.keywords,
+        lat: pinnedBasic.data?.lat,
+        lng: pinnedBasic.data?.lng,
+        isOpen: pinnedBasic.data?.isOpen ?? false,
+        reviewCount: String(pinnedBasic.data?.reviewCount ?? 0),
+        keywords: pinnedBasic.data?.tags ?? [],
       }
     : null;
 
