@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { type StoreCardData } from "@/components/common/StoreCard";
 import { useRestaurantBasicQuery, useRestaurantInfoQuery, useToggleLikeMutation } from "@/hooks/useRestaurant";
@@ -43,12 +43,6 @@ export default function StoreBasicInfo({ store, restaurantId }: StoreBasicInfoPr
   const { data: infoData } = useRestaurantInfoQuery(restaurantId);
   const { mutate: toggleLikeMutate } = useToggleLikeMutation();
   const [liked, setLiked] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    if (basicData?.data?.isLiked !== undefined && liked === null) {
-      setLiked(basicData.data.isLiked);
-    }
-  }, [basicData?.data?.isLiked]);
 
   const isLiked = liked ?? basicData?.data?.isLiked ?? false;
 

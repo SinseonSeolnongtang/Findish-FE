@@ -150,7 +150,6 @@ export default function AiTab({ store, restaurantId, onMoreClick }: AiTabProps) 
                 name={item.name ?? ""}
                 price={item.price ?? 0}
                 imageUrl={item.imageUrl || store.imageUrl}
-                isSignature={item.isSignature}
                 className="shrink-0 w-30 h-25"
               />
             ))}
