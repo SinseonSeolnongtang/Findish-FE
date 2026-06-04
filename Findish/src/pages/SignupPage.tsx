@@ -5,7 +5,8 @@ import Header from "@/components/common/Header";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
 import { cn } from "@/lib/utils";
-import { useSignupMutation } from "@/hooks/useAuth";
+import { useSignupMutation, useLoginMutation } from "@/hooks/useAuth";
+import { useAuthStore } from "@/stores/authStore";
 import { checkId } from "@/api/auth";
 
 interface SignupFormFields {
@@ -44,6 +45,8 @@ export default function SignupPage() {
     formState: { errors },
   } = useForm<SignupFormFields>();
   const { mutate: signupMutate, isPending } = useSignupMutation();
+  const { mutateAsync: loginMutate } = useLoginMutation();
+  const loginToStore = useAuthStore((s) => s.login);
 
   const [terms, setTerms] = useState<TermsState>({
     all: false,
@@ -104,7 +107,11 @@ export default function SignupPage() {
         },
       },
       {
-        onSuccess: () => navigate("/login"),
+        onSuccess: async () => {
+          const res = await loginMutate({ loginId: data.loginId, password: data.password });
+          loginToStore(res.accessToken, res.refreshToken);
+          navigate("/onboarding");
+        },
       },
     );
   };

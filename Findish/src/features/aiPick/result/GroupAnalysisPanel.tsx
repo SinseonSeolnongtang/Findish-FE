@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { AiPickPersonalization } from "@/types/aiPick";
 import GroupRadarChart from "./GroupRadarChart";
-import Keyword from "@/components/common/Keyword";
 import { RADAR_AXES } from "./constants";
 
 const ASPECT_COLOR: Record<string, string> = {
@@ -23,6 +22,58 @@ type ViewMode = "all" | "me" | "group";
 interface Props {
   personalization?: AiPickPersonalization;
   friendNames?: string[];
+}
+
+function getKeywordIcon(keyword: string) {
+  const kw = keyword;
+  const color = "#FF6900";
+  if (kw.includes("친절") || kw.includes("직원") || kw.includes("서비스") || kw.includes("응대")) {
+    return (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="9" cy="7" r="4" stroke={color} strokeWidth="2" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke={color} strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (kw.includes("음식") || kw.includes("맛") || kw.includes("양") || kw.includes("요리") || kw.includes("메뉴")) {
+    return (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" stroke={color} strokeWidth="2" strokeLinecap="round" />
+        <path d="M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3v7" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  if (kw.includes("분위기") || kw.includes("매장") || kw.includes("공간")) {
+    return (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <polyline points="9,22 9,12 15,12 15,22" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  if (kw.includes("인테리어") || kw.includes("조명") || kw.includes("인테")) {
+    return (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.5-1.3 4.7-3.3 6H8.3A7.004 7.004 0 0 1 5 9a7 7 0 0 1 7-7z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  if (kw.includes("규모") || kw.includes("크기") || kw.includes("좌석") || kw.includes("넓")) {
+    return (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="3" width="7" height="7" rx="1" stroke={color} strokeWidth="2" />
+        <rect x="14" y="3" width="7" height="7" rx="1" stroke={color} strokeWidth="2" />
+        <rect x="3" y="14" width="7" height="7" rx="1" stroke={color} strokeWidth="2" />
+        <rect x="14" y="14" width="7" height="7" rx="1" stroke={color} strokeWidth="2" />
+      </svg>
+    );
+  }
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
 }
 
 function computeScore(radar: Record<string, number>): number {
@@ -299,21 +350,49 @@ export default function GroupAnalysisPanel({ personalization, friendNames }: Pro
       {/* 공통 취향 키워드 */}
       {sharedKeywords && sharedKeywords.length > 0 && (
         <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-5">
-          <p className="typo-body-sm font-semibold text-neutral-700 mb-1">
-            공통 취향 키워드
-          </p>
-          <p className="typo-caption text-neutral-400 mb-4">
-            그룹 내 모든 멤버가 공유하는 취향
-          </p>
-          <div className="flex flex-wrap gap-3">
-            {sharedKeywords.map((kw) => (
-              <div key={kw.keyword} className="flex flex-col items-center gap-1">
-                <Keyword label={kw.keyword} colored />
-                <span className="text-[11px] text-neutral-400 font-medium">
-                  {Math.round(kw.group_weight * 100)}%
-                </span>
+          {/* 헤더 */}
+          <div className="flex items-start justify-between mb-5">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center shrink-0">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="#FF6900" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="9" cy="7" r="4" stroke="#FF6900" strokeWidth="2" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="#FF6900" strokeWidth="2" strokeLinecap="round" />
+                </svg>
               </div>
-            ))}
+              <div>
+                <p className="typo-body-sm font-semibold text-neutral-700">공통 취향 키워드</p>
+                <p className="typo-caption text-neutral-400 mt-0.5">그룹 내 모든 멤버가 공유하는 취향</p>
+              </div>
+            </div>
+          </div>
+
+          {/* 키워드 카드 행 */}
+          <div className="flex bg-neutral-50 rounded-2xl border border-neutral-100 overflow-hidden divide-x divide-neutral-100">
+            {sharedKeywords.map((kw) => {
+              const pct = Math.round(kw.group_weight * 100);
+              const r = 22;
+              const circumf = 2 * Math.PI * r;
+              return (
+                <div key={kw.keyword} className="flex-1 flex flex-col items-center gap-3 px-3 py-5">
+                  <div className="w-11 h-11 rounded-full bg-orange-100 flex items-center justify-center">
+                    {getKeywordIcon(kw.keyword)}
+                  </div>
+                  <p className="typo-caption font-bold text-neutral-700 text-center leading-tight">{kw.keyword}</p>
+                  <div className="relative w-16 h-16">
+                    <svg width="64" height="64" viewBox="0 0 64 64" className="-rotate-90">
+                      <circle cx="32" cy="32" r={r} fill="none" stroke="#E5E7EB" strokeWidth="5" />
+                      <circle cx="32" cy="32" r={r} fill="none" stroke="#FF6900" strokeWidth="5"
+                        strokeDasharray={`${circumf * pct / 100} ${circumf}`}
+                        strokeLinecap="round" />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-xs font-bold text-primary">{pct}%</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

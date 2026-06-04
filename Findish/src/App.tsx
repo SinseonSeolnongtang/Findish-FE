@@ -6,10 +6,12 @@ import SignupPage from '@/pages/SignupPage';
 import NormalModePage from '@/pages/NormalModePage';
 import ComparePage from '@/pages/ComparePage';
 import AIPickPage from '@/pages/AIPickPage';
+import FindyCodePage from '@/pages/FindyCodePage';
 import CartPage from '@/pages/CartPage';
 import MyPage from '@/pages/MyPage';
 import MapTestPage from '@/pages/MapTestPage';
 import StorePage from '@/pages/StorePage';
+import OnboardingPage from '@/pages/OnboardingPage';
 import AuthLayout from '@/layout/AuthLayout';
 import PrivateRoute from '@/components/common/PrivateRoute';
 
@@ -39,7 +41,9 @@ export default function App() {
           <Route path="/store/:id" element={<StorePage />} />
           <Route element={<PrivateRoute />}>
             <Route path="/ai-pick" element={<AIPickPage />} />
+            <Route path="/findy-code" element={<FindyCodePage />} />
             <Route path="/mypage" element={<MyPage />} />
+            <Route path="/onboarding" element={<OnboardingPage />} />
           </Route>
           <Route path="/about" element={<Navigate to="/" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />

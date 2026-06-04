@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Header from "@/components/common/Header";
 import Input from "@/components/common/Input";
 import Button from "@/components/common/Button";
@@ -10,6 +10,7 @@ import type { LoginRequest } from "@/types/auth";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { register, handleSubmit } = useForm<LoginRequest>();
   const { mutate: loginMutate, isPending, isError } = useLoginMutation();
   const loginToStore = useAuthStore((s) => s.login);
@@ -18,7 +19,8 @@ export default function LoginPage() {
     loginMutate(data, {
       onSuccess: (res) => {
         loginToStore(res.accessToken, res.refreshToken);
-        navigate("/");
+        const from = searchParams.get("from");
+        navigate(from === "onboarding" ? "/onboarding" : "/");
       },
     });
   };

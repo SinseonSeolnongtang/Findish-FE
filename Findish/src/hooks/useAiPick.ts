@@ -10,6 +10,7 @@ import {
   requestFriend,
   respondFriendRequest,
   deleteFriend,
+  getMePreference,
 } from '@/api/aiPick';
 import type {
   CreateAiPickPresetRequest,
@@ -21,6 +22,7 @@ import type {
 const PRESET_HISTORY_KEY = ['preset-history'] as const;
 const FRIENDS_KEY = ['friends'] as const;
 const RECEIVED_REQUESTS_KEY = ['received-friend-requests'] as const;
+const ME_PREFERENCE_KEY = ['me-preference'] as const;
 
 // ─── useQuery ────────────────────────────────────────────────────────────────
 
@@ -54,6 +56,15 @@ export const useReceivedFriendRequestsQuery = () => {
   return useQuery({
     queryKey: RECEIVED_REQUESTS_KEY,
     queryFn: ({ signal }) => getReceivedFriendRequests(signal),
+  });
+};
+
+// GET /api/v1/members/me/preference
+export const useMePreferenceQuery = () => {
+  return useQuery({
+    queryKey: ME_PREFERENCE_KEY,
+    queryFn: ({ signal }) => getMePreference(signal),
+    enabled: false,
   });
 };
 
