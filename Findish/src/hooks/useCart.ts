@@ -43,11 +43,7 @@ export const useDeleteCartItemMutation = () => {
 };
 
 export const useOrderCartMutation = () => {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: orderCart,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: CART_QUERY_KEY });
-    },
   });
 };
