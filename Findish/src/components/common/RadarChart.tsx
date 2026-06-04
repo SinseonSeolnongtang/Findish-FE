@@ -153,9 +153,8 @@ export default function RadarChart({ restaurants }: { restaurants: RadarRestaura
 
   return (
     <svg
-      width="100%"
+      width={SIZE}
       viewBox={`0 0 ${SIZE} ${SIZE}`}
-      style={{ maxWidth: SIZE }}
     >
       <defs>
         <filter id="tt-shadow" x="-20%" y="-20%" width="140%" height="140%">

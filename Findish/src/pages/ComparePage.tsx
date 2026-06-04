@@ -288,17 +288,17 @@ export default function ComparePage() {
             {hasRadar && restaurants.length > 1 && (
               <div className="bg-white border border-[#E5E7EB] rounded-xl p-5 shadow-sm mb-4">
                 <p className="text-[16px] font-semibold text-neutral-700 mb-4">종합 비교</p>
-                <div className="flex items-center gap-6">
-                  <div className="flex-1 min-w-0">
+                <div className="flex justify-center">
+                  <div className="inline-flex items-center gap-6">
                     <RadarChart
                       restaurants={restaurants.map((r) => ({
                         name: r.name,
                         aspectRadar: r.aspectRadar,
                       }))}
                     />
-                  </div>
-                  <div className="w-44 shrink-0">
-                    <ScorePanel restaurants={restaurants} />
+                    <div className="w-44 shrink-0">
+                      <ScorePanel restaurants={restaurants} />
+                    </div>
                   </div>
                 </div>
                 <div className="flex justify-center gap-5 mt-3 flex-wrap">

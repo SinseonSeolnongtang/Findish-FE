@@ -1,4 +1,4 @@
-import type { AiPickRestaurantItem, AiPickPersonalization } from "@/types/aiPick";
+import type { AiPickRestaurantItem } from "@/types/aiPick";
 import RadarChart from "@/components/common/RadarChart";
 import { RADAR_COLORS } from "@/components/common/radarChart.constants";
 
@@ -52,19 +52,10 @@ function OverallScorePanel({ restaurants }: { restaurants: AiPickRestaurantItem[
 }
 
 interface Props {
-  personalization?: AiPickPersonalization;
   restaurants: AiPickRestaurantItem[];
 }
 
-export default function PersonalizationPanel({ personalization, restaurants }: Props) {
-  const personalizationMessage =
-    personalization?.personalizationMessage ??
-    (personalization?.vectorActive === false
-      ? "좋아요를 더 누를수록 취향 분석이 정확해져요!"
-      : null);
-
-  const personaLabel = personalization?.personaLabel;
-  const isDataInsufficient = !personalization?.vectorActive;
+export default function PersonalizationPanel({ restaurants }: Props) {
   const activeRestaurants = restaurants.slice(0, 3);
 
   const radarRestaurants = activeRestaurants.map((r) => ({
@@ -74,31 +65,12 @@ export default function PersonalizationPanel({ personalization, restaurants }: P
 
   return (
     <div className="w-full bg-white rounded-2xl border border-neutral-100 shadow-sm p-5">
-      <div className="flex items-center justify-between mb-3">
-        <p className="typo-body-sm font-semibold text-neutral-700">나의 취향 매칭</p>
-        {personaLabel && (
-          <span
-            className={`typo-caption font-semibold px-2.5 py-1 rounded-full ${
-              isDataInsufficient
-                ? "bg-neutral-100 text-neutral-500"
-                : "bg-orange-100 text-primary"
-            }`}
-          >
-            {personaLabel}
-          </span>
-        )}
-      </div>
-
-      {personalizationMessage && (
-        <p className="typo-caption text-neutral-400 mb-4">{personalizationMessage}</p>
-      )}
-
-      <div className="flex items-center gap-4">
-        <div className="flex-1 min-w-0">
+      <div className="flex justify-center">
+        <div className="inline-flex items-center gap-4">
           <RadarChart restaurants={radarRestaurants} />
-        </div>
-        <div className="w-44 shrink-0">
-          <OverallScorePanel restaurants={activeRestaurants} />
+          <div className="w-44 shrink-0">
+            <OverallScorePanel restaurants={activeRestaurants} />
+          </div>
         </div>
       </div>
 
