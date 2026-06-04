@@ -16,6 +16,7 @@ import type {
   ToggleLikeResponse,
   GetMyLikesRequest,
   GetMyLikesResponse,
+  GetRandomRestaurantsResponse,
 } from '@/types/restaurant';
 
 // ─── 0. 키워드 검색 (일반모드) ────────────────────────────────────────────────
@@ -85,5 +86,12 @@ export const toggleLike = async (naverPlaceId: string) => {
 // GET /api/v1/members/me/likes
 export const getMyLikes = async (params?: GetMyLikesRequest, signal?: AbortSignal) => {
   const { data } = await axiosInstance.get<ApiResponse<GetMyLikesResponse>>('/api/v1/members/me/likes', { params, signal });
+  return data;
+};
+
+// ─── 10. 랜덤 식당 조회 (온보딩용) ───────────────────────────────────────────
+// GET /api/v1/restaurants/random
+export const getRandomRestaurants = async (size = 5, signal?: AbortSignal) => {
+  const { data } = await axiosInstance.get<ApiResponse<GetRandomRestaurantsResponse>>('/api/v1/restaurants/random', { params: { size }, signal });
   return data;
 };

@@ -445,6 +445,7 @@ export default function AIPickPage() {
               <StepResult
                 restaurants={displayResult.restaurants}
                 personalization={displayResult.personalization}
+                friendNames={displayConditions?.friendNames}
               />
             </>
           )}

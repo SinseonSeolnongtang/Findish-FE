@@ -46,6 +46,12 @@ export default function Header() {
         >
           AI Pick
         </Link>
+        <Link
+          to="/findy-code"
+          className="typo-body-lg text-neutral-800 hover:text-primary transition-colors"
+        >
+          미식코드
+        </Link>
       </nav>
 
       <div className="flex items-center gap-4">

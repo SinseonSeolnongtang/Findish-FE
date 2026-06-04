@@ -72,11 +72,20 @@ export interface AspectRadarItem {
 
 export type AspectRadarKey = "taste" | "mood" | "service" | "value" | "facility" | "waiting";
 
+export interface RestaurantPersona {
+  code?: string;
+  label?: string;
+}
+
 export interface RestaurantCardItem {
   restaurantId?: string;
   name?: string;
   category?: string;
+  address?: string | null;
   thumbnailUrl?: string;
+  parking?: boolean;
+  groupSeating?: boolean;
+  restaurantPersona?: RestaurantPersona | null;
   topKeywords?: TopKeywordItem[];
   aspectRadar?: Partial<Record<AspectRadarKey, AspectRadarItem>>;
   aiReason?: string;

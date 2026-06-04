@@ -10,6 +10,7 @@ import {
   createReservation,
   toggleLike,
   getMyLikes,
+  getRandomRestaurants,
 } from '@/api/restaurant';
 import type {
   SearchRestaurantsRequest,
@@ -116,5 +117,13 @@ export const useMyLikesQuery = (params?: GetMyLikesRequest) => {
     queryKey: ['likes', 'me', params],
     queryFn: () => getMyLikes(params),
     enabled: isLoggedIn,
+  });
+};
+
+export const useRandomRestaurantsQuery = (size = 5) => {
+  return useQuery({
+    queryKey: ['restaurants', 'random', size],
+    queryFn: () => getRandomRestaurants(size),
+    staleTime: 0,
   });
 };

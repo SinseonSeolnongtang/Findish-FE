@@ -14,6 +14,7 @@ import type {
   ResolveFriendRequestBody,
   ResolveFriendRequestResponse,
   DeleteFriendResponse,
+  GetMePreferenceResponse,
 } from '@/types/aiPick';
 
 // ─── 1. 프리셋 목록 조회 ──────────────────────────────────────────────────────
@@ -90,5 +91,12 @@ export const respondFriendRequest = async (requestId: string, body: ResolveFrien
 // DELETE /api/v1/friends/{memberId}
 export const deleteFriend = async (memberId: string) => {
   const { data } = await axiosInstance.delete<ApiResponse<DeleteFriendResponse>>(`/api/v1/friends/${memberId}`);
+  return data.data;
+};
+
+// ─── 내 AI 선호도 벡터 조회 ───────────────────────────────────────────────────
+// GET /api/v1/members/me/preference
+export const getMePreference = async (signal?: AbortSignal) => {
+  const { data } = await axiosInstance.get<ApiResponse<GetMePreferenceResponse>>('/api/v1/members/me/preference', { signal });
   return data.data;
 };

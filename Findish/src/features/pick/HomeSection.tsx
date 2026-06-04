@@ -44,16 +44,6 @@ export default function HomeSection({ restaurant }: Props) {
           </div>
         )}
         <div>
-          <p className="typo-body-md font-bold text-neutral-900 mb-1.5">가격</p>
-          <p className="typo-body-sm text-neutral-600">
-            사람들은 주로{" "}
-            <span className="font-bold text-primary-dark">
-              1인당 {restaurant.priceRange}
-            </span>
-            을 사용해요
-          </p>
-        </div>
-        <div>
           <p className="typo-body-md font-bold text-neutral-900 mb-1.5">위치</p>
           <p className="typo-body-sm text-neutral-600">
             현재 위치에서{" "}

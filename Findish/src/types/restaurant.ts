@@ -141,6 +141,26 @@ export interface CreateReservationResponse {
 // POST /api/v1/restaurants/{naverPlaceId}/like
 export type ToggleLikeResponse = { [key: string]: boolean };
 
+// ─── 10. 랜덤 식당 조회 (온보딩용) ───────────────────────────────────────────
+// GET /api/v1/restaurants/random
+export interface RandomRestaurantItem {
+  restaurantId: string;
+  name?: string;
+  category?: string;
+  address?: string;
+  parking?: boolean;
+  groupSeating?: boolean;
+  isLiked?: boolean;
+  reviewCount?: number;
+  businessHours?: string;
+  priceRange?: string;
+  tags?: string[];
+  lat?: number;
+  lng?: number;
+  thumbnailUrl?: string;
+}
+export type GetRandomRestaurantsResponse = RandomRestaurantItem[];
+
 // ─── 9. 좋아요 목록 조회 ──────────────────────────────────────────────────────
 // GET /api/v1/members/me/likes
 export interface GetMyLikesRequest {

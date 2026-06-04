@@ -213,3 +213,21 @@ export interface ResolveFriendRequestResponse {
 export interface DeleteFriendResponse {
   message?: string;
 }
+
+// ─── 내 AI 선호도 벡터 조회 (GET /api/v1/members/me/preference) ──────────────
+export interface MePreferenceTopAspect {
+  aspect: string;
+  label: string;
+  score: number;
+}
+
+export interface GetMePreferenceResponse {
+  interactionCount?: number;
+  lastUpdated?: string;
+  keywordWeights?: Record<string, number>;
+  aspectScores?: Record<string, number>;
+  aspectCentroidsDims?: Record<string, number>;
+  personaCode?: string;
+  personaLabel?: string;
+  topAspects?: MePreferenceTopAspect[];
+}
