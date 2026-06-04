@@ -1,4 +1,4 @@
-import { useState, type JSX } from "react";
+import { useState, type ReactElement } from "react";
 import { useSearchParams } from "react-router-dom";
 import Header from "@/components/common/Header";
 import Button from "@/components/common/Button";
@@ -60,7 +60,7 @@ function EditIcon({ className }: { className?: string }) {
   );
 }
 
-const TAB_ICONS: Record<Tab, (props: { className?: string }) => JSX.Element> = {
+const TAB_ICONS: Record<Tab, (props: { className?: string }) => ReactElement> = {
   "좋아요 내역": HeartIcon,
   "예약 내역": CalendarIcon,
   "주문 내역": ReceiptIcon,

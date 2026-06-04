@@ -25,19 +25,24 @@ agentAxiosInstance.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
     const hasRefreshToken = !!localStorage.getItem('refreshToken');
+    const hasAccessToken = !!localStorage.getItem('accessToken');
 
-    if (
-      (error.response?.status === 401 || error.response?.status === 403) &&
-      !originalRequest._retry &&
-      hasRefreshToken
-    ) {
-      originalRequest._retry = true;
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      if (!originalRequest._retry && hasRefreshToken) {
+        originalRequest._retry = true;
 
-      try {
-        const accessToken = await refreshAccessToken();
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        return agentAxiosInstance(originalRequest);
-      } catch {
+        try {
+          const accessToken = await refreshAccessToken();
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          return agentAxiosInstance(originalRequest);
+        } catch {
+          forceLogout();
+          return Promise.reject(error);
+        }
+      }
+
+      // 리프레시 토큰 없거나 이미 재시도한 경우: 로그인 상태였다면 강제 로그아웃
+      if (hasAccessToken || hasRefreshToken) {
         forceLogout();
       }
     }

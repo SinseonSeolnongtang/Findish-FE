@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import TrashIcon from "@/assets/icons/common/trash.svg?react";
 import RightIcon from "@/assets/icons/common/right.svg?react";
 import Header from "@/components/common/Header";
 import Checkbox from "@/components/common/Checkbox";
 import Button from "@/components/common/Button";
+import ConfirmModal from "@/components/common/ConfirmModal";
 import {
   useCartQuery,
   useUpdateCartQuantityMutation,
@@ -16,6 +18,7 @@ import type { StoreCardData } from "@/components/common/StoreCard";
 
 export default function CartPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data, isLoading, isError } = useCartQuery();
   const { mutate: updateQuantity } = useUpdateCartQuantityMutation();
@@ -45,6 +48,7 @@ export default function CartPage() {
     navigate("/normal", { state: { preSelectedStore } });
   };
 
+  const [orderDone, setOrderDone] = useState<{ totalPrice: number } | null>(null);
   const [deselectedIds, setDeselectedIds] = useState<Set<string>>(new Set());
 
   const selectedIds = new Set(
@@ -87,10 +91,7 @@ export default function CartPage() {
   const handleOrder = () => {
     order(undefined, {
       onSuccess: (res) => {
-        alert(
-          `주문이 완료되었습니다!\n주문번호: ${res.orderId}\n총 금액: ${res.totalPrice?.toLocaleString() ?? 0}원`,
-        );
-        navigate("/");
+        setOrderDone({ totalPrice: res.totalPrice ?? 0 });
       },
     });
   };
@@ -139,7 +140,7 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="relative min-h-screen bg-white flex flex-col">
       <Header />
 
       <main className="pt-18 flex-1 max-w-195 w-full mx-auto px-6 pb-28">
@@ -248,6 +249,17 @@ export default function CartPage() {
           })}
         </div>
       </main>
+
+      {orderDone && (
+        <ConfirmModal
+          title="주문이 완료되었습니다!"
+          message={`총 금액 ${orderDone.totalPrice.toLocaleString()}원`}
+          confirmLabel="홈으로"
+          cancelLabel="닫기"
+          onConfirm={() => { queryClient.invalidateQueries({ queryKey: ['cart'] }); setOrderDone(null); navigate("/"); }}
+          onClose={() => { queryClient.invalidateQueries({ queryKey: ['cart'] }); setOrderDone(null); }}
+        />
+      )}
 
       {/* 주문하기 버튼 (하단 고정) */}
       <div className="fixed bottom-0 left-0 right-0 px-6 pb-6 bg-white">

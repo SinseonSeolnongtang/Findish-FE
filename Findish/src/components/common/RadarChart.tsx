@@ -111,12 +111,13 @@ export default function RadarChart({ restaurants }: { restaurants: RadarRestaura
     const pad = 12;
     const titleH = 28;
     const rowH = 27;
-    const barAreaX = 90;
-    const barW = 92;
+    const barAreaX = 128;
+    const barW = 54;
     const th = pad + titleH + 6 + active.length * rowH + pad;
     let tx = labelPos.x + 12;
     let ty = labelPos.y - th / 2;
     if (tx + tw > SIZE - 6) tx = labelPos.x - tw - 12;
+    if (tx < 6) tx = 6;
     if (ty < 6) ty = 6;
     if (ty + th > SIZE - 6) ty = SIZE - th - 6;
     return { axis, tw, pad, titleH, rowH, barAreaX, barW, th, tx, ty };

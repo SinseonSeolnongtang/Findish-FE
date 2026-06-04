@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import Button from "@/components/common/Button";
@@ -23,10 +23,10 @@ export default function OnboardingPage() {
   const [isLiking, setIsLiking] = useState(false);
   const [done, setDone] = useState(false);
 
-  // 데이터가 들어오면 큐 초기화 (최초 1회)
-  const restaurants: RandomRestaurantItem[] = queue.length > 0
-    ? queue
-    : (data?.data ?? []);
+  const restaurants = useMemo<RandomRestaurantItem[]>(
+    () => (queue.length > 0 ? queue : (data?.data ?? [])),
+    [queue, data],
+  );
 
   const current = restaurants[currentIndex];
   const isProcessed = current ? !!actionMap[current.restaurantId] : false;

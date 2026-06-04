@@ -2,7 +2,6 @@ import { useState } from 'react';
 import HamburgerIcon from '@/assets/icons/AIPick/hamburger.svg?react';
 import UserIcon from '@/assets/icons/AIPick/user.svg?react';
 import NewChatIcon from '@/assets/icons/AIPick/new_chat.svg?react';
-import SettingsIcon from '@/assets/icons/common/settings.svg?react';
 import SearchField from '@/components/common/SearchField';
 import { usePresetHistoryQuery } from '@/hooks/useAiPick';
 
@@ -106,16 +105,6 @@ export default function AISidebar({ open, onToggle, onFriendClick, onNewChat, on
           </ul>
         </div>
       )}
-
-      {/* 하단: 설정 */}
-      <div className="pl-5 pb-6 mt-auto">
-        <div className="flex items-center gap-3">
-          <SettingsIcon width="24" height="24" className="shrink-0" />
-          {effectiveOpen && (
-            <span className="typo-body-sm text-neutral-900 whitespace-nowrap">설정</span>
-          )}
-        </div>
-      </div>
     </aside>
   );
 }
