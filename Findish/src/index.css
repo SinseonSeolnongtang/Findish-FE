@@ -209,4 +209,21 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
+  /* 스켈레톤 shimmer */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      #DEE6E9 25%,
+      #F3F1EF 50%,
+      #DEE6E9 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }

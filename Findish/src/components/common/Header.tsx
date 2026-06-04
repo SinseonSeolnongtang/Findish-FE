@@ -18,9 +18,13 @@ export default function Header() {
 
       <nav className="flex items-center gap-10 flex-1">
         <div className="relative group">
-          <span className="typo-body-lg text-neutral-800 group-hover:text-primary transition-colors cursor-pointer">
+          <Link
+            to="/normal"
+            state={{ initialMode: "normal" }}
+            className="typo-body-lg text-neutral-800 group-hover:text-primary transition-colors"
+          >
             맛집 검색
-          </span>
+          </Link>
           <div className="absolute top-full -left-4 hidden group-hover:block pt-2 z-10">
             <div className="bg-white shadow-md rounded-md overflow-hidden min-w-26">
               <Link

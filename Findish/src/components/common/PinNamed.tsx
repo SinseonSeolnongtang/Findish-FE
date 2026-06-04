@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
+import Skeleton from "./Skeleton";
 
 interface PinNamedProps {
   name: string;
@@ -20,6 +21,7 @@ export default function PinNamed({
 }: PinNamedProps) {
   const nameBg = isSelected ? "#FF6900" : "white";
   const textColor = isSelected ? "white" : "#1a1a1a";
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   return (
     <button
@@ -45,13 +47,17 @@ export default function PinNamed({
           style={{ width: 96, background: nameBg }}
         >
           {/* 상단: 식당 대표 이미지 썸네일 */}
-          <div className="w-full overflow-hidden bg-neutral-200" style={{ height: 82 }}>
+          <div className="relative w-full overflow-hidden bg-neutral-200" style={{ height: 82 }}>
             {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt={name}
-                className="w-full h-full object-cover"
-              />
+              <>
+                {!imgLoaded && <Skeleton className="absolute inset-0 rounded-none" />}
+                <img
+                  src={imageUrl}
+                  alt={name}
+                  className={cn("w-full h-full object-cover", !imgLoaded && "invisible")}
+                  onLoad={() => setImgLoaded(true)}
+                />
+              </>
             ) : (
               <div className="w-full h-full bg-neutral-200" />
             )}

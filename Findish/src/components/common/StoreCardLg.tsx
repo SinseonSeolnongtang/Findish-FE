@@ -2,6 +2,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import Rating from "./Rating";
 import Keyword from "./Keyword";
+import Skeleton from "./Skeleton";
 import type { StoreCardData } from "./StoreCard";
 import StarIcon from "@/assets/icons/common/star.svg?react";
 
@@ -21,6 +22,7 @@ export default function StoreCardLg({
   className,
 }: StoreCardLgProps) {
   const [imgIdx, setImgIdx] = useState(0);
+  const [loadedUrls, setLoadedUrls] = useState<Set<string>>(new Set());
   const imgList =
     images.length > 0 ? images : ([store.imageUrl].filter(Boolean) as string[]);
 
@@ -33,15 +35,26 @@ export default function StoreCardLg({
     >
       {/* 이미지 */}
       <div className="relative">
-        <div className="w-full h-[242px] bg-[#E5E7EB] overflow-hidden rounded-t-2xl">
+        <div className="relative w-full h-60.5 bg-[#E5E7EB] overflow-hidden rounded-t-2xl">
           {imgList[imgIdx] ? (
-            <img
-              src={imgList[imgIdx]}
-              alt={store.name}
-              className="w-full h-full object-cover"
-            />
+            <>
+              {!loadedUrls.has(imgList[imgIdx]) && (
+                <Skeleton className="absolute inset-0 rounded-none" />
+              )}
+              <img
+                src={imgList[imgIdx]}
+                alt={store.name}
+                className={cn(
+                  "w-full h-full object-cover",
+                  !loadedUrls.has(imgList[imgIdx]) && "invisible",
+                )}
+                onLoad={() =>
+                  setLoadedUrls((prev) => new Set(prev).add(imgList[imgIdx]))
+                }
+              />
+            </>
           ) : (
-            <div className="w-full h-full bg-gradient-to-br from-[#FFE4CC] to-[#FFD0A8]" />
+            <div className="w-full h-full bg-linear-to-br from-[#FFE4CC] to-[#FFD0A8]" />
           )}
         </div>
 

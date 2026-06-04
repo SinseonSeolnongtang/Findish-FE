@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import Rating from "./Rating";
 import Keyword from "./Keyword";
 import Button from "./Button";
+import Skeleton from "./Skeleton";
 import ReviewIcon from "@/assets/icons/common/review.svg?react";
 import ClockIcon from "@/assets/icons/common/clock.svg?react";
 import FavoriteIcon from "@/assets/icons/common/favorite.svg?react";
@@ -56,6 +57,7 @@ export default function StoreCard({
   const isControlled = onFavorite !== undefined;
   const [localFavorited, setLocalFavorited] = useState(isFavorited);
   const favorited = isControlled ? isFavorited : localFavorited;
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   return (
     <div
@@ -69,13 +71,17 @@ export default function StoreCard({
     >
       {/* 가게 대표 이미지 */}
       <div className="relative shrink-0 w-31.5 h-31.5">
-        <div className="w-full h-full rounded-2xl overflow-hidden bg-neutral-200">
+        <div className="relative w-full h-full rounded-2xl overflow-hidden bg-neutral-200">
           {store.imageUrl ? (
-            <img
-              src={store.imageUrl}
-              alt={store.name}
-              className="w-full h-full object-cover"
-            />
+            <>
+              {!imgLoaded && <Skeleton className="absolute inset-0 rounded-none" />}
+              <img
+                src={store.imageUrl}
+                alt={store.name}
+                className={cn("w-full h-full object-cover", !imgLoaded && "invisible")}
+                onLoad={() => setImgLoaded(true)}
+              />
+            </>
           ) : (
             <div className="w-full h-full bg-linear-to-br from-[#FFE4CC] to-[#FFD0A8]" />
           )}

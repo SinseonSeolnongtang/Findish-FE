@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import RightIcon from "@/assets/icons/common/right.svg?react";
+import Skeleton from "@/components/common/Skeleton";
 
 interface Props {
   images: string[];
@@ -10,6 +11,7 @@ interface Props {
 export default function ImageCarousel({ images, alt = "사진" }: Props) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
+  const [loadedUrls, setLoadedUrls] = useState<Set<string>>(new Set());
 
   const isDragging = useRef(false);
   const touchStartX = useRef(0);
@@ -105,8 +107,14 @@ export default function ImageCarousel({ images, alt = "사진" }: Props) {
         }}
       >
         {images.map((src, i) => (
-          <div key={i} className="h-full shrink-0" style={{ width: `${100 / n}%` }}>
-            <img src={src} className="w-full h-full object-cover" alt={`${alt} ${i + 1}`} />
+          <div key={i} className="relative h-full shrink-0" style={{ width: `${100 / n}%` }}>
+            {!loadedUrls.has(src) && <Skeleton className="absolute inset-0 rounded-none" />}
+            <img
+              src={src}
+              className={cn("w-full h-full object-cover", !loadedUrls.has(src) && "invisible")}
+              alt={`${alt} ${i + 1}`}
+              onLoad={() => setLoadedUrls((prev) => new Set(prev).add(src))}
+            />
           </div>
         ))}
       </div>

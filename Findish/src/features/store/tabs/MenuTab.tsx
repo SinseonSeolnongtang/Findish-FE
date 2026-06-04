@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import MenuItem from "@/components/common/MenuItem";
+import Skeleton from "@/components/common/Skeleton";
 import Toast from "@/components/common/Toast";
 import { useRestaurantMenusQuery } from "@/hooks/useRestaurant";
 import { useAddToCartMutation } from "@/hooks/useCart";
@@ -61,7 +62,14 @@ export default function MenuTab({ restaurantId }: MenuTabProps) {
     return (
       <div className="flex flex-col gap-3 p-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-24 rounded-xl bg-neutral-100 animate-pulse" />
+          <div key={i} className="flex items-center gap-3">
+            <Skeleton className="w-24 h-24 rounded-[10px] shrink-0" />
+            <div className="flex flex-col gap-2 flex-1">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-1/3" />
+              <Skeleton className="h-6 w-16 rounded-md self-end" />
+            </div>
+          </div>
         ))}
       </div>
     );
