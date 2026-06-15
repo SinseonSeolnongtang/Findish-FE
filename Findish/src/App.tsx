@@ -1,13 +1,53 @@
-import "./App.css";
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import MainPage from '@/pages/MainPage';
+import LoginPage from '@/pages/LoginPage';
+import SignupPage from '@/pages/SignupPage';
+import NormalModePage from '@/pages/NormalModePage';
+import ComparePage from '@/pages/ComparePage';
+import AIPickPage from '@/pages/AIPickPage';
+import FindyCodePage from '@/pages/FindyCodePage';
+import CartPage from '@/pages/CartPage';
+import MyPage from '@/pages/MyPage';
+import StorePage from '@/pages/StorePage';
+import OnboardingPage from '@/pages/OnboardingPage';
+import AuthLayout from '@/layout/AuthLayout';
+import PrivateRoute from '@/components/common/PrivateRoute';
 
-function App() {
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5분 (개별 쿼리에서 override 가능)
+      retry: 1,
+    },
+  },
+});
+
+export default function App() {
   return (
-    <>
-      <div className="flex justify-center text-2xl text-red-500">
-        Capston Design - Findish FE
-      </div>
-    </>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<MainPage />} />
+          <Route element={<AuthLayout />}>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+          </Route>
+          <Route path="/normal" element={<NormalModePage />} />
+          <Route path="/pick" element={<Navigate to="/normal" replace />} />
+          <Route path="/compare" element={<ComparePage />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/store/:id" element={<StorePage />} />
+          <Route element={<PrivateRoute />}>
+            <Route path="/ai-pick" element={<AIPickPage />} />
+            <Route path="/findy-code" element={<FindyCodePage />} />
+            <Route path="/mypage" element={<MyPage />} />
+            <Route path="/onboarding" element={<OnboardingPage />} />
+          </Route>
+          <Route path="/about" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
-
-export default App;
